@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Badge - Parkour Progress</title>
+  <meta name="description" content="A Parkour Progress badge: where it is earned, how rare it is and every player who holds it.">
+  <meta property="og:site_name" content="Parkour Progress">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <svg class="sprites" aria-hidden="true">
+    <symbol id="i-search" viewBox="0 0 8 8"><path d="M1 0h4v1h-4zM0 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM5 2h1v1h-1zM0 3h1v1h-1zM5 3h1v1h-1zM1 4h4v1h-4zM5 5h2v1h-2zM6 6h2v1h-2z"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 8 8"><path d="M0 0h1v1h-1zM0 1h6v1h-6zM0 2h7v1h-7zM0 3h6v1h-6zM0 4h1v1h-1zM0 5h1v1h-1zM0 6h1v1h-1zM0 7h1v1h-1z"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 8 8"><path d="M0 1h1v1h-1zM3 1h2v1h-2zM7 1h1v1h-1zM0 2h2v1h-2zM3 2h2v1h-2zM6 2h2v1h-2zM0 3h8v1h-8zM0 4h8v1h-8zM1 5h6v1h-6z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 8 8"><path d="M4 0h1v1h-1zM4 1h2v1h-2zM0 2h7v1h-7zM0 3h8v1h-8zM0 4h7v1h-7zM4 5h2v1h-2zM4 6h1v1h-1z"/></symbol>
+  </svg>
+  <div class="world" id="world"></div>
+
+  <header class="bar">
+    <a class="brand" href="profile.html">Parkour Progress</a>
+    <form class="search" role="search" autocomplete="off" onsubmit="return false">
+      <label>
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" placeholder="Search players and maps" aria-label="Search players and maps">
+      </label>
+      <div class="results" role="listbox" hidden></div>
+    </form>
+    <nav aria-label="Main">
+      <button class="button menu" type="button" aria-expanded="false" aria-controls="nav-list">Menu</button>
+      <ul id="nav-list">
+        <li><a href="map.html">Maps</a></li>
+        <li><a href="profile.html">Players</a></li>
+        <li><a href="#">Leaderboards</a></li>
+        <li><a href="#">Activity</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero badge-hero" aria-label="Badge">
+      <div class="hero-side" id="side"></div>
+    </section>
+
+    <section class="block" aria-labelledby="holders-title">
+      <h2 class="win-title" id="holders-title">Holders <small id="holders-count"></small></h2>
+      <div class="win">
+        <ol class="well holders" id="holders"></ol>
+      </div>
+    </section>
+
+    <footer class="foot dim">
+      <p>Real data from a copy of the ProgressBot database, 2 Oct 2026.</p>
+      <p>Mockup: badge pages exist for wlatr's badges and the Magnum Opus ones.</p>
+    </footer>
+  </main>
+
+  <script src="data/search.js"></script>
+  <script src="data/names.js"></script>
+  <script src="data/badges.js"></script>
+  <script src="site.js"></script>
+  <script src="badge.js"></script>
+</body>
+</html>
