@@ -760,6 +760,7 @@ main {
 
 .hero h1.blend.holo:hover::after {
   opacity: 0.8;
+  transition-duration: 120ms;
 }
 
 .name.blend:hover,
