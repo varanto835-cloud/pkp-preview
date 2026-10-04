@@ -187,9 +187,10 @@ document.addEventListener("pointerout", (event) => {
   if (el && !el.contains(event.relatedTarget)) tooltip.hidden = true;
 });
 
+// keyboard focus only, a click keeps the tooltip where the pointer is
 document.addEventListener("focusin", (event) => {
   const el = tipTarget(event);
-  if (!el) return;
+  if (!el || !event.target.matches(":focus-visible")) return;
   const box = el.getBoundingClientRect();
   showTip(el, box.right, box.top + 8);
 });

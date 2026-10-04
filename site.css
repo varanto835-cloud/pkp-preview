@@ -724,13 +724,19 @@ main {
 }
 
 .hero h1.blend {
-  filter: drop-shadow(var(--lift) var(--lift) 0 rgba(0, 0, 0, 0.55));
+  filter: drop-shadow(var(--lift) var(--lift) 0 rgba(0, 0, 0, 0.55)) drop-shadow(0 0 0 transparent);
+  transition: filter 500ms ease-out;
   animation: flow 3s linear infinite;
 }
 
 .name.blend:hover,
 :is(a, li, .who, .results a):hover > .name.blend {
   animation: flow 3s linear infinite;
+}
+
+.name.holo {
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.6)) drop-shadow(0 0 0 transparent);
+  transition: filter 300ms ease-out;
 }
 
 .name.holo:hover,
