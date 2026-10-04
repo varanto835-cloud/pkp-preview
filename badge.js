@@ -27,7 +27,7 @@ function renderSide() {
   document.getElementById("world").style.setProperty("--world", `url("${asset(`assets/world/${slug(badge.map)}.jpg`)}")`);
 
   side.append(...[
-    h("h1", { class: `badge-name${badge.end ? " blend" : ""}${badge.third ? " holo" : ""}`, style: nameColours(badge.color, badge.end, badge.third) }, badge.name),
+    h("h1", { class: `badge-name${badge.end ? " blend" : ""}${badge.third ? " holo" : ""}`, style: nameColours(badge.color, badge.end, badge.third), "data-text": badge.name }, badge.name),
     h("ul", { class: "facts" },
       h("li", {}, h("span", { class: "mode-chip" }, MODE_LETTER[badge.gamemode]), mapPage ? h("a", { href: mapPage }, badge.map) : badge.map),
       h("li", {}, socket(badge.tier), tierText(badge.tier)),

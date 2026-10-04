@@ -30,7 +30,7 @@ function renderSide() {
 
   side.append(
     h("div", { class: "title" },
-      h("h1", { class: `blend${map.role.third ? " holo" : ""}`, style: nameColours(map.role.color, map.role.end, map.role.third) }, map.name),
+      h("h1", { class: `blend${map.role.third ? " holo" : ""}`, style: nameColours(map.role.color, map.role.end, map.role.third), "data-text": map.name }, map.name),
       tip(h("span", { class: "splash" }, map.victors.length ? `Beaten by ${plural(map.victors.length, "player")}!` : "Still unbeaten!"),
         () => map.victors.length
           ? `<b>${plural(map.victors.length, "victor")}</b>`

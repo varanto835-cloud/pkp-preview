@@ -92,7 +92,7 @@ function renderSide() {
 
   side.append(
     h("p", { class: "favourite", id: "favourite" }),
-    h("h1", {}, player.name),
+    h("h1", { "data-text": player.name }, player.name),
     h("ul", { class: "facts" },
       h("li", {}, flag(player.country), COUNTRIES[player.country]),
       h("li", {}, h("strong", {}, `TOP ${player.modes[best.gamemode].top}`), ` in ${best.gamemode}`),

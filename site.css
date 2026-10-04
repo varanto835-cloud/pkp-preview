@@ -723,29 +723,48 @@ main {
   filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.6));
 }
 
+/* big titles draw their shadow and glow as copies of the text behind them,
+   so the glow can fade with opacity instead of a filter that jumps */
 .hero h1.blend {
-  filter: drop-shadow(var(--lift) var(--lift) 0 rgba(0, 0, 0, 0.55)) drop-shadow(0 0 0 transparent);
-  transition: filter 500ms ease-out;
+  position: relative;
+  filter: none;
   animation: flow 3s linear infinite;
+}
+
+.hero h1.blend::before,
+.hero h1.blend::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  text-shadow: none;
+  pointer-events: none;
+}
+
+.hero h1.blend::before {
+  color: rgba(0, 0, 0, 0.55);
+  -webkit-text-fill-color: rgba(0, 0, 0, 0.55);
+  transform: translate(var(--lift), var(--lift));
+}
+
+.hero h1.blend::after {
+  color: var(--c2);
+  -webkit-text-fill-color: var(--c2);
+  filter: blur(14px);
+  opacity: 0;
+  transition: opacity 450ms ease-out;
+}
+
+.hero h1.blend.holo:hover::after {
+  opacity: 0.8;
 }
 
 .name.blend:hover,
 :is(a, li, .who, .results a):hover > .name.blend {
   animation: flow 3s linear infinite;
-}
-
-.name.holo {
-  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.6)) drop-shadow(0 0 0 transparent);
-  transition: filter 300ms ease-out;
-}
-
-.name.holo:hover,
-:is(a, li, .who):hover > .name.holo {
-  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.6)) drop-shadow(0 0 6px color-mix(in srgb, var(--c2) 70%, transparent));
-}
-
-.hero h1.blend.holo:hover {
-  filter: drop-shadow(var(--lift) var(--lift) 0 rgba(0, 0, 0, 0.55)) drop-shadow(0 0 14px color-mix(in srgb, var(--c2) 70%, transparent));
 }
 
 @keyframes flow {
