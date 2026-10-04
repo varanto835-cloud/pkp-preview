@@ -755,12 +755,12 @@ main {
   -webkit-text-fill-color: var(--c2);
   filter: blur(14px);
   opacity: 0;
-  transition: opacity 450ms ease-out;
+  transition: opacity 450ms ease-in-out;
 }
 
 .hero h1.blend.holo:hover::after {
   opacity: 0.8;
-  transition-duration: 120ms;
+  transition: opacity 280ms ease-out;
 }
 
 .name.blend:hover,
