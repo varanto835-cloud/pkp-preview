@@ -6,9 +6,9 @@ const COUNTRIES = {
   ar: "Argentina", at: "Austria", au: "Australia", az: "Azerbaijan", br: "Brazil", ca: "Canada", ch: "Switzerland",
   cn: "China", cz: "Czechia", de: "Germany", dk: "Denmark", ec: "Ecuador", ee: "Estonia", es: "Spain", fi: "Finland",
   fm: "Micronesia", fr: "France", gb: "United Kingdom", gr: "Greece", hk: "Hong Kong", hr: "Croatia", hu: "Hungary",
-  ie: "Ireland", il: "Israel", it: "Italy", jo: "Jordan", jp: "Japan", kr: "South Korea", kz: "Kazakhstan", la: "Laos",
-  my: "Malaysia", nl: "Netherlands", no: "Norway", ph: "Philippines", pl: "Poland", ps: "Palestine", pt: "Portugal",
-  rs: "Serbia", ru: "Russia", se: "Sweden", sg: "Singapore", sk: "Slovakia", th: "Thailand", tw: "Taiwan",
+  id: "Indonesia", ie: "Ireland", il: "Israel", it: "Italy", jo: "Jordan", jp: "Japan", kr: "South Korea", kz: "Kazakhstan", la: "Laos",
+  md: "Moldova", my: "Malaysia", nl: "Netherlands", no: "Norway", pe: "Peru", ph: "Philippines", pl: "Poland", ps: "Palestine", pt: "Portugal",
+  ro: "Romania", rs: "Serbia", ru: "Russia", se: "Sweden", sg: "Singapore", sk: "Slovakia", th: "Thailand", tw: "Taiwan",
   ua: "Ukraine", us: "United States",
 };
 const PAGES = { wlatr: "profile.html", "Magnum Opus": "map.html" };
@@ -70,7 +70,7 @@ function exact(iso, by) {
 }
 
 function plural(n, word, many = word + "s") {
-  return `${n.toLocaleString("en-US")} ${n === 1 ? word : many}`;
+  return `${n} ${n === 1 ? word : many}`;
 }
 
 function icon(name, cls = "") {
@@ -205,20 +205,17 @@ addEventListener("scroll", () => {
 
 // player heads, grey if the account is gone
 
+// grey face for players with no skin, like the game's empty one
+const NO_FACE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAJklEQVR42mMMDQ1lwAZYGBgYzMzM0ERPnTrFxIAD0EOCBeIGTAkA0KwGcUOafBcAAAAASUVORK5CYII=";
+
+// faces load only when they come near the screen
 function head(name) {
-  const canvas = h("canvas", { class: "head", width: 8, height: 8, "aria-hidden": "true" });
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#555";
-  ctx.fillRect(0, 0, 8, 8);
-  ctx.fillStyle = "#8b8b8b";
-  ctx.fillRect(1, 1, 6, 6);
-  const img = new Image();
-  img.onload = () => {
-    ctx.clearRect(0, 0, 8, 8);
-    ctx.drawImage(img, 0, 0);
-  };
-  img.src = asset(`assets/face/${name.toLowerCase()}.png`);
-  return canvas;
+  return h("img", {
+    class: "head", src: asset(`assets/face/${name.toLowerCase()}.png`), width: 8, height: 8, alt: "", loading: "lazy", decoding: "async",
+    onerror: (event) => {
+      event.currentTarget.src = NO_FACE;
+    },
+  });
 }
 
 function tile(tag, attrs, art, tier, mark) {
@@ -228,17 +225,106 @@ function tile(tag, attrs, art, tier, mark) {
 }
 
 // lighten dark role colours so names stay readable
+// the same badge colours come back on many names, so each is worked out once
+const legibleSeen = new Map();
+
 function legible(hex) {
-  const channels = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-  const luminance = (rgb) => rgb.map((v) => {
-    const c = v / 255;
-    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-  }).reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0);
-  let lifted = channels;
-  for (let t = 0; luminance(lifted) < 0.24 && t <= 1; t += 0.05) {
-    lifted = channels.map((v) => Math.round(v + (255 - v) * t));
+  if (!legibleSeen.has(hex)) legibleSeen.set(hex, lift(hex));
+  return legibleSeen.get(hex);
+}
+
+// A dark badge colour is raised until it reads on the dark page (relative luminance 0.24,
+// about 4.5:1 on the windows). Only its lightness goes up, in OKLCH where lightness and colour
+// are kept apart: the hue stays, and a dark but vivid colour keeps all its saturation, so a
+// dark red becomes a bright red, not a pink. A colour near black shows little of its hue, so it
+// keeps only the colour it really has and stays a tinted grey.
+function lift(hex) {
+  const rgb = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  if (luminance(rgb) >= 0.24) return hex;
+  const [l, a, b] = toOklab(rgb);
+  const hue = Math.atan2(b, a);
+  const chroma = Math.hypot(a, b);
+  const share = Math.min(1, chroma / Math.max(1e-6, maxChroma(l, hue)));
+  const vivid = Math.min(1, Math.max(0, (l - 0.1) / 0.2));
+  let low = l;
+  let high = 1;
+  let best = [1, 1, 1];
+  for (let step = 0; step < 18; step++) {
+    const mid = (low + high) / 2;
+    const shown = inGamut(mid, chroma + (share * maxChroma(mid, hue) - chroma) * vivid, hue);
+    if (luminance(shown) >= 0.24) {
+      high = mid;
+      best = shown;
+    } else {
+      low = mid;
+    }
   }
-  return `#${lifted.map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+  return `#${best.map((v) => Math.round(v * 255).toString(16).padStart(2, "0")).join("")}`;
+}
+
+function maxChroma(L, hue) {
+  let low = 0;
+  let high = 0.4;
+  for (let step = 0; step < 16; step++) {
+    const c = (low + high) / 2;
+    if (fromOklab([L, c * Math.cos(hue), c * Math.sin(hue)]).every((x) => x >= 0 && x <= 1)) low = c;
+    else high = c;
+  }
+  return low;
+}
+
+function luminance(rgb) {
+  return rgb.reduce((sum, c, i) => sum + linear(c) * [0.2126, 0.7152, 0.0722][i], 0);
+}
+
+function linear(c) {
+  return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+}
+
+function gamma(c) {
+  return c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055;
+}
+
+function toOklab(rgb) {
+  const [r, g, b] = rgb.map(linear);
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  return [
+    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+  ];
+}
+
+function fromOklab([L, a, b]) {
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  return [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+  ];
+}
+
+// the colour at this lightness, with chroma cut back only as far as the screen needs
+function inGamut(L, chroma, hue) {
+  let low = 0;
+  let high = chroma;
+  let fit = fromOklab([L, 0, 0]);
+  for (let step = 0; step < 14; step++) {
+    const c = (low + high) / 2;
+    const rgb = fromOklab([L, c * Math.cos(hue), c * Math.sin(hue)]);
+    if (rgb.every((v) => v >= 0 && v <= 1)) {
+      low = c;
+      fit = rgb;
+    } else {
+      high = c;
+    }
+  }
+  const full = fromOklab([L, chroma * Math.cos(hue), chroma * Math.sin(hue)]);
+  return (full.every((v) => v >= 0 && v <= 1) ? full : fit).map((v) => gamma(Math.min(1, Math.max(0, v))));
 }
 
 function nameColours(c1, c2, c3) {

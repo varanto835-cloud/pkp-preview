@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leaderboards - Parkour Progress</title>
+  <meta name="description" content="Parkour Progress leaderboards: players by EXP, difficulty, tiers, victories, badges and sky fails, plus countries, maps and badges.">
+  <meta property="og:title" content="Leaderboards">
+  <meta property="og:description" content="Players, countries, maps and badges, ranked">
+  <meta property="og:site_name" content="Parkour Progress">
+  <meta name="theme-color" content="#eaee57">
+  <link rel="stylesheet" href="site.css?v=2610051900">
+</head>
+<body>
+  <svg class="sprites" aria-hidden="true">
+    <symbol id="i-search" viewBox="0 0 8 8"><path d="M1 0h4v1h-4zM0 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM5 2h1v1h-1zM0 3h1v1h-1zM5 3h1v1h-1zM1 4h4v1h-4zM5 5h2v1h-2zM6 6h2v1h-2z"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 8 8"><path d="M0 1h1v1h-1zM3 1h2v1h-2zM7 1h1v1h-1zM0 2h2v1h-2zM3 2h2v1h-2zM6 2h2v1h-2zM0 3h8v1h-8zM0 4h8v1h-8zM1 5h6v1h-6z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 8 8"><path d="M4 0h1v1h-1zM4 1h2v1h-2zM0 2h7v1h-7zM0 3h8v1h-8zM0 4h7v1h-7zM4 5h2v1h-2zM4 6h1v1h-1z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 8 8"><path d="M0 0h2v1h-2zM6 0h2v1h-2zM1 1h2v1h-2zM5 1h2v1h-2zM2 2h4v1h-4zM3 3h2v1h-2zM2 4h4v1h-4zM1 5h2v1h-2zM5 5h2v1h-2zM0 6h2v1h-2zM6 6h2v1h-2z"/></symbol>
+  </svg>
+  <div class="world" style="--world: url('assets/world/halloflegends.jpg')"></div>
+
+  <header class="bar">
+    <a class="brand" href="profile.html">Parkour Progress</a>
+    <form class="search" role="search" autocomplete="off" onsubmit="return false">
+      <label>
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" placeholder="Search players and maps" aria-label="Search players and maps">
+      </label>
+      <div class="results" role="listbox" hidden></div>
+    </form>
+    <nav aria-label="Main">
+      <button class="button menu" type="button" aria-expanded="false" aria-controls="nav-list">Menu</button>
+      <ul id="nav-list">
+        <li><a href="map.html">Maps</a></li>
+        <li><a href="profile.html">Players</a></li>
+        <li><a href="leaderboards.html" aria-current="page">Leaderboards</a></li>
+        <li><a href="#">Activity</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="lb-head">
+      <h1 class="page-title">Leaderboards</h1>
+      <div class="lb-boards" role="tablist" aria-label="Leaderboard" id="tabs"></div>
+    </div>
+    <div class="lb-filters" id="filters"></div>
+
+    <section class="podium" id="podium" aria-label="Top three"></section>
+
+    <section class="win lb-window" role="tabpanel" id="panel">
+      <h2 class="win-title" id="list-title"></h2>
+      <div class="well lb-body" id="body"></div>
+    </section>
+    <p class="sr-only" id="announce" aria-live="polite"></p>
+
+    <footer class="foot dim">
+      <p>Real data from a copy of the ProgressBot database, 2 Oct 2026.</p>
+      <p>Cards made with Goldy's card generator, for the top 25 by EXP.</p>
+    </footer>
+  </main>
+
+  <script src="data/search.js?v=2610051900"></script>
+  <script src="data/names.js?v=2610051900"></script>
+  <script src="data/boards.js?v=2610051900"></script>
+  <script src="data/skins.js?v=2610051900"></script>
+  <script src="site.js?v=2610051900"></script>
+  <script src="leaderboards.js?v=2610051900"></script>
+</body>
+</html>

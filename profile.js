@@ -96,7 +96,7 @@ function renderSide() {
     h("ul", { class: "facts" },
       h("li", {}, flag(player.country), COUNTRIES[player.country]),
       h("li", {}, h("strong", {}, `TOP ${player.modes[best.gamemode].top}`), ` in ${best.gamemode}`),
-      h("li", {}, `${player.exp.toLocaleString("en-US")} EXP`),
+      h("li", {}, `${player.exp} EXP`),
       h("li", {}, plural(player.victories.length, "victory", "victories")),
       h("li", {}, plural(badges.length, "badge")),
       h("li", {}, `${player.progress.length} in progress`)),

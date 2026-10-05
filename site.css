@@ -1056,7 +1056,9 @@ button.pill {
   width: 24px;
   height: 24px;
   flex: none;
+  background: #8b8b8b;
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.6);
+  image-rendering: pixelated;
 }
 
 .target-flag {
@@ -1333,13 +1335,894 @@ button.pill {
   gap: 10px;
 }
 
+/* leaderboards */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.lb-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 32px;
+}
+
+.page-title {
+  font-size: 72px;
+  line-height: 80px;
+  font-weight: 700;
+  text-shadow: 8px 8px 0 #3f3f3f;
+}
+
+.lb-boards {
+  display: flex;
+  gap: 6px;
+  padding-bottom: 8px;
+}
+
+.board-tab {
+  padding: 6px 18px 8px;
+  font-weight: 700;
+}
+
+.board-tab[aria-selected="true"] {
+  border-image-source: url("assets/gui/button-hover.png");
+  color: var(--hover);
+}
+
+.lb-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 32px;
+  margin: 18px 0 0;
+}
+
+.lb-filters .seg > span,
+.gui-select > span {
+  margin-right: 6px;
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+}
+
+.gui-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.select-face {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+}
+
+.select-face select {
+  appearance: none;
+  border: 0;
+  padding: 2px 36px 4px 12px;
+  font: inherit;
+  color: var(--white);
+  text-shadow: var(--shadow);
+  background: transparent;
+  cursor: pointer;
+}
+
+.select-face select option {
+  background: var(--deep);
+}
+
+.select-face .chev {
+  position: absolute;
+  right: 10px;
+  width: 12px;
+  height: 12px;
+  rotate: 90deg;
+  pointer-events: none;
+}
+
+.mode-phone {
+  display: none;
+}
+
+/* podium: the top three standing on blocks of gold, iron and copper, as in a server lobby */
+
+.podium {
+  --cube: 64px;
+  --cap: 16px;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 320px));
+  justify-content: center;
+  align-items: end;
+  margin: 24px 0 16px;
+  /* the empty sides of the 3D canvases must not widen the page */
+  overflow-x: clip;
+}
+
+.podium[hidden] {
+  display: none;
+}
+
+/* with no podium (badges, or a reversed board) the table keeps its distance from the filters */
+.podium[hidden] + .lb-window {
+  margin-top: 24px;
+}
+
+.podium-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  justify-items: center;
+  align-content: end;
+  color: var(--white);
+  text-shadow: var(--shadow);
+}
+
+.podium-visual,
+.podium-label,
+.zoom {
+  padding: 0;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-shadow: inherit;
+  background: none;
+  cursor: pointer;
+}
+
+.zoom {
+  cursor: zoom-in;
+}
+
+.podium-visual {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  transition: translate 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* flags and screenshots lift on hover; the 3D players are drawn by the stage and stay put */
+.podium:not(.podium-players) :is(.podium-visual:hover, .podium-visual:focus-visible),
+.podium:not(.podium-players) .podium-step:has(.podium-label:hover, .podium-label:focus-visible) .podium-visual {
+  translate: 0 -6px;
+}
+
+.podium-label {
+  display: block;
+  width: 100%;
+}
+
+/* the name tag floating over the head, as in the game */
+.podium-plate {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  max-width: 100%;
+  margin-bottom: 6px;
+  padding: 2px 10px 4px;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.podium-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.place1 .podium-name {
+  font-size: 27px;
+  line-height: 32px;
+}
+
+.podium-value {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+}
+
+.podium-value .pill {
+  min-width: 0;
+}
+
+.place1 .podium-value {
+  color: var(--hover);
+}
+
+/* a player drawn in 3D from their skin, in a parkour move */
+.pose {
+  position: relative;
+  display: block;
+  width: 320px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* one canvas over the whole podium, reaching above it for the jumps; players fade in once drawn */
+.podium-stage {
+  position: absolute;
+  top: -260px;
+  bottom: -60px;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  height: calc(100% + 320px);
+  opacity: 0;
+  transition: opacity 250ms ease-out;
+  pointer-events: none;
+}
+
+.podium-stage.shown {
+  opacity: 1;
+}
+
+/* the shadow under the feet shrinks and fades as the player goes up */
+.pose-shadow {
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  width: 92px;
+  height: 18px;
+  translate: calc(-50% + var(--slide, 0px)) 0;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.35) 60%, transparent);
+  scale: calc(1 - var(--air, 0) * 0.45);
+  opacity: calc(1 - var(--air, 0) * 0.55);
+  pointer-events: none;
+}
+
+/* experience orbs, square and glowing like the game's */
+.orb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  background: #b9f53a;
+  box-shadow: inset -3px -3px 0 #5aa50a, inset 3px 3px 0 #f2ff9a, 0 0 10px 2px rgba(190, 255, 80, 0.55);
+  pointer-events: none;
+}
+
+/* dust on take-off and landing, square like the game's particles */
+.dust {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+}
+
+.dust i {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #d9d4c4;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  animation: dust 650ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.dust i:nth-child(1) { --dx: -46px; --dy: -10px; }
+.dust i:nth-child(2) { --dx: -30px; --dy: -24px; animation-delay: 30ms; }
+.dust i:nth-child(3) { --dx: -12px; --dy: -14px; }
+.dust i:nth-child(4) { --dx: 10px; --dy: -26px; animation-delay: 50ms; }
+.dust i:nth-child(5) { --dx: 26px; --dy: -12px; }
+.dust i:nth-child(6) { --dx: 44px; --dy: -20px; animation-delay: 20ms; }
+.dust i:nth-child(7) { --dx: -2px; --dy: -32px; animation-delay: 60ms; }
+
+@keyframes dust {
+  0% { opacity: 0.9; translate: 0 0; scale: 1; }
+  100% { opacity: 0; translate: var(--dx) var(--dy); scale: 0.4; }
+}
+
+/* without 3D the face stands on the step */
+.pose.flat .podium-head {
+  position: static;
+  display: block;
+  margin: 0 auto 8px;
+  translate: none;
+}
+
+.podium-head {
+  width: 96px;
+  height: 96px;
+}
+
+.podium-flag {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 4px;
+}
+
+.podium-maps .podium-visual .tile {
+  width: min(220px, 100%);
+  margin: 0 auto 4px;
+}
+
+/* big blocks with a flat top seen from a little above; second place is a block and a slab */
+.podium-block {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  width: 100%;
+  height: calc(var(--rows) * var(--cube) + var(--cap));
+  padding-top: calc(var(--cap) + 4px);
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.28)),
+    var(--tex) center var(--cap) / var(--cube) var(--cube) repeat;
+  image-rendering: pixelated;
+}
+
+.podium-block::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--cap);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)),
+    var(--tex) center 0 / var(--cube) var(--cap) repeat-x;
+  image-rendering: pixelated;
+}
+
+.podium-block::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 30%;
+  right: 30%;
+  height: calc(var(--cap) + 4px);
+  background: radial-gradient(50% 100% at 50% 0, rgba(0, 0, 0, 0.5), transparent);
+}
+
+/* players cast their own shadow */
+.podium-players .podium-block::after {
+  display: none;
+}
+
+.podium-block.m5 { --tex: url("assets/gui/mat-5.png"); --rows: 2; }
+.podium-block.m4 { --tex: url("assets/gui/mat-4.png"); --rows: 1.5; }
+.podium-block.m3 { --tex: url("assets/gui/mat-3.png"); --rows: 1; }
+
+.podium-rank {
+  font-size: 36px;
+  line-height: 44px;
+  font-weight: 700;
+  text-shadow: 4px 4px 0 #000;
+}
+
+.place1 .podium-rank {
+  font-size: 54px;
+  line-height: 60px;
+  text-shadow: 6px 6px 0 #000;
+}
+
+/* a card at full size, over the page */
+
+.card-view {
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  overflow: visible;
+}
+
+.card-view[open] {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
+.card-view::backdrop {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.card-view img {
+  display: block;
+  width: min(500px, 90vw, calc((100vh - 120px) / 1.4));
+  height: auto;
+  filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.7));
+}
+
+/* the table */
+
+.lb-window .win-title {
+  align-items: center;
+}
+
+.lb-window .win-title small {
+  margin-right: auto;
+}
+
+/* Players by [EXP] [Highest first] */
+.rank-by {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.lb-window .win-title .button {
+  margin-left: 0;
+}
+
+.order {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 12px 4px;
+}
+
+.sort-arrow {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  rotate: 90deg;
+}
+
+.sort-arrow.up {
+  rotate: -90deg;
+}
+
+.lb-window .find {
+  margin-left: auto;
+}
+
+.field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 260px;
+  padding: 3px 8px;
+  border-style: solid;
+  border-width: 2px;
+  border-image: url("assets/gui/field.png") 1 fill / 2px;
+  image-rendering: pixelated;
+  color: var(--dim);
+}
+
+.field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--white);
+  text-shadow: var(--shadow);
+  background: none;
+  caret-color: var(--white);
+  outline: none;
+}
+
+.field:focus-within {
+  border-image-source: url("assets/gui/field-focus.png");
+}
+
+.field input::placeholder {
+  color: var(--g8b);
+  text-shadow: none;
+}
+
+.lb-body {
+  padding: 6px 10px 10px;
+}
+
+.lb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.lb-table th {
+  padding: 4px 10px 8px;
+  border-bottom: 2px solid var(--d37);
+  font-weight: 400;
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.lb-table th.c-lead,
+.lb-table th.c-wide,
+.lb-table th.c-rank {
+  text-align: left;
+}
+
+.lb-table th button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-shadow: inherit;
+  background: none;
+  cursor: pointer;
+}
+
+.lb-table th button:hover {
+  color: var(--white);
+}
+
+.lb-table th button.sorted {
+  color: var(--hover);
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+
+.lb-table td {
+  padding: 5px 10px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.lb-table .c-rank {
+  width: 64px;
+  text-align: left;
+}
+
+.lb-table td.c-lead {
+  padding: 0 4px;
+  text-align: left;
+}
+
+.lb-table td.c-wide {
+  max-width: 340px;
+  text-align: left;
+}
+
+.lb-table td.on {
+  color: var(--hover);
+  font-weight: 700;
+}
+
+.lb-table td small {
+  font-size: inherit;
+  color: var(--dim);
+  font-weight: 400;
+}
+
+.lb-table td.c-num .socket {
+  width: 26px;
+  height: 26px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.lb-table td.c-num .socket .sword {
+  width: 20px;
+  height: 20px;
+}
+
+.rank-line {
+  cursor: pointer;
+  scroll-margin-top: 96px;
+}
+
+.rank-line:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.lb-table .rank-line:hover,
+.lb-list .rank-line:hover .row-open {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.rank-line.open,
+.lb-list .rank-line.open .row-open {
+  background: rgba(255, 255, 160, 0.12);
+}
+
+.rank-line.flash {
+  animation: found 900ms ease-out;
+}
+
+@keyframes found {
+  from { background: rgba(255, 255, 160, 0.4); }
+}
+
+.row-open {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 5px 6px;
+  border: 0;
+  font: inherit;
+  color: var(--white);
+  text-shadow: var(--shadow);
+  text-align: left;
+  background: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.rank {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+}
+
+.top .rank {
+  color: var(--white);
+  font-weight: 700;
+  text-shadow: var(--shadow);
+}
+
+.top .rank .first {
+  width: 14px;
+  height: 14px;
+}
+
+.group-row td,
+li.group-row {
+  padding: 14px 10px 6px;
+  border-bottom: 2px solid var(--d37);
+  font-weight: 700;
+  text-align: left;
+}
+
+.group-row td {
+  display: table-cell;
+}
+
+.group-row .socket {
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+li.group-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pill.cut {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.pill.cut .pill-map {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.pill.cut .tok {
+  flex: none;
+}
+
+/* old labels of removed roles can be long in the token too */
+.pill.ghost.cut .tok {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* cut text fades out at the edge instead of ending in dots */
+.pill-map.overflow,
+.tok.overflow,
+.row-open > .overflow,
+.lead > .overflow {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+}
+
+.rank-empty,
+.find-miss {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding: 12px;
+}
+
+.find-miss > p {
+  color: var(--hover);
+}
+
+/* the detail that opens under a row */
+
+.detail-row > td {
+  padding: 0 0 14px;
+  text-align: left;
+  white-space: normal;
+}
+
+/* the detail takes the width the table already has, it never widens it */
+.detail-row > td > .inline-detail {
+  width: 0;
+  min-width: 100%;
+}
+
+li.detail-row {
+  padding: 4px 0 14px;
+}
+
+.inline-detail {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  padding: 18px 20px;
+  border-top: 2px solid var(--hover);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.detail-visual {
+  display: grid;
+  place-items: center;
+  min-width: 96px;
+}
+
+.detail-card {
+  display: block;
+  width: 200px;
+  height: auto;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.55));
+}
+
+.detail-visual .tile {
+  width: 280px;
+}
+
+.head.big {
+  width: 96px;
+  height: 96px;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.5);
+}
+
+.detail-info {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.detail-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.detail-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 36px;
+  line-height: 40px;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+.detail-actions .close {
+  padding: 2px 8px 4px;
+}
+
+.detail-stats {
+  width: auto;
+  border-collapse: collapse;
+}
+
+.detail-stats th {
+  width: 170px;
+  padding: 5px 12px 5px 0;
+  font-weight: 400;
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.detail-stats td {
+  padding: 5px 0;
+  text-align: left;
+  white-space: normal;
+}
+
+.detail-stats tr + tr {
+  border-top: 2px solid rgba(255, 255, 255, 0.06);
+}
+
+.detail-stats .pos {
+  min-width: 260px;
+  padding-left: 28px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.detail-stats .pos button {
+  padding: 0;
+  border: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--white);
+  text-shadow: var(--shadow);
+  text-align: left;
+  background: none;
+  cursor: pointer;
+}
+
+.detail-stats .pos button:hover {
+  color: var(--hover);
+}
+
+.detail-stats .pos small {
+  display: block;
+  font-size: inherit;
+  font-weight: 400;
+  color: var(--dim);
+  white-space: normal;
+}
+
+.detail-stats .socket {
+  vertical-align: middle;
+}
+
+.detail-more {
+  display: grid;
+  gap: 6px;
+}
+
+.mini-ranks {
+  display: grid;
+  gap: 4px;
+}
+
+.mini-ranks li {
+  display: grid;
+  grid-template-columns: 28px 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.mini-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.inline-detail .rarity {
+  max-width: 420px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .held-card,
-  .tile {
+  .tile,
+  .podium-stage {
     transition: none;
   }
 
   .slot.held::after,
+  .rank-line.flash,
   .card-glint,
   .splash,
   .hero h1.blend,
@@ -1571,5 +2454,371 @@ button.pill {
 
   .holders li > :last-child {
     grid-column: 3;
+  }
+}
+
+/* the name gives way first, the numbers stay whole; maps have the most columns */
+.board-maps td.c-lead {
+  width: 100%;
+  max-width: 0;
+}
+
+.board-maps .row-open > * {
+  flex: none;
+}
+
+.board-maps .row-open > :nth-child(2) {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 1300px) {
+  .lb-table td.c-lead {
+    width: 100%;
+    max-width: 0;
+  }
+
+  .lb-table .row-open > * {
+    flex: none;
+  }
+
+  .lb-table .row-open > :nth-child(2):not(.pill) {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 1200px) {
+  .lb-table .c-wide:not(.on) {
+    display: none;
+  }
+
+  .lb-table td.c-wide {
+    max-width: 240px;
+  }
+
+  .lb-table:has(.c-wide.on) .c-minor:not(.on) {
+    display: none;
+  }
+
+  .board-maps td small {
+    display: none;
+  }
+
+  .inline-detail {
+    gap: 20px;
+  }
+
+  .detail-card {
+    width: 160px;
+  }
+
+  .detail-stats th {
+    width: 140px;
+  }
+
+  .detail-stats .pos {
+    min-width: 0;
+    padding-left: 20px;
+  }
+
+  .detail-stats .pos small {
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .page-title {
+    font-size: 54px;
+    line-height: 60px;
+    text-shadow: 6px 6px 0 #3f3f3f;
+  }
+
+  .board-maps .row-open > .socket {
+    display: none;
+  }
+}
+
+@media (max-width: 1000px) {
+  .detail-stats .pos small {
+    display: none;
+  }
+
+  .lb-table .c-minor:not(.on) {
+    display: none;
+  }
+}
+
+/* below this the table becomes a list, as on phones */
+@media (max-width: 900px) {
+  .lb-list {
+    display: grid;
+  }
+
+  .lb-list .row-open {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    row-gap: 2px;
+    white-space: normal;
+  }
+
+  .lb-list .lead {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .lb-list .lead > * {
+    flex: none;
+  }
+
+  .lb-list .lead > .pill {
+    flex: 0 1 auto;
+  }
+
+  .lb-list .lead > :nth-child(2):not(.pill) {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .lb-list .line-value {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--dim);
+  }
+
+  .inline-detail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .lb-head {
+    display: block;
+  }
+
+  .page-title {
+    font-size: 36px;
+    line-height: 40px;
+    text-shadow: 4px 4px 0 #3f3f3f;
+    margin-bottom: 12px;
+  }
+
+  .lb-boards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .board-tab {
+    padding: 4px 0 6px;
+  }
+
+  .lb-filters {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .lb-filters .seg {
+    display: none;
+  }
+
+  .mode-phone {
+    display: block;
+  }
+
+  .gui-select {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  .gui-select .select-face,
+  .gui-select .select-face select {
+    width: 100%;
+  }
+
+  .podium {
+    --cube: 32px;
+    --cap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 24px 0 24px;
+  }
+
+  .pose-shadow {
+    bottom: -4px;
+    width: 40px;
+    height: 8px;
+  }
+
+  /* the left column ends near the screen edge here, so the wheel turns a little to the right */
+  .pose.aerial .dust,
+  .pose.aerial .pose-shadow {
+    left: calc(50% + 30px);
+  }
+
+  .podium-head,
+  .podium-flag {
+    width: 64px;
+    height: 64px;
+  }
+
+  .podium-maps .podium-visual .tile {
+    width: 100%;
+  }
+
+  .podium-plate {
+    padding: 2px 4px 4px;
+  }
+
+  .podium-name,
+  .place1 .podium-name {
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  .podium-name {
+    flex-wrap: wrap;
+    justify-content: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+
+  .podium-value {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* a badge under a name breaks over lines instead of widening the step */
+  .podium-value .pill {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px 6px;
+    padding: 0;
+    border: 0;
+    border-image: none;
+    white-space: normal;
+  }
+
+  .podium-value .pill .tok {
+    white-space: normal;
+  }
+
+  .podium-block {
+    padding-top: calc(var(--cap) + 2px);
+  }
+
+  .podium-rank,
+  .place1 .podium-rank {
+    font-size: 27px;
+    line-height: 32px;
+    text-shadow: 3px 3px 0 #000;
+  }
+
+  .lb-window .win-title {
+    flex-wrap: wrap;
+  }
+
+  .lb-window .win-title small {
+    display: block;
+    white-space: normal;
+  }
+
+  .lb-window .find,
+  .field {
+    width: 100%;
+  }
+
+  .inline-detail {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 14px 12px;
+  }
+
+  .detail-card {
+    width: 180px;
+  }
+
+  .detail-visual .tile {
+    width: 100%;
+  }
+
+  .detail-name {
+    font-size: 27px;
+    line-height: 32px;
+  }
+
+  .detail-top {
+    flex-wrap: wrap;
+  }
+
+  .detail-top > div:first-child {
+    flex: 1 1 180px;
+  }
+
+  .detail-stats th {
+    width: auto;
+  }
+
+  .detail-stats tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 12px;
+    padding: 4px 0;
+  }
+
+  .detail-stats th,
+  .detail-stats td {
+    padding: 0;
+  }
+
+  .detail-stats td:not(.pos) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .detail-stats .pos {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    padding-left: 0;
+    text-align: right;
+  }
+
+  .detail-stats .pos small {
+    display: none;
+  }
+
+  .pill.cut .pill-map {
+    overflow: visible;
+    white-space: normal;
+  }
+
+  /* in the list a badge name is the thing to read, so it wraps inside its pill like a line of text */
+  .lb-list .pill.cut {
+    display: block;
+    white-space: normal;
+  }
+
+  .lb-list .pill.cut .dot {
+    display: inline-block;
+    margin-right: 8px;
+    vertical-align: 1px;
+  }
+
+  .lb-list .pill.cut .pill-map {
+    overflow: visible;
+    white-space: normal;
   }
 }
