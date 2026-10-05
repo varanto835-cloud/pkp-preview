@@ -456,7 +456,7 @@ const wheel = (u) => u + 0.6 * (u * u * (3 - 2 * u) - u);
 const MOVES = {
   // backflip off the gold, lands on both feet and throws both arms up
   flip: {
-    delay: 2100, length: 3000, air: 135, extra: 40, dust: [430, 1300], land: 1300, orbs: 1350, orbCount: 18,
+    delay: 1900, length: 3000, air: 135, extra: 40, dust: [430, 1300], land: 1300, orbs: 1350, orbCount: 18,
     crouch: [[0, 0], [250, 0.7], [420, 0], [1180, 0], [1300, 0.75], [1550, 0.1], [1800, 0], [3000, 0]],
     flip: [[0, 0], [420, 0], [600, -1.5], [800, -3.2], [1000, -4.9], [1200, -TAU], [3000, -TAU]],
     turn: [[0, 0.2], [300, 0.1], [450, -1.15], [1000, -1.1], [1350, 0.2], [1700, 0.35], [3000, 0.35]],
@@ -474,7 +474,7 @@ const MOVES = {
   // an aerial from standing: arms up, a star wheeling sideways toward the middle of the podium,
   // a soft landing, then both arms open to the crowd
   aerial: {
-    delay: 1250, length: 3100, air: 85, extra: 40, dust: [520, 1520], land: 1520, orbs: 1570, orbCount: 14,
+    delay: 1000, length: 3100, air: 85, extra: 40, dust: [520, 1520], land: 1520, orbs: 1570, orbCount: 14,
     roll: [[0, 0], ...along(520, 1520, (u) => -TAU * wheel(u))],
     slide: [[0, -110], ...along(520, 1520, (u) => -110 * (1 - wheel(u)))],
     lift: [[0, 0], ...along(520, 1520, (u) => 4 * u * (1 - u))],
@@ -650,6 +650,7 @@ function mountPose(box, row, place) {
     slim: skinSlim.includes(name),
     rim: tier ? getComputedStyle(document.documentElement).getPropertyValue(`--t${tier}`).trim() : "",
     zoom: (0.9 * height) / tall,
+    height,
     // the model leaves a little room under its feet, so the frame sits that much lower
     sink: (small ? 6 : 16) + extra / 2,
     // on phones the left column ends near the screen edge, so the aerial wheels a little to the right
@@ -691,7 +692,7 @@ function measure(s) {
 
 // draws every player into its own frame of the stage canvas
 function paint(s) {
-  const views = s.views.filter((view) => view.actor && view.box.isConnected);
+  const views = s.views.filter((view) => view.actor && view.box.isConnected && view.here);
   if (!views.length || !s.width) return;
   const gl = s.gl;
   gl.setScissorTest(false);
@@ -724,8 +725,34 @@ function paint(s) {
   }
 }
 
+// a player comes on in a puff of white smoke, as anything does when it spawns in the game
+function appear(view) {
+  const step = view.box.closest(".podium-step");
+  if (!step) return;
+  step.classList.remove("waiting");
+  const area = step.getBoundingClientRect();
+  const box = view.box.getBoundingClientRect();
+  const cloud = h("span", { class: "poof", style: `left: ${box.left - area.left + box.width / 2 + view.x + view.shift}px; bottom: ${area.bottom - box.bottom}px` });
+  for (let i = 0; i < 26; i++) {
+    const size = (16 + Math.random() * 16) * view.scale;
+    const grey = 200 + Math.round(Math.random() * 55);
+    const speck = h("i", { style: `left: ${(Math.random() - 0.5) * 100 * view.scale - size / 2}px; top: ${-Math.random() * view.height * 0.9 - size / 2}px; width: ${size}px; height: ${size}px; background: rgb(${grey}, ${grey}, ${grey})` });
+    // the cloud is thick for a moment, hiding the player as it appears, then thins out and rises
+    speck.animate([
+      { opacity: 0, scale: 0.4, translate: "0 0" },
+      { opacity: 1, scale: 1, translate: "0 -4px", offset: 0.2 },
+      { opacity: 0.85, scale: 1.1, translate: "0 -10px", offset: 0.45 },
+      { opacity: 0, scale: 1.3, translate: `${(Math.random() - 0.5) * 30}px ${-24 - Math.random() * 20}px` },
+    ], { duration: 650 + Math.random() * 300, delay: Math.random() * 80, easing: "ease-out", fill: "both" });
+    cloud.append(speck);
+  }
+  step.append(cloud);
+  setTimeout(() => cloud.remove(), 1100);
+}
+
 // no 3D here (no WebGL), the face stands in on the step
 function flatten(view) {
+  view.box.closest(".podium-step")?.classList.remove("waiting");
   const face = head(view.name);
   face.classList.add("podium-head");
   view.box.className = "pose flat";
@@ -776,7 +803,10 @@ async function stagePlayers(podium, views, run) {
   measure(s);
   const end = (view) => view.move.length + LAG_MAX;
   if (calm.matches) {
-    views.forEach((view) => setPose(view, end(view)));
+    views.forEach((view) => {
+      view.here = true;
+      setPose(view, end(view));
+    });
     paint(s);
     s.canvas.classList.add("shown");
     views.forEach((view) => view.land());
@@ -789,14 +819,25 @@ async function stagePlayers(podium, views, run) {
   });
   paint(s);
   s.canvas.classList.add("shown");
-  // third place moves first and the winner last
+  // they come on one at a time, third place first and the winner last
   const t0 = performance.now() + 150;
   const step = (now) => {
     if (run !== podiumRun) return;
     let busy = false;
     for (const view of views) {
       if (view.done) continue;
-      const ms = Math.min(Math.max(0, now - t0 - view.move.delay), end(view));
+      const since = now - t0 - view.move.delay;
+      if (since < 0) {
+        busy = true;
+        continue;
+      }
+      if (!view.puffed) {
+        view.puffed = true;
+        appear(view);
+      }
+      // the player shows once the smoke is thick
+      if (since >= 120) view.here = true;
+      const ms = Math.min(since, end(view));
       if (ms !== view.ms) setPose(view, ms);
       if (view.dust.length && ms >= view.dust[0]) {
         view.dust.shift();
@@ -839,7 +880,7 @@ function renderPodium() {
   podium.replaceChildren(...steps.map(([row, place, material]) => {
     const open = () => openRow(rows.indexOf(row), true);
     const card = hasCard(row);
-    return h("div", { class: `podium-step place${place}` },
+    return h("div", { class: `podium-step place${place}${row.kind === "player" && !calm.matches ? " waiting" : ""}` },
       h("span", { class: "podium-plate" },
         h("span", { class: "podium-name" }, row.kind === "player" ? [nameTag(row.name), flag(row.country)] : row.kind === "map" ? painted(row.name, row.badge) : row.name),
         h("span", { class: "podium-value" }, valueOf(row))),

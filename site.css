@@ -1589,6 +1589,31 @@ button.pill {
   pointer-events: none;
 }
 
+/* players come on one at a time: until then the step is empty and its name tag hidden */
+.podium-plate {
+  transition: opacity 200ms ease-out;
+}
+
+.podium-step.waiting .podium-plate,
+.podium-step.waiting .pose-shadow {
+  opacity: 0;
+}
+
+/* the white puff the game shows when something spawns, in front of the player */
+.poof {
+  position: absolute;
+  z-index: 3;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.poof i {
+  position: absolute;
+  box-shadow: inset -3px -3px 0 rgba(0, 0, 0, 0.12);
+  opacity: 0;
+}
+
 /* experience orbs, square and glowing like the game's */
 .orb {
   position: absolute;
