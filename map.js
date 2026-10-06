@@ -49,7 +49,7 @@ function renderSide() {
         h("span", { class: "dim" }, `${i + 1}.`),
         who(person),
         h("a", { href: `#step-${person.step.id}`, class: "dim" }, person.step.code),
-        h("span", { class: "dim" }, date(person.date)))))),
+        h("span", { class: "dim" }, dayOf(person.date)))))),
     sibling ? h("p", { class: "dim" }, `Also on the list: ${sibling.name}, ${sibling.gamemode}, ${tierText(sibling.tier)}, ${expOf(sibling.value)} EXP, ${sibling.victors ? plural(sibling.victors, "victor") : "unbeaten"}.`) : null,
   );
 }
@@ -142,7 +142,7 @@ function renderAside() {
         h("span", { class: "dim" }, "Furthest so far"),
         who(lead),
         h("a", { href: `#step-${lead.step.id}` }, icon("flag", "target-flag"), stepName(lead.step)),
-        h("span", { class: "dim" }, `since ${date(lead.date)}`)) : null)));
+        h("span", { class: "dim" }, "since ", dayOf(lead.date))) : null)));
 }
 
 function markTarget() {

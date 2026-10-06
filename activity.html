@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Leaderboards - Parkour Progress</title>
-  <meta name="description" content="Parkour Progress leaderboards: players by EXP, difficulty, tiers, victories, badges and sky fails, plus countries, maps and badges.">
-  <meta property="og:title" content="Leaderboards">
-  <meta property="og:description" content="Players, countries, maps and badges, ranked">
+  <title>Activity - Parkour Progress</title>
+  <meta name="description" content="Parkour Progress activity: every victory, step, tier and new map, day by day.">
+  <meta property="og:title" content="Activity">
+  <meta property="og:description" content="Victories, steps, tiers and new maps, day by day">
   <meta property="og:site_name" content="Parkour Progress">
-  <meta name="theme-color" content="#eaee57">
+  <meta name="theme-color" content="#2fd86d">
   <link rel="stylesheet" href="site.css?v=2610062344">
 </head>
 <body>
@@ -34,39 +34,58 @@
       <ul id="nav-list">
         <li><a href="map.html">Maps</a></li>
         <li><a href="profile.html">Players</a></li>
-        <li><a href="leaderboards.html" aria-current="page">Leaderboards</a></li>
-        <li><a href="activity.html">Activity</a></li>
+        <li><a href="leaderboards.html">Leaderboards</a></li>
+        <li><a href="activity.html" aria-current="page">Activity</a></li>
       </ul>
     </nav>
   </header>
 
   <main>
     <div class="lb-head">
-      <h1 class="page-title">Leaderboards</h1>
-      <div class="lb-boards" role="tablist" aria-label="Leaderboard" id="tabs"></div>
+      <h1 class="page-title">Activity</h1>
+      <div class="lb-boards" role="group" aria-label="Period" id="periods"></div>
     </div>
     <div class="lb-filters" id="filters"></div>
 
-    <section class="podium" id="podium" aria-label="Top three"></section>
+    <div class="act-grid">
+      <p class="seen-top news" id="news"></p>
+      <aside class="hud-top" aria-label="Biggest moments and totals">
+        <section class="moment" id="moment" aria-label="Biggest moment"></section>
+        <div class="toasts" id="toasts"></div>
+        <section class="score" id="totals"></section>
+      </aside>
 
-    <section class="win lb-window" role="tabpanel" id="panel">
-      <h2 class="win-title" id="list-title"></h2>
-      <div class="well lb-body" id="body"></div>
-    </section>
+      <section class="chat" aria-label="Activity log">
+        <div class="chat-bar">
+          <div class="chat-show" id="shows"></div>
+          <label class="chat-find">
+            <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+            <input type="search" id="find" placeholder="Player or map" aria-label="Find a player or map">
+          </label>
+        </div>
+        <div class="chat-log" id="log"></div>
+      </section>
+
+      <aside class="hud-more" aria-label="Most active">
+        <section class="score" id="gains"></section>
+        <section class="score" id="busy"></section>
+      </aside>
+    </div>
     <p class="sr-only" id="announce" aria-live="polite"></p>
 
     <footer class="foot dim">
-      <p>Real data from a copy of the ProgressBot database, 2 Oct 2026.</p>
-      <p>Cards made with Goldy's card generator, for the top 25 by EXP.</p>
+      <p>Real data from a copy of the ProgressBot database, 2 Oct 2026. Its newest entries are from 19 Sep, so the log ends that day.</p>
+      <p>Tiers and EXP worked out with the bot's own code.</p>
+      <p>Mockup: your last visit is set to 16 Sep so the marker for what is new shows. The site will remember each visitor's own.</p>
     </footer>
   </main>
 
   <script src="data/search.js?v=2610062344"></script>
   <script src="data/names.js?v=2610062344"></script>
-  <script src="data/boards.js?v=2610062344"></script>
+  <script src="data/activity.js?v=2610062344"></script>
   <script src="data/skins.js?v=2610062344"></script>
   <script src="site.js?v=2610062344"></script>
   <script src="figure.js?v=2610062344"></script>
-  <script src="leaderboards.js?v=2610062344"></script>
+  <script src="activity.js?v=2610062344"></script>
 </body>
 </html>

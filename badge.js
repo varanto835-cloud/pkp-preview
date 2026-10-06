@@ -15,7 +15,7 @@ function slug(text) {
 }
 
 function reached(row) {
-  return when(row[2], row[3]);
+  return dayOf(row[2], row[3]);
 }
 
 function renderSide() {
@@ -61,8 +61,9 @@ function renderHolders() {
       head(name),
       h("span", { class: "who" }, personLink(name), flag(country), i === 0 && exact(row[2], row[3]) ? icon("crown", "first") : null),
       h("span", { class: "dim" }, reached(row))),
-    () => `<b>${esc(name)}</b><p>Got it ${esc(reached(row))}</p>${favouriteLine(name)}`));
+    () => `<b>${esc(name)}</b><p>Got it ${esc(when(row[2], row[3]))}</p>${exact(row[2], row[3]) ? "" : "<p>* exact day not recorded</p>"}${favouriteLine(name)}`));
   });
+  if (holders.some((row) => !exact(row[2], row[3]))) list.after(starNote());
 }
 
 renderSide();

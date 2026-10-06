@@ -123,7 +123,8 @@ function renderProgress() {
       `${step.gamemode}, ${tierText(step.tier)}`,
       step.value == null ? "No EXP" : `${expOf(step.value)} EXP`,
       `Step ${step.step} of ${step.steps}${step.note ? `, ${step.note}` : ""}`,
-      step.date ? `Reached ${date(step.date)}` : "Date not recorded",
+      step.date ? `Reached ${when(step.date)}` : "Date not recorded",
+      step.date && !exact(step.date) ? "* exact day not recorded, reached by then" : null,
       step.role ? `Latest badge: ${step.role.name}` : "No badge on this map yet",
       rarity(step.holders),
     ].filter(Boolean), href ? "Click to open this step on the map" : null));
@@ -134,7 +135,7 @@ function renderProgress() {
         h("strong", { class: "meta-map" }, step.map),
         h("span", { class: "dim" }, withFlags(step.title && !/^[\u{1F1E6}-\u{1F1FF}]{2}$/u.test(step.title) ? `${step.code} ${step.title}` : step.code)),
         token ? pill("a", { class: "pill", href: badgeHref(step.role.name) }, step.role, token) : h("span", { class: "pill ghost" }, dot(null), h("span", {}, "no badge")),
-        h("span", { class: "dim date" }, date(step.date)))));
+        h("span", { class: "dim date" }, dayOf(step.date)))));
   }
 }
 
@@ -143,9 +144,8 @@ function renderProgress() {
 function badgeTip(b) {
   return roleTip(b, [
     `${b.gamemode}, ${tierText(b.tier)}`,
-    !b.date ? "Date not recorded"
-      : b.by ? `Got on the way to the victory, by ${date(b.date)}`
-        : b.date === HISTORY_START ? `Got on or before ${date(b.date)}` : `Got ${date(b.date)}`,
+    b.date ? `Got ${when(b.date, b.by)}` : "Date not recorded",
+    b.date && !exact(b.date, b.by) ? "* exact day not recorded, held by then" : null,
     rarity(b.holders),
     b.first ? "First player to beat it" : null,
     b === favourite ? "Favourite badge" : null,

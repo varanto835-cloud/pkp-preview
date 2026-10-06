@@ -13,7 +13,19 @@ const COUNTRIES = {
 };
 const PAGES = { wlatr: "profile.html", "Magnum Opus": "map.html" };
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const calm = matchMedia("(prefers-reduced-motion: reduce)");
+// Animations always play, whatever the system setting says: many people switch it off only to
+// make Windows feel faster, and then never see the podium (the user's call, 2026-10-06). A
+// setting to turn them off will come with the site's settings; it will be kept in this browser.
+const calm = { matches: stored("pkp-calm") === "1" };
+document.documentElement.classList.toggle("calm", calm.matches);
+
+function stored(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
 
 // standalone build puts the images in INLINE
 function asset(path) {
@@ -59,14 +71,32 @@ function date(iso) {
 // progress from before this day was imported on it, so the date only means "on or before"
 const HISTORY_START = "2025-04-06";
 
-function when(iso, by) {
-  if (!iso) return "date not recorded";
-  if (by) return `by ${date(iso)}`;
-  return iso === HISTORY_START ? `${date(iso)} or earlier` : date(iso);
-}
-
+// Some days the bot never recorded: progress imported on the first day of the history, and badges
+// only known to be held by the day of a later step or of the victory. They read as plain dates
+// with a small star that says why (Deciron found "by" and "or earlier" confusing).
 function exact(iso, by) {
   return Boolean(iso) && !by && iso !== HISTORY_START;
+}
+
+function when(iso, by) {
+  if (!iso) return "date not recorded";
+  return exact(iso, by) ? date(iso) : `${date(iso)}*`;
+}
+
+function whyStar(iso, by) {
+  return by
+    ? `<b>Exact day not recorded</b><p>The bot only knows it was held by ${date(iso)}, the day of a later step or of the victory.</p>`
+    : `<b>Exact day not recorded</b><p>Progress from before ${date(HISTORY_START)} was imported on that day, so it may be older.</p>`;
+}
+
+function dayOf(iso, by) {
+  if (exact(iso, by) || !iso) return when(iso, by);
+  return h("span", { class: "day" }, date(iso), tip(h("span", { class: "star", role: "img", "aria-label": "exact day not recorded" }, "*"), () => whyStar(iso, by)));
+}
+
+// the line under a list that has starred days
+function starNote() {
+  return h("p", { class: "star-note dim" }, "* Exact day not recorded: held by then, maybe earlier.");
 }
 
 function plural(n, word, many = word + "s") {

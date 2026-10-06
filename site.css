@@ -195,6 +195,9 @@ ol {
 .bar nav {
   position: relative;
   justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 24px;
 }
 
 .menu {
@@ -826,9 +829,10 @@ button.pill {
 }
 
 .pill .first,
+/* the crown's 8 pixels land on whole screen pixels at 16px */
 .first {
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   color: var(--hover);
 }
 
@@ -1998,8 +2002,8 @@ button.pill {
 }
 
 .top .rank .first {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
 }
 
 .group-row td,
@@ -2239,21 +2243,20 @@ li.detail-row {
   max-width: 420px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .held-card,
-  .tile,
-  .podium-stage {
-    transition: none;
-  }
+/* animations off, from the settings */
+html.calm .held-card,
+html.calm .tile,
+html.calm .podium-stage {
+  transition: none;
+}
 
-  .slot.held::after,
-  .rank-line.flash,
-  .card-glint,
-  .splash,
-  .hero h1.blend,
-  .name.blend {
-    animation: none !important;
-  }
+html.calm .slot.held::after,
+html.calm .rank-line.flash,
+html.calm .card-glint,
+html.calm .splash,
+html.calm .hero h1.blend,
+html.calm .name.blend {
+  animation: none !important;
 }
 
 @media (max-width: 1100px) {
@@ -2845,5 +2848,896 @@ li.detail-row {
   .lb-list .pill.cut .pill-map {
     overflow: visible;
     white-space: normal;
+  }
+}
+
+/* a day the bot did not record exactly */
+/* the star hangs past the end, so starred and plain days keep their digits in one column */
+.day {
+  white-space: nowrap;
+}
+
+.star {
+  margin-right: -1ch;
+  cursor: help;
+}
+
+.star-note {
+  margin: 8px 2px 0;
+}
+
+/* activity: the game's own HUD, the chat log on the left, toasts and the scoreboard on the right */
+
+.world {
+  transition: opacity 600ms ease-out;
+}
+
+.world.fresh {
+  opacity: 0;
+}
+
+.act-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  grid-template-areas: "log top" "log more";
+  grid-template-rows: auto 1fr;
+  gap: 24px;
+  align-items: start;
+  margin-top: 24px;
+}
+
+.hud-top {
+  grid-area: top;
+  display: grid;
+  gap: 24px;
+}
+
+.hud-more {
+  grid-area: more;
+  display: grid;
+  gap: 24px;
+}
+
+/* the chat sits on the game's see-through black, with no frame */
+.chat {
+  grid-area: log;
+  min-width: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.chat-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 24px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.62);
+}
+
+.chat-find {
+  flex: 1 1 0;
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 8px;
+  border-style: solid;
+  border-width: 2px;
+  border-image: url("assets/gui/field.png") 1 fill / 2px;
+  image-rendering: pixelated;
+  color: var(--dim);
+}
+
+.chat-find:focus-within {
+  border-image-source: url("assets/gui/field-focus.png");
+  color: var(--white);
+}
+
+.chat-find input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--white);
+  text-shadow: var(--shadow);
+  background: none;
+  caret-color: var(--white);
+  outline: none;
+}
+
+.chat-find input::placeholder {
+  color: var(--g8b);
+  text-shadow: none;
+}
+
+.chat-find input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.chat-find .clear {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  color: var(--dim);
+  background: none;
+  cursor: pointer;
+}
+
+.chat-find .clear[hidden] {
+  display: none;
+}
+
+.chat-find .clear:hover {
+  color: var(--hover);
+}
+
+.chat-find .clear .icon {
+  width: 12px;
+  height: 12px;
+}
+
+.chat-show {
+  flex: none;
+}
+
+.act-day + .act-day {
+  margin-top: 8px;
+}
+
+/* each day's bar stays under the top bar while its lines scroll by */
+.day-bar {
+  position: sticky;
+  top: var(--bar, 70px);
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 16px;
+  padding: 6px 12px 8px;
+  font-size: 18px;
+  font-weight: 700;
+  background: var(--deep);
+  border-bottom: 2px solid var(--d37);
+}
+
+.day-bar .dim {
+  font-weight: 400;
+}
+
+.act-lines {
+  padding: 4px 0 8px;
+}
+
+.act-line {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto 10ch;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 12px;
+}
+
+.act-line > .shot {
+  grid-column: 3;
+}
+
+.act-line > .act-exp {
+  grid-column: 4;
+  justify-self: end;
+}
+
+.shot .tile {
+  width: 96px;
+}
+
+/* the line between what is new and what was there at the last visit */
+.seen-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  padding: 0 12px;
+  color: var(--hover);
+  text-shadow: 2px 2px 0 #404028;
+}
+
+.seen-bar::after {
+  content: "";
+  flex: 1;
+  min-width: 24px;
+  height: 2px;
+  background: var(--hover);
+}
+
+.seen-bar .icon {
+  rotate: -90deg;
+}
+
+/* at the top of the log: how much is new, and a way down to where it ends */
+.seen-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 8px 12px;
+  color: var(--hover);
+  text-shadow: 2px 2px 0 #404028;
+  background: rgba(255, 255, 160, 0.06);
+}
+
+/* the count of what is new above the moment, on phones only */
+.news {
+  display: none;
+}
+
+.new-tag {
+  margin-left: 12px;
+  color: var(--hover);
+  text-shadow: 2px 2px 0 #404028;
+}
+
+.act-line:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.act-line:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.act-line.big {
+  background: rgba(255, 255, 160, 0.06);
+}
+
+.act-line.big:hover {
+  background: rgba(255, 255, 160, 0.1);
+}
+
+.act-line.flash {
+  animation: found 900ms ease-out;
+}
+
+.act-text {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.act-text .who {
+  vertical-align: top;
+}
+
+.act-text .flag {
+  margin-left: -2px;
+}
+
+a.bk:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+.bk.plain {
+  color: var(--white);
+}
+
+.act-note {
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+  white-space: nowrap;
+}
+
+.act-note.crowned {
+  color: var(--hover);
+  text-shadow: 2px 2px 0 #404028;
+}
+
+.act-note .first,
+.act-rank .first {
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+
+.act-rank {
+  font-weight: 700;
+}
+
+.act-rank.top {
+  color: var(--hover);
+  text-shadow: 2px 2px 0 #404028;
+}
+
+.builder {
+  font-weight: 700;
+}
+
+/* EXP in the game's experience green */
+.act-exp {
+  color: #b9f53a;
+  text-shadow: 2px 2px 0 #2e3d0e;
+  white-space: nowrap;
+}
+
+.act-exp.total {
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+}
+
+/* advancement frames around the slot, as the game marks an advancement's kind: cut corners for
+   a goal, spikes for a challenge. The slot inside stays as it is, so the sword reads the same */
+.kind {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin: -4px;
+  background: url("assets/gui/frame-goal.png") center / 40px 40px no-repeat;
+  image-rendering: pixelated;
+}
+
+.kind.challenge {
+  width: 48px;
+  height: 48px;
+  margin: -8px;
+  background-image: url("assets/gui/frame-challenge.png");
+  background-size: 48px 48px;
+}
+
+.kind .icon {
+  rotate: -90deg;
+}
+
+.socket > .head {
+  width: 24px;
+  height: 24px;
+  box-shadow: none;
+}
+
+/* a big moment's sword shines like an enchanted item. The shine is a violet copy of the sword
+   seen through a moving band, so it needs no mask (masks are blocked on pages opened from disk) */
+.glint {
+  position: relative;
+}
+
+.glint .sheen {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  filter: grayscale(1) brightness(1.8) sepia(1) hue-rotate(225deg) saturate(4);
+  opacity: 0.75;
+  mix-blend-mode: screen;
+  clip-path: polygon(-60% 0, -30% 0, -50% 100%, -80% 100%);
+  animation: sheen 4s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes sheen {
+  50%,
+  to { clip-path: polygon(130% 0, 160% 0, 140% 100%, 110% 100%); }
+}
+
+.act-empty {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding: 40px 24px 48px;
+}
+
+.act-empty .big {
+  font-size: 27px;
+  line-height: 36px;
+  font-weight: 700;
+}
+
+.act-empty .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+/* toasts slide in from the right edge, as the game shows an advancement */
+.toasts {
+  display: grid;
+  gap: 8px;
+  margin: -4px;
+  padding: 4px;
+  overflow: clip;
+}
+
+.toasts[hidden] {
+  display: none;
+}
+
+.toast {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  width: 100%;
+  padding: 6px 12px 8px 10px;
+  border-style: solid;
+  border-width: 6px;
+  border-image: url("assets/gui/toast.png") 3 fill / 6px;
+  image-rendering: pixelated;
+  font: inherit;
+  text-align: left;
+  color: var(--white);
+  text-shadow: var(--shadow);
+  background: none;
+  cursor: pointer;
+  transition: translate 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  animation: toast-in 500ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i) * 160ms + 150ms) both;
+}
+
+.toast > :first-child {
+  align-self: center;
+}
+
+.toast:hover,
+.toast:focus-visible {
+  translate: -6px 0;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+@keyframes toast-in {
+  from { translate: 110% 0; }
+}
+
+@keyframes toast-fade {
+  from { opacity: 0; }
+}
+
+.toast-text {
+  display: grid;
+  min-width: 0;
+}
+
+.toast-title {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 12px;
+  color: var(--hover);
+  text-shadow: 2px 2px 0 #404028;
+}
+
+.toast-main {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.toast-sub {
+  overflow-wrap: anywhere;
+}
+
+/* the moment: the map's screenshot in its tier frame, the player in 3D on a block of the tier's
+   material in front of it, and its toast under them */
+.moment {
+  --cube: 32px;
+  --cap: 8px;
+  --figure: 210px;
+  --spot-right: 40px;
+  /* how far the ledge reaches below the screenshot's bottom edge */
+  --overhang: 32px;
+  display: grid;
+  gap: calc(var(--overhang) + 12px);
+  margin-bottom: 16px;
+}
+
+.moment[hidden] {
+  display: none;
+}
+
+.moment-art {
+  position: relative;
+}
+
+.moment-art > .tile {
+  width: 100%;
+}
+
+/* the screenshot darkens toward the side the player stands on, so the player stands out from it */
+.moment-art > .tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 30%, rgba(0, 0, 0, 0.6) 75%);
+  pointer-events: none;
+}
+
+.moment-art .tile-tier {
+  z-index: 1;
+}
+
+/* a ledge of the tier's blocks, shaded like the podium's, that the screenshot stands on and the
+   player stands in front of; one texture pixel is one GUI pixel */
+.moment-ledge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(-1 * var(--overhang));
+  height: calc(var(--cube) + var(--cap));
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.28)),
+    var(--tex) 0 var(--cap) / var(--cube) var(--cube) repeat;
+  image-rendering: pixelated;
+}
+
+.moment-ledge.plain {
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.28)),
+    repeating-linear-gradient(90deg, var(--g8b) 0 calc(var(--cube) - 2px), var(--g55) calc(var(--cube) - 2px) var(--cube));
+}
+
+.moment-ledge.plain::before {
+  background: var(--face);
+}
+
+.moment-ledge::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--cap);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)),
+    var(--tex) 0 0 / var(--cube) var(--cap) repeat-x;
+  image-rendering: pixelated;
+}
+
+.moment-spot {
+  position: absolute;
+  right: var(--spot-right);
+  bottom: calc(var(--cube) + var(--cap) - var(--overhang));
+  width: var(--figure);
+  height: var(--figure);
+  pointer-events: none;
+}
+
+.moment-figure {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  opacity: 0;
+  transition: opacity 250ms ease-out;
+  pointer-events: none;
+}
+
+.moment-figure.shown {
+  opacity: 1;
+}
+
+.moment-spot .pose-shadow {
+  bottom: -6px;
+  width: 56px;
+  height: 12px;
+}
+
+/* the game's floating name tag over the player, on once the player is there */
+.moment-tag {
+  position: absolute;
+  right: calc(var(--spot-right) + var(--figure) / 2);
+  bottom: calc(var(--cube) + var(--cap) - var(--overhang) + var(--figure) * 0.85 + 6px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 10px 4px;
+  translate: 50% 0;
+  font-weight: 700;
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+  pointer-events: none;
+}
+
+.moment-art.here .moment-tag {
+  opacity: 1;
+}
+
+.toast-title .act-exp.waiting {
+  visibility: hidden;
+}
+
+/* the game's experience bar on the moment's toast: the place on the EXP board in green over a
+   segmented bar, drawn here in the GUI ramp and the experience green */
+.xp-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.xp-level {
+  min-width: 4ch;
+  font-weight: 700;
+  color: #b9f53a;
+  text-shadow: 2px 2px 0 #2e3d0e;
+}
+
+.xp-bar {
+  position: relative;
+  flex: 1;
+  height: 14px;
+  border: 2px solid var(--black);
+  background: var(--deep);
+}
+
+.xp-bar i {
+  position: absolute;
+  inset: 0;
+  background: #b9f53a;
+  box-shadow: inset 0 2px 0 #f2ff9a, inset 0 -2px 0 #5aa50a;
+  transform-origin: left;
+}
+
+/* the bar's notches, as in the game */
+.xp-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 2px), var(--black) calc(10% - 2px) 10%);
+  pointer-events: none;
+}
+
+.socket.mode {
+  font-weight: 700;
+  color: var(--white);
+}
+
+.moment-head {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 64px;
+  height: 64px;
+  translate: -50% 0;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* the moment's own toast fades in with it; sliding would push past the page edge */
+.moment .toast {
+  animation-name: toast-fade;
+}
+
+/* the scoreboard, as a server shows it down the side: see-through black, a darker title row */
+.score {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.score-title {
+  padding: 6px 12px 8px;
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 700;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.62);
+}
+
+.score-sub,
+.score-scope {
+  padding: 8px 12px 0;
+  text-align: center;
+}
+
+.score-scope {
+  padding-top: 2px;
+  color: var(--hover);
+  text-shadow: 2px 2px 0 #404028;
+}
+
+.score-rows {
+  display: grid;
+  padding: 8px 12px 10px;
+}
+
+.score-rows li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 36px;
+}
+
+.score-rows li.none {
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+}
+
+.score-rows b {
+  font-weight: 700;
+}
+
+.score-rows li:has(.follow[aria-pressed="true"]) {
+  margin: 0 -12px;
+  padding: 0 12px;
+  background: rgba(255, 255, 160, 0.12);
+}
+
+.score-none {
+  padding: 12px 12px 14px;
+  text-align: center;
+}
+
+.follow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 2px 0;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  color: var(--white);
+  text-shadow: var(--shadow);
+  background: none;
+  cursor: pointer;
+}
+
+.follow:hover > span:not(.name, .socket) {
+  color: var(--hover);
+}
+
+.follow:hover > .name.blend {
+  animation: flow 3s linear infinite;
+}
+
+/* animations off, from the settings */
+html.calm .world,
+html.calm .toast {
+  transition: none;
+}
+
+html.calm .toast,
+html.calm .moment-figure,
+html.calm .moment-tag,
+html.calm .glint .sheen,
+html.calm .act-line.flash,
+html.calm .follow:hover > .name.blend {
+  animation: none;
+}
+
+/* narrower, the log comes right after the toasts and the scoreboard goes under it */
+@media (max-width: 1100px) {
+  .act-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-areas: "art art art hero hero hero" "art art art toasts toasts toasts" "log log log log log log" "totals totals gains gains busy busy";
+    grid-template-rows: none;
+  }
+
+  .moment {
+    display: contents;
+  }
+
+  .moment-art {
+    grid-area: art;
+    margin-bottom: var(--overhang);
+  }
+
+  .moment > .toast {
+    grid-area: hero;
+  }
+
+  .hud-top,
+  .hud-more {
+    display: contents;
+  }
+
+  .toasts {
+    grid-area: toasts;
+    align-content: start;
+  }
+
+  #totals {
+    grid-area: totals;
+  }
+
+  #gains {
+    grid-area: gains;
+  }
+
+  #busy {
+    grid-area: busy;
+  }
+}
+
+@media (max-width: 760px) {
+  #periods {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .act-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "news" "moment" "toasts" "log" "totals" "gains" "busy";
+  }
+
+  .news {
+    grid-area: news;
+    display: flex;
+  }
+
+  .news:empty,
+  .chat-log > .seen-top {
+    display: none;
+  }
+
+  .moment {
+    --figure: 150px;
+    --spot-right: 24px;
+    display: grid;
+    grid-area: moment;
+    margin-bottom: 0;
+  }
+
+  .moment-art,
+  .moment > .toast {
+    grid-area: auto;
+    margin-bottom: 0;
+  }
+
+  /* the name tag stands where the tier socket would be; the toast shows the tier */
+  .moment-art .tile-tier {
+    display: none;
+  }
+
+  .act-line > .shot {
+    display: none;
+  }
+
+  .act-note {
+    white-space: normal;
+  }
+
+  /* the toasts become a row to swipe, the next one peeking in */
+  .toasts {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 86%;
+    overflow: auto hidden;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+  }
+
+  /* in a row that scrolls, sliding in from the side would scroll it, so they fade in */
+  .toast {
+    scroll-snap-align: start;
+    animation-name: toast-fade;
+  }
+
+  .chat-bar {
+    padding: 10px;
+  }
+
+  .chat-show {
+    flex: 1 1 100%;
+  }
+
+  .chat-bar .seg {
+    display: none;
+  }
+
+  .chat-bar .mode-phone .gui-select {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  .day-bar {
+    padding: 6px 10px 8px;
+  }
+
+  .act-line {
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 2px 12px;
+    padding: 8px 10px;
+  }
+
+  .act-line > .act-exp {
+    grid-column: 2;
   }
 }
