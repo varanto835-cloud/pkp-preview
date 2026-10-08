@@ -138,7 +138,7 @@ function card(m) {
   const link = h(page ? "a" : "span", { class: "map-link", href: page || null }, art(m));
   const facts = [h("span", { class: m.victors ? (state.sort === "victors" ? "on" : "") : "unbeaten" }, victorsText(m))];
   if (m.steps) facts.push(h("span", { class: state.sort === "players" ? "on" : "dim" }, `${m.on} on it`));
-  else facts.push(h("span", { class: "dim" }, m.legacy ? "Legacy" : "Extra"));
+  else facts.push(h("span", { class: "dim" }, m.legacy ? "Legacy" : m.extra ? "Extra" : "victory only"));
   const sorted = sortedFact(m);
   if (sorted) facts.unshift(sorted);
   const line = [m.value != null ? `${expOf(m.value)} EXP` : m.legacy ? "no EXP" : "no EXP yet", m.steps ? plural(m.steps, "step") : null].filter(Boolean).join(", ");

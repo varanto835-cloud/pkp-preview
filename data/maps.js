@@ -153,7 +153,7 @@ const mapCatalog = [
   ["Glitch Reloaded","Onlysprint",1,3,13.0,56,0,0,["2024-02-04","Majikal"],["2026-09-14","Awa9999"],null,null,"oKyrea","2024-01-30",null,"https://www.youtube.com/watch?v=Ya0qZBIlges",44,"glitchreloaded",null,0.076,null],
   ["Cerkour XI","Onlysprint",1,4,10.0,30,0,0,["2025-05-30","Cerdax"],["2026-09-14","clawnys"],null,null,"Unknown","2025-06-06",null,null,21,"cerkourxi",null,0.179,null],
   ["Perfect Extra 7","Onlysprint",2,0,null,81,0,0,["2021-02-14","crazy4pokemon"],["2026-09-12","Zuckerfreaks"],null,null,"Unknown","2023-08-26","crazy4pokemon",null,null,"perfectextra7",null,0.495,null],
-  ["Remedy","Miscellaneous",1,1,113.0,13,0,0,["2022-10-20","BRCamy"],["2026-07-01","Kev4"],null,null,"EntityWolf, NateTheCrack","2022-08-05",null,"https://youtu.be/ruFgGFYDBHg",16,"remedy",null,0.041,null],
+  ["Remedy","Miscellaneous",0,1,113.0,13,0,0,["2022-10-20","BRCamy"],["2026-07-01","Kev4"],null,null,"EntityWolf, NateTheCrack","2022-08-05",null,"https://youtu.be/ruFgGFYDBHg",16,"remedy",null,0.041,null],
   ["Versatile","Miscellaneous",1,1,43.0,38,0,0,["2023-05-18","wlatr"],["2026-08-11","Meiomooo"],null,null,"NateTheCrack","2023-05-12",null,"https://youtu.be/qtpTeK_lDg4",42,"versatile",null,0.055,null],
   ["Master Tag","Miscellaneous",1,2,4.0,20,0,0,["2022-02-07","xBonkZ14"],["2026-08-05","MegaTop4ick"],null,null,"HelloSarina","2022-01-04",null,"https://youtu.be/YB1u-dYFzzk",6,"mastertag",null,0.348,null]
 ];
