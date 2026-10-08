@@ -169,7 +169,7 @@ function pillHtml(badge) {
 }
 
 function headColour(badge) {
-  return badge ? legible(badge.color) : "#fff";
+  return badge ? headingColour(badge.color, badge.end, badge.third) : "#fff";
 }
 
 function modeTier(mode, tier) {
@@ -749,38 +749,6 @@ function renderMoment(e) {
     xp?.settle();
   }
   stageMoment(e, spot, card.gain, run);
-}
-
-// the world behind is the map of the biggest moment
-
-let worldNow = "";
-
-function veil(light) {
-  const top = Math.max(0.66, 1 - 0.03 / (light || 0.03));
-  const bottom = Math.max(0.84, 1 - 0.015 / (light || 0.015));
-  return `--veil-top: rgba(16, 16, 16, ${top.toFixed(2)}); --veil-bottom: rgba(16, 16, 16, ${bottom.toFixed(2)})`;
-}
-
-function setWorld(slug, light) {
-  if (!slug || slug === worldNow) return;
-  const first = !worldNow;
-  worldNow = slug;
-  const old = [...document.querySelectorAll(".world")];
-  const next = h("div", { class: "world fresh", style: `--world: url('${asset(`assets/world/${slug}.jpg`)}'); ${veil(light)}` });
-  document.body.prepend(next);
-  const done = () => old.forEach((w) => w.remove());
-  if (first || calm.matches) {
-    next.classList.remove("fresh");
-    done();
-    return;
-  }
-  // wait for the picture so the swap never flashes the bare night
-  const img = new Image();
-  img.onload = img.onerror = () => {
-    requestAnimationFrame(() => next.classList.remove("fresh"));
-    setTimeout(done, 700);
-  };
-  img.src = asset(`assets/world/${slug}.jpg`);
 }
 
 // the scoreboard: totals for what the log shows, then who gained most and where it happened

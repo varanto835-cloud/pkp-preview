@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>wlatr - Parkour Progress</title>
-  <meta name="description" content="wlatr on Parkour Progress: Tier VIII, TOP 3 in Segmented, 56 victories.">
-  <meta property="og:title" content="wlatr">
-  <meta property="og:description" content="Tier VIII Sapphire, TOP 3 in Segmented, 56 victories, 8 in progress">
+  <title>Maps - Parkour Progress</title>
+  <meta name="description" content="Every Parkour Progress map: screenshot, tier, victors, who is on it, builder and release day, in the order of the server's map list.">
+  <meta property="og:title" content="Maps">
+  <meta property="og:description" content="Every map on the list, with its tier, victors and who is on it">
   <meta property="og:site_name" content="Parkour Progress">
   <meta name="theme-color" content="#336aeb">
   <link rel="stylesheet" href="site.css?v=2610082338">
@@ -14,12 +14,13 @@
 <body>
   <svg class="sprites" aria-hidden="true">
     <symbol id="i-search" viewBox="0 0 8 8"><path d="M1 0h4v1h-4zM0 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM5 2h1v1h-1zM0 3h1v1h-1zM5 3h1v1h-1zM1 4h4v1h-4zM5 5h2v1h-2zM6 6h2v1h-2z"/></symbol>
-    <symbol id="i-flag" viewBox="0 0 8 8"><path d="M0 0h1v1h-1zM0 1h6v1h-6zM0 2h7v1h-7zM0 3h6v1h-6zM0 4h1v1h-1zM0 5h1v1h-1zM0 6h1v1h-1zM0 7h1v1h-1z"/></symbol>
-    <symbol id="i-check" viewBox="0 0 8 8"><path d="M7 1h1v1h-1zM6 2h2v1h-2zM0 3h1v1h-1zM5 3h2v1h-2zM0 4h2v1h-2zM4 4h2v1h-2zM1 5h4v1h-4zM2 6h2v1h-2z"/></symbol>
     <symbol id="i-crown" viewBox="0 0 8 8"><path d="M0 1h1v1h-1zM3 1h2v1h-2zM7 1h1v1h-1zM0 2h2v1h-2zM3 2h2v1h-2zM6 2h2v1h-2zM0 3h8v1h-8zM0 4h8v1h-8zM1 5h6v1h-6z"/></symbol>
     <symbol id="i-arrow" viewBox="0 0 8 8"><path d="M4 0h1v1h-1zM4 1h2v1h-2zM0 2h7v1h-7zM0 3h8v1h-8zM0 4h7v1h-7zM4 5h2v1h-2zM4 6h1v1h-1z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 8 8"><path d="M0 0h2v1h-2zM6 0h2v1h-2zM1 1h2v1h-2zM5 1h2v1h-2zM2 2h4v1h-4zM3 3h2v1h-2zM2 4h4v1h-4zM1 5h2v1h-2zM5 5h2v1h-2zM0 6h2v1h-2zM6 6h2v1h-2z"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 8 8"><path d="M0 0h1v1h-1zM0 1h6v1h-6zM0 2h7v1h-7zM0 3h6v1h-6zM0 4h1v1h-1zM0 5h1v1h-1zM0 6h1v1h-1zM0 7h1v1h-1z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 8 8"><path d="M1 0h2v8h-2zM3 1h2v6h-2zM5 2h1v4h-1zM6 3h1v2h-1z"/></symbol>
   </svg>
-  <div class="world" style="--world: url('assets/world/jukusection.jpg')"></div>
+  <div class="world" style="--world: url('assets/world/realmofchampions.jpg')"></div>
 
   <header class="bar">
     <a class="brand" href="profile.html">Parkour Progress</a>
@@ -33,8 +34,8 @@
     <nav aria-label="Main">
       <button class="button menu" type="button" aria-expanded="false" aria-controls="nav-list">Menu</button>
       <ul id="nav-list">
-        <li><a href="maps.html">Maps</a></li>
-        <li><a href="profile.html" aria-current="page">Players</a></li>
+        <li><a href="maps.html" aria-current="page">Maps</a></li>
+        <li><a href="profile.html">Players</a></li>
         <li><a href="leaderboards.html">Leaderboards</a></li>
         <li><a href="activity.html">Activity</a></li>
       </ul>
@@ -42,35 +43,26 @@
   </header>
 
   <main>
-    <section class="hero" aria-label="Player">
-      <figure class="held-card" id="card"></figure>
-      <div class="hero-side" id="side"></div>
-    </section>
+    <div class="lb-head">
+      <h1 class="page-title">Maps</h1>
+      <div class="lb-boards" role="group" aria-label="Gamemode" id="modes"></div>
+    </div>
+    <p class="dim lb-count" id="count"></p>
+    <div class="lb-filters map-tools" id="tools"></div>
 
-    <section class="block" aria-labelledby="progress-title">
-      <h2 class="win-title" id="progress-title">In progress</h2>
-      <ol class="rail" id="progress"></ol>
-    </section>
-
-    <section class="block" aria-labelledby="badges-title">
-      <h2 class="win-title" id="badges-title">Badges <small id="badges-count"></small></h2>
-      <div class="win">
-        <div class="toolbar" id="badges-bar"></div>
-        <div class="well collection" id="badges"></div>
-      </div>
-    </section>
+    <section id="catalog" aria-label="Map list"></section>
+    <p class="sr-only" id="announce" aria-live="polite"></p>
 
     <footer class="foot dim">
-      <p>Real data from a copy of the ProgressBot database, 2 Oct 2026.</p>
-      <p>Cards made with Goldy's card generator. Mockup: only wlatr and Magnum Opus have pages.</p>
+      <p>Real data from a copy of the ProgressBot database, 2 Oct 2026. Release days and verifiers come from the bot's victor lists.</p>
+      <p>Only Magnum Opus has a map page in this mockup.</p>
     </footer>
   </main>
 
   <script src="data/search.js?v=2610082338"></script>
   <script src="data/names.js?v=2610082338"></script>
-  <script src="data/wlatr.js?v=2610082338"></script>
-  <script src="data/wlatr-badges.js?v=2610082338"></script>
+  <script src="data/maps.js?v=2610082338"></script>
   <script src="site.js?v=2610082338"></script>
-  <script src="profile.js?v=2610082338"></script>
+  <script src="maps.js?v=2610082338"></script>
 </body>
 </html>

@@ -12,7 +12,7 @@ function stepLabel(label) {
 }
 
 function roleTip(role, lines, hint) {
-  const colour = role && role.color ? role.color : "#fff";
+  const colour = role && role.color ? headingColour(role.color, role.end, role.third) : "#fff";
   const title = role && role.name ? role.name : lines.shift();
   return `<b style="color:${colour}">${esc(title)}</b>${lines.map((line) => `<p>${esc(line)}</p>`).join("")}${hint ? `<p class="hint">${esc(hint)}</p>` : ""}`;
 }

@@ -24,7 +24,7 @@ function who(person) {
 function renderSide() {
   const side = document.getElementById("side");
   const victorPill = tip(pill("a", { class: "pill", href: badgeHref(map.role.name) }, map.role, "Magnum Opus", victorToken),
-    () => `<b style="color:${map.role.color}">${esc(map.role.name)}</b><p>${map.gamemode}, ${tierText(map.tier)}</p><p>Held by nobody yet</p><p class="hint">Click to open the badge page</p>`);
+    () => `<b style="color:${headingColour(map.role.color, map.role.end, map.role.third)}">${esc(map.role.name)}</b><p>${map.gamemode}, ${tierText(map.tier)}</p><p>Held by nobody yet</p><p class="hint">Click to open the badge page</p>`);
   const top = furthest.slice(0, 6);
   const sibling = map.siblings[0];
 
@@ -62,7 +62,7 @@ function renderRoles() {
   cards.push({ href: "#victor", art: `assets/tile/tile_${map.art}.jpg`, role: map.role, tier: map.tier, label: "VICTOR", count: map.victors.length });
   for (const item of cards) {
     const el = tile("a", { href: item.href }, item.art, item.tier);
-    tip(el, () => `<b style="color:${item.role.color}">${esc(item.role.name)}</b><p>${tierText(item.tier)}</p><p>${item.count ? `${plural(item.count, "player")} on this step` : "Nobody on this step right now"}</p><p class="hint">Click to see it on the route</p>`);
+    tip(el, () => `<b style="color:${headingColour(item.role.color, item.role.end, item.role.third)}">${esc(item.role.name)}</b><p>${tierText(item.tier)}</p><p>${item.count ? `${plural(item.count, "player")} on this step` : "Nobody on this step right now"}</p><p class="hint">Click to see it on the route</p>`);
     rail.append(h("li", {}, el, h("div", { class: "meta" },
       h("strong", {}, item.label),
       pill("a", { class: "pill", href: badgeHref(item.role.name) }, item.role, token(item.role)),
@@ -88,7 +88,7 @@ function stepRow(step) {
   const row = h("li", { class: people.length ? "step held" : "step", id: `step-${step.id}` },
     h("span", { class: "step-mark" }, people.length ? icon("flag") : null),
     h("span", { class: "step-name" }, withFlags(stepName(step)), step.note ? h("span", { class: "dim" }, ` ${step.note}`) : null),
-    h("span", {}, step.role ? tip(h("a", { class: "pill", href: badgeHref(step.role.name) }, dot(step.role), token(step.role)), () => `<b style="color:${step.role.color}">${esc(step.role.name)}</b><p>Badge for reaching this step</p><p class="hint">Click to open the badge page</p>`) : null),
+    h("span", {}, step.role ? tip(h("a", { class: "pill", href: badgeHref(step.role.name) }, dot(step.role), token(step.role)), () => `<b style="color:${headingColour(step.role.color, step.role.end, step.role.third)}">${esc(step.role.name)}</b><p>Badge for reaching this step</p><p class="hint">Click to open the badge page</p>`) : null),
     h("span", { class: "step-value" }, step.value == null ? "-" : `${expOf(step.value)} EXP`),
     socket(step.tier),
     people.length ? h("span", { class: "step-who" }, people.map(who)) : null);

@@ -174,12 +174,34 @@ ol {
   border-bottom: 2px solid var(--black);
 }
 
+/* the brand in two tight lines, so the bar keeps the height the search field gives it */
 .brand {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   font-weight: 700;
+  line-height: 20px;
   white-space: nowrap;
+}
+
+/* the credit under it, typed out letter by letter with the chat's underscore caret */
+/* 16.5px, a little under the brand at the user's request, the one size off the 9px grid */
+.byline {
+  min-height: 20px;
+  font-size: 16.5px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+}
+
+.byline .caret {
+  animation: caret 530ms steps(1) infinite;
+}
+
+@keyframes caret {
+  50% { opacity: 0; }
 }
 
 .bar nav ul {
@@ -2653,6 +2675,7 @@ html.calm .name.blend {
 
   .lb-filters {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 10px;
     margin-top: 14px;
   }
@@ -3739,5 +3762,310 @@ html.calm .follow:hover > .name.blend {
 
   .act-line > .act-exp {
     grid-column: 2;
+  }
+}
+
+/* maps: the server's map list as framed screenshots, grouped by gamemode in the bot's order */
+
+.lb-count {
+  margin-top: 12px;
+}
+
+.map-tools {
+  gap: 10px 12px;
+}
+
+.map-tools .find {
+  margin-left: auto;
+}
+
+.map-tools .find .field {
+  width: 224px;
+}
+
+/* the tier select keeps one width instead of growing to its longest name */
+.map-tools .tier .select-face {
+  width: 200px;
+}
+
+.map-tools .tier select {
+  width: 100%;
+  /* a long tier name fades out before the arrow, as cut text does everywhere on the site */
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 60px), transparent calc(100% - 36px));
+  mask-image: linear-gradient(90deg, #000 calc(100% - 60px), transparent calc(100% - 36px));
+}
+
+.list-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin: 40px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--d37);
+  font-size: 27px;
+  line-height: 36px;
+  font-weight: 700;
+  text-shadow: 3px 3px 0 #3f3f3f;
+}
+
+.list-head .dim {
+  font-size: 18px;
+  font-weight: 400;
+  text-shadow: 2px 2px 0 #2a2a2a;
+}
+
+.list-head:first-child {
+  margin-top: 24px;
+}
+
+.sub-head {
+  margin: 24px 0 12px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.sub-head span {
+  font-weight: 400;
+}
+
+.map-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px 16px;
+}
+
+.map-card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  min-width: 0;
+}
+
+.map-card .meta {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  line-height: 24px;
+}
+
+.map-link {
+  display: block;
+}
+
+a.map-link:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 2px;
+}
+
+.map-name {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.map-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 12px;
+}
+
+.unbeaten,
+.map-facts .on {
+  color: var(--hover);
+  text-shadow: 2px 2px 0 #404028;
+}
+
+.map-facts .on {
+  font-weight: 700;
+}
+
+/* the open challenges: the unbeaten maps, with who stands furthest on each */
+.challenges .who {
+  gap: 6px;
+  min-width: 0;
+}
+
+.challenges .who .head {
+  width: 20px;
+  height: 20px;
+}
+
+.map-card .builder {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.map-card .builder.cut {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+}
+
+/* a map with no screenshot yet keeps its frame, with the words where the picture would be */
+.tile.blank {
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.tile.blank > .dim {
+  padding: 0 12px;
+}
+
+/* list view: the window keeps the same distance from the tools as the first group head */
+#catalog > .lb-window {
+  margin-top: 24px;
+}
+
+/* fixed columns, so the map name is what gives way, cut with the site's fade */
+.map-table {
+  table-layout: fixed;
+}
+
+.col-hardest { width: 96px; }
+.col-exp { width: 72px; }
+.col-victors { width: 100px; }
+.col-players { width: 80px; }
+.col-steps { width: 80px; }
+.col-avg { width: 120px; }
+.col-fails { width: 84px; }
+.col-newest { width: 142px; }
+.col-builder { width: 160px; }
+
+.map-table td.c-lead {
+  padding: 3px 4px;
+}
+
+.map-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.map-cell .map-name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.map-cell .map-name.cut {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+}
+
+.map-cell .dim {
+  flex: none;
+}
+
+.thumb {
+  flex: none;
+  width: 48px;
+  height: 30px;
+  border: 2px solid var(--d37);
+  background: var(--art, none) center / cover no-repeat, var(--d37);
+}
+
+/* a long builder list is cut with the site's fade, never with dots */
+.map-table td.c-wide > span {
+  display: block;
+  max-width: 140px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.map-table td.c-wide > span.cut {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+}
+
+@media (max-width: 1100px) {
+  .map-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .map-table .c-wide,
+  .map-table col:last-child,
+  .map-table th:nth-child(7),
+  .map-table td:nth-child(7),
+  .map-table col:nth-child(7),
+  .map-table th:nth-child(8),
+  .map-table td:nth-child(8),
+  .map-table col:nth-child(8) {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  /* the gamemode buttons become a select here, with the other tools */
+  .lb-head #modes {
+    display: none;
+  }
+
+  .map-tools {
+    display: grid;
+    gap: 10px;
+  }
+
+  .map-tools .seg {
+    display: none;
+  }
+
+  .map-tools .find,
+  .map-tools .field,
+  .map-tools .find .field,
+  .map-tools .tier .select-face {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .map-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 12px;
+  }
+
+  /* a narrow blank tile keeps its words clear: the frame colour already says the tier */
+  .tile.blank .tile-tier {
+    display: none;
+  }
+
+  .list-head {
+    font-size: 18px;
+    line-height: 28px;
+    text-shadow: 2px 2px 0 #3f3f3f;
+  }
+
+  /* phones keep the map, its tier and its victors */
+  .map-table th:nth-child(n + 5),
+  .map-table td:nth-child(n + 5),
+  .map-table col:nth-child(n + 5),
+  .map-table th:nth-child(3),
+  .map-table td:nth-child(3),
+  .map-table col:nth-child(3) {
+    display: none;
+  }
+
+  .col-hardest {
+    width: 72px;
+  }
+
+  .col-victors {
+    width: 84px;
+  }
+
+  .thumb {
+    display: none;
+  }
+
+  /* on a phone the name wraps instead of being cut */
+  .map-table td.c-lead,
+  .map-cell .map-name {
+    white-space: normal;
+    overflow: visible;
+  }
+
+  .map-cell {
+    padding: 4px 0;
   }
 }

@@ -90,7 +90,9 @@ function whyStar(iso, by) {
 }
 
 function dayOf(iso, by) {
-  if (exact(iso, by) || !iso) return when(iso, by);
+  // short, so a tile label or a list cell with no date keeps its width
+  if (!iso) return "no date";
+  if (exact(iso, by)) return date(iso);
   return h("span", { class: "day" }, date(iso), tip(h("span", { class: "star", role: "img", "aria-label": "exact day not recorded" }, "*"), () => whyStar(iso, by)));
 }
 
@@ -357,8 +359,40 @@ function inGamut(L, chroma, hue) {
   return (full.every((v) => v >= 0 && v <= 1) ? full : fit).map((v) => gamma(Math.min(1, Math.max(0, v))));
 }
 
+function oklchOf(hex) {
+  const [l, a, b] = toOklab([1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255));
+  return { l, c: Math.hypot(a, b), h: Math.atan2(b, a) };
+}
+
+function hexOf(rgb) {
+  return `#${rgb.map((v) => Math.round(v * 255).toString(16).padStart(2, "0")).join("")}`;
+}
+
+// A badge colour close to black has almost no hue left once it is made readable, so it turns
+// grey. In a gradient it borrows the hue of the badge's most vivid colour instead, at its own
+// lightness: a black to violet badge reads as two violets, not grey to violet.
+const shownSeen = new Map();
+
+function shownColours(c1, c2, c3) {
+  const key = `${c1}${c2}${c3}`;
+  if (shownSeen.has(key)) return shownSeen.get(key);
+  const shown = [c1, c2 || c1, c3 || c2 || c1].map(legible);
+  const lch = shown.map(oklchOf);
+  const vivid = lch.reduce((a, b) => (b.c > a.c ? b : a));
+  const out = shown.map((hex, i) => (lch[i].c < 0.05 && vivid.c > 0.1 ? legible(hexOf(inGamut(lch[i].l, vivid.c * 0.7, vivid.h))) : hex));
+  shownSeen.set(key, out);
+  return out;
+}
+
 function nameColours(c1, c2, c3) {
-  return `--c1:${legible(c1)};--c2:${legible(c2 || c1)};--c3:${legible(c3 || c2 || c1)}`;
+  const [a, b, c] = shownColours(c1, c2, c3);
+  return `--c1:${a};--c2:${b};--c3:${c}`;
+}
+
+// a tooltip heading takes the most vivid of the badge's readable colours
+function headingColour(c1, c2, c3) {
+  if (!c1) return "#fff";
+  return shownColours(c1, c2, c3).reduce((a, b) => (oklchOf(b).c > oklchOf(a).c ? b : a));
 }
 
 // name in the colours of the favourite badge
@@ -381,6 +415,38 @@ function favouriteLine(name) {
   const [badge, c1, c2, c3] = row;
   const colours = `--c1:${c1};--c2:${c2 || c1};--c3:${c3 || c2 || c1}`;
   return `<p>Favourite badge</p><p class="tip-pill"><span class="pill"><span class="dot${c2 ? " blend" : ""}" style="${colours}"></span><span>${esc(badge)}</span></span></p>`;
+}
+
+// the world behind the page can change to another map's screenshot: the new picture loads first,
+// then fades in over the old one, and a bright screenshot gets a thicker veil
+let worldNow = "";
+
+function veil(light) {
+  const top = Math.max(0.66, 1 - 0.03 / (light || 0.03));
+  const bottom = Math.max(0.84, 1 - 0.015 / (light || 0.015));
+  return `--veil-top: rgba(16, 16, 16, ${top.toFixed(2)}); --veil-bottom: rgba(16, 16, 16, ${bottom.toFixed(2)})`;
+}
+
+function setWorld(slug, light) {
+  if (!slug || slug === worldNow) return;
+  const first = !worldNow;
+  worldNow = slug;
+  const old = [...document.querySelectorAll(".world")];
+  const next = h("div", { class: "world fresh", style: `--world: url('${asset(`assets/world/${slug}.jpg`)}'); ${veil(light)}` });
+  document.body.prepend(next);
+  const done = () => old.forEach((w) => w.remove());
+  if (first || calm.matches) {
+    next.classList.remove("fresh");
+    done();
+    return;
+  }
+  // wait for the picture so the swap never flashes the bare night
+  const img = new Image();
+  img.onload = img.onerror = () => {
+    requestAnimationFrame(() => next.classList.remove("fresh"));
+    setTimeout(done, 700);
+  };
+  img.src = asset(`assets/world/${slug}.jpg`);
 }
 
 // card tilt
@@ -494,6 +560,32 @@ function initMenu() {
     }
   });
 }
+
+// "by antoultrav" types itself under the brand, a letter at a time like the game's chat, with
+// its blinking underscore; it runs as soon as this file loads, so the bar has its height before
+// any page measures it
+function initByline() {
+  const brand = document.querySelector(".brand");
+  if (!brand) return;
+  const text = "by antoultrav";
+  if (calm.matches) {
+    brand.append(h("span", { class: "byline" }, text));
+    return;
+  }
+  const typed = h("span", {});
+  const caret = h("span", { class: "caret", "aria-hidden": "true" }, "_");
+  brand.append(h("span", { class: "byline", "aria-label": text }, typed, caret));
+  let shown = 0;
+  const next = () => {
+    shown += 1;
+    typed.textContent = text.slice(0, shown);
+    if (shown < text.length) setTimeout(next, text[shown] === " " ? 160 : 60 + Math.random() * 70);
+    else setTimeout(() => caret.remove(), 1800);
+  };
+  setTimeout(next, 450);
+}
+
+initByline();
 
 document.addEventListener("DOMContentLoaded", () => {
   document.body.append(tooltip);
