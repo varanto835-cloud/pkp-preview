@@ -137,13 +137,18 @@ function bracket(text, badge, href, build) {
   return tip(h(href ? "a" : "span", attrs, bracketText(text)), build);
 }
 
-// the step after the bar never breaks away from the word before it
+// the step after the bar never breaks away from the word before it; a long step can still wrap
+// after its first word, so it fits a narrow phone
 function bracketText(text) {
   const cut = text.lastIndexOf(" | ");
   if (cut < 0) return withFlags(`[${text}]`);
   const head = text.slice(0, cut);
+  const step = text.slice(cut + 3);
   const space = head.lastIndexOf(" ") + 1;
-  return [withFlags(`[${head.slice(0, space)}`), h("span", { class: "nowrap" }, withFlags(`${head.slice(space)} | ${text.slice(cut + 3)}]`))];
+  const gap = step.indexOf(" ");
+  const first = gap < 0 ? `${step}]` : step.slice(0, gap);
+  const rest = gap < 0 ? "" : withFlags(`${step.slice(gap)}]`);
+  return [withFlags(`[${head.slice(0, space)}`), h("span", { class: "nowrap" }, withFlags(`${head.slice(space)} | ${first}`)), rest];
 }
 
 // a map's badges carry the name the community uses for it ("ROC SP Mode")
@@ -844,7 +849,7 @@ function renderControls() {
   document.getElementById("periods").replaceChildren(...PERIODS.map(([d, text]) => h("button", {
     class: "button board-tab", type: "button", "aria-pressed": String(d === state.days), onclick: () => go({ days: d }),
   }, text)));
-  const codes = [...new Set(Object.values(activityCountry).filter(Boolean))].sort((a, b) => (COUNTRIES[a] || a).localeCompare(COUNTRIES[b] || b));
+  const codes = [...new Set(Object.values(activityCountry).filter((c) => COUNTRIES[c]))].sort((a, b) => (COUNTRIES[a] || a).localeCompare(COUNTRIES[b] || b));
   document.getElementById("shows").replaceChildren(...seg("Show", SHOWS, state.show, (show) => go({ show })));
   document.getElementById("filters").replaceChildren(
     ...seg("Gamemode", MODES, state.mode, (mode) => go({ mode })),
@@ -945,11 +950,4 @@ addEventListener("popstate", () => {
   render();
 });
 
-// day bars stop right under the top bar, which is taller on phones
-function measureBar() {
-  document.documentElement.style.setProperty("--bar", `${document.querySelector(".bar").offsetHeight}px`);
-}
-
-addEventListener("resize", measureBar);
-measureBar();
 render();

@@ -163,8 +163,8 @@ function showWorld(m) {
 function challenges(list) {
   const open = list.filter((m) => !m.victors);
   if (!open.length) return [];
-  return [
-    h("h2", { class: "list-head" }, h("span", {}, "Still unbeaten"), h("span", { class: "dim" }, plural(open.length, "open challenge"))),
+  return [h("section", { class: "map-group" },
+    h("h2", { class: "list-head" }, h("span", {}, "Still unbeaten"), h("span", { class: "dim" }, `${open.length} open`, h("span", { class: "head-more" }, open.length === 1 ? " challenge" : " challenges"))),
     h("ol", { class: "map-grid challenges" }, open.map((m) => {
       const page = PAGES[m.name];
       const who = m.far ? h("span", { class: "who" }, head(m.far[0]), nameTag(m.far[0])) : h("span", { class: "dim" }, "nobody yet");
@@ -176,9 +176,23 @@ function challenges(list) {
           m.far ? h("span", { class: "dim" }, "at ", withFlags(shortStep(stripFlags(m.far[1])))) : null,
           h("span", { class: "dim" }, `${m.mode}, ${m.tier ? `Tier ${ROMAN[m.tier]}` : "no tier yet"}`),
           h("span", { class: "dim" }, `${m.on} on it`))), () => mapTip(m));
-    })),
-  ];
+    })))];
 }
+
+// a sub-group with its own sticky heading, which stops under its group's heading
+function subGroup(title, note, list) {
+  return h("div", { class: "map-sub" }, h("h3", { class: "sub-head dim" }, title, h("span", {}, note)), h("ol", { class: "map-grid" }, list.map(card)));
+}
+
+// each sub-heading stops right under its group's heading, whatever height that has wrapped to
+function measureHeads() {
+  for (const group of document.querySelectorAll(".map-group")) {
+    const head = group.querySelector(".list-head");
+    if (head) group.style.setProperty("--group-head", `${head.offsetHeight}px`);
+  }
+}
+
+addEventListener("resize", measureHeads);
 
 // the list view: the leaderboard table without ranks
 
@@ -223,8 +237,10 @@ function table(list) {
 function groupHead(title, list, sub) {
   const open = list.filter((m) => !m.victors).length;
   const on = list.reduce((n, m) => n + m.on, 0);
-  const facts = [plural(list.length, "map"), open ? `${open} unbeaten` : null, on ? `${on} on them` : null].filter(Boolean).join(", ");
-  return h("h2", { class: "list-head" }, h("span", {}, title, sub ? h("span", { class: "dim" }, ` ${sub}`) : null), h("span", { class: "dim" }, facts));
+  const more = [open ? `${open} unbeaten` : null, on ? `${on} on them` : null].filter(Boolean).join(", ");
+  // on phones the sticky head keeps to one line: the rest of the numbers drop
+  return h("h2", { class: "list-head" }, h("span", {}, title, sub ? h("span", { class: "dim" }, ` ${sub}`) : null),
+    h("span", { class: "dim" }, plural(list.length, "map"), more ? h("span", { class: "head-more" }, `, ${more}`) : null));
 }
 
 function renderCatalog() {
@@ -254,22 +270,19 @@ function renderCatalog() {
       const main = here.filter((m) => m.list === "main");
       const extra = here.filter((m) => m.extra);
       const legacy = here.filter((m) => m.legacy);
-      blocks.push(groupHead(mode === "Miscellaneous" ? "Misc" : mode, here));
-      if (main.length) blocks.push(h("ol", { class: "map-grid" }, main.map(card)));
-      if (extra.length) {
-        blocks.push(h("h3", { class: "sub-head dim" }, "Extra maps", h("span", {}, ": victory only, no progress steps")));
-        blocks.push(h("ol", { class: "map-grid" }, extra.map(card)));
-      }
-      if (legacy.length) {
-        blocks.push(h("h3", { class: "sub-head dim" }, "Legacy maps", h("span", {}, ": too easy for the lists above now, still kept up to date")));
-        blocks.push(h("ol", { class: "map-grid" }, legacy.map(card)));
-      }
+      blocks.push(h("section", { class: "map-group" },
+        groupHead(mode === "Miscellaneous" ? "Misc" : mode, here),
+        main.length ? h("ol", { class: "map-grid" }, main.map(card)) : null,
+        extra.length ? subGroup("Extra maps", ": victory only, no progress steps", extra) : null,
+        legacy.length ? subGroup("Legacy maps", ": too easy for the lists above now, still kept up to date", legacy) : null));
     }
   } else {
-    blocks.push(groupHead(SORTS.find(([s]) => s === state.sort)[1], shown, state.mode === "All" ? "" : state.mode));
-    blocks.push(h("ol", { class: "map-grid" }, shown.map(card)));
+    blocks.push(h("section", { class: "map-group" },
+      groupHead(SORTS.find(([s]) => s === state.sort)[1], shown, state.mode === "All" ? "" : state.mode),
+      h("ol", { class: "map-grid" }, shown.map(card))));
   }
   catalog.replaceChildren(...blocks);
+  measureHeads();
   // only a builder line that does not fit gets the fade
   for (const span of catalog.querySelectorAll(".map-card .builder")) span.classList.toggle("cut", span.scrollWidth > span.clientWidth);
 }

@@ -4,12 +4,113 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Parkour Progress</title>
-  <meta http-equiv="refresh" content="0; url=profile.html">
-  <link rel="stylesheet" href="site.css?v=2610082345">
+  <meta name="description" content="Parkour Progress: every map, step and victor of the community's hardest Minecraft parkour, with player profiles, leaderboards and the latest activity.">
+  <meta property="og:title" content="Parkour Progress">
+  <meta property="og:description" content="Every map, every step, every victor">
+  <meta property="og:site_name" content="Parkour Progress">
+  <meta name="theme-color" content="#eaee57">
+  <link rel="stylesheet" href="site.css?v=2610148100">
 </head>
-<body>
+<body class="home">
+  <svg class="sprites" aria-hidden="true">
+    <symbol id="i-search" viewBox="0 0 8 8"><path d="M1 0h4v1h-4zM0 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM5 2h1v1h-1zM0 3h1v1h-1zM5 3h1v1h-1zM1 4h4v1h-4zM5 5h2v1h-2zM6 6h2v1h-2z"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 8 8"><path d="M0 1h1v1h-1zM3 1h2v1h-2zM7 1h1v1h-1zM0 2h2v1h-2zM3 2h2v1h-2zM6 2h2v1h-2zM0 3h8v1h-8zM0 4h8v1h-8zM1 5h6v1h-6z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 8 8"><path d="M1 0h2v8h-2zM3 1h2v6h-2zM5 2h1v4h-1zM6 3h1v2h-1z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 8 8"><path d="M4 0h1v1h-1zM4 1h2v1h-2zM0 2h7v1h-7zM0 3h8v1h-8zM0 4h7v1h-7zM4 5h2v1h-2zM4 6h1v1h-1z"/></symbol>
+  </svg>
+  <div class="world" style="--world: url('assets/world/pandorasbox.jpg')"></div>
+
+  <header class="bar">
+    <a class="brand" href="index.html" aria-current="page">Parkour Progress</a>
+    <form class="search" role="search" autocomplete="off" onsubmit="return false">
+      <label>
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" placeholder="Search players and maps" aria-label="Search players and maps">
+      </label>
+      <div class="results" role="listbox" hidden></div>
+    </form>
+    <nav aria-label="Main">
+      <button class="button bar-find" type="button" aria-label="Search players and maps"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></button>
+      <button class="button menu" type="button" aria-expanded="false" aria-controls="nav-list">Menu</button>
+      <ul id="nav-list">
+        <li><a href="maps.html">Maps</a></li>
+        <li><a href="profile.html">Players</a></li>
+        <li><a href="leaderboards.html">Leaderboards</a></li>
+        <li><a href="activity.html">Activity</a></li>
+      </ul>
+    </nav>
+  </header>
+
   <main>
-    <p><a href="profile.html">Open the preview</a></p>
+    <div class="home-intro">
+      <h1 class="home-name building" aria-label="Welcome to Parkour Progress!">
+        <span class="welcome" aria-hidden="true">Welcome to</span>
+        <span class="build-line" id="build-line" aria-hidden="true">Parkour Progress!</span>
+      </h1>
+      <p class="dim" id="home-totals"></p>
+    </div>
+
+    <section class="stage" id="stage" aria-labelledby="stage-title">
+      <h2 class="screen-title stage-title" id="stage-title">The six hardest maps</h2>
+      <div class="stage-words" id="stage-words">
+        <p class="stage-name" id="stage-name"></p>
+        <p class="stage-sub" id="stage-sub"></p>
+        <div class="stage-status" id="stage-status"></div>
+        <p class="stage-who" id="stage-who"></p>
+        <div class="stage-actions" id="stage-actions"></div>
+      </div>
+      <div class="stage-side">
+        <div class="stage-view" id="stage-view">
+          <div class="stage-player" id="stage-player"></div>
+        </div>
+        <div class="stage-picks">
+          <ol id="stage-picks" aria-label="The six hardest maps"></ol>
+        </div>
+      </div>
+    </section>
+
+    <div class="home-under">
+      <form class="search hero-search" role="search" autocomplete="off" onsubmit="return false">
+        <label>
+          <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+          <input type="search" placeholder="Search players and maps" aria-label="Search players and maps">
+        </label>
+        <div class="results" role="listbox" hidden></div>
+      </form>
+      <ul class="doors" id="doors" aria-label="Sections"></ul>
+    </div>
+
+    <section class="screen" aria-labelledby="featured-title">
+      <h2 class="screen-title" id="featured-title">Featured</h2>
+      <p class="dim" id="featured-note"></p>
+      <ol class="featured" id="featured" aria-label="The biggest of the last 30 days"></ol>
+      <div class="newest">
+        <p class="dim">The newest victories</p>
+        <p class="item-name" id="item-name"></p>
+        <ol class="hotbar" id="hotbar" aria-label="The nine newest victories"></ol>
+      </div>
+      <a class="button" href="activity.html">All activity</a>
+    </section>
+
+    <section class="screen climb" aria-labelledby="climb-title">
+      <h2 class="screen-title" id="climb-title">The climb</h2>
+      <p class="dim" id="climb-note"></p>
+      <div class="beacon" id="beacon"></div>
+      <a class="button" href="leaderboards.html?by=difficulty">Hardest badges</a>
+    </section>
+
+    <footer class="foot dim">
+      <p>Real data from a copy of the ProgressBot database, 2 Oct 2026. Its newest entries are from 19 Sep.</p>
+      <p id="mockup-note"></p>
+    </footer>
   </main>
+
+  <script src="data/search.js?v=2610148100"></script>
+  <script src="data/names.js?v=2610148100"></script>
+  <script src="data/home.js?v=2610148100"></script>
+  <script src="data/skins.js?v=2610148100"></script>
+  <script src="site.js?v=2610148100"></script>
+  <script src="figure.js?v=2610148100"></script>
+  <script src="index.js?v=2610148100"></script>
 </body>
 </html>

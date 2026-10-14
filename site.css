@@ -166,7 +166,8 @@ ol {
   top: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: auto minmax(220px, 480px) 1fr;
+  /* the links keep one row; the search gives way first, down to the width of its placeholder */
+  grid-template-columns: auto minmax(340px, 480px) minmax(max-content, 1fr);
   align-items: center;
   gap: 32px;
   padding: 12px var(--gutter);
@@ -207,11 +208,33 @@ ol {
 .bar nav ul {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 28px;
 }
 
 .bar nav a[aria-current] {
   color: var(--hover);
+}
+
+/* the account at the end of the bar: Sign in, or the signed-in player's face and name */
+.bar nav .account-item {
+  display: flex;
+  align-items: center;
+}
+
+.bar nav .account.button {
+  padding: 0 12px 2px;
+}
+
+.bar nav .account:not(.button) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bar nav .account .head {
+  width: 24px;
+  height: 24px;
 }
 
 .bar nav {
@@ -275,18 +298,27 @@ ol {
   border-width: 4px;
   border-image: url("assets/gui/tooltip.png") 2 fill / 4px stretch;
   image-rendering: pixelated;
+  /* it opens over the page, so its fill is solid: nothing reads through it */
+  background: #100010;
+  background-clip: padding-box;
+  container-type: inline-size;
 }
 
 .results[hidden] {
   display: none;
 }
 
-.results a,
-.results span {
+.results > a,
+.results > span {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 4px 8px;
+}
+
+/* a flag takes a sword's width, so player and map names start on the same line */
+.results .flag {
+  margin: 0 4px;
 }
 
 .results .active {
@@ -303,6 +335,25 @@ ol {
   margin-left: auto;
   font-size: inherit;
   color: var(--dim);
+}
+
+/* in a narrow list (the bar's, or any on a phone) the detail goes under the name, so neither has
+   to wrap in half the width */
+@container (max-width: 560px) {
+  .results > a,
+  .results > span {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0 10px;
+  }
+
+  .results > :is(a, span) > :first-child {
+    grid-row: span 2;
+  }
+
+  .results small {
+    margin-left: 0;
+  }
 }
 
 /* windows */
@@ -2281,7 +2332,8 @@ html.calm .name.blend {
   animation: none !important;
 }
 
-@media (max-width: 1100px) {
+/* the links and the account fold into the Menu once they no longer fit beside the search */
+@media (max-width: 1300px) {
   .bar {
     grid-template-columns: auto minmax(0, 1fr) auto;
   }
@@ -2308,6 +2360,7 @@ html.calm .name.blend {
 
   .bar nav.open ul {
     display: flex;
+    align-items: stretch;
   }
 
   .bar nav a {
@@ -2315,6 +2368,14 @@ html.calm .name.blend {
     padding: 6px 4px;
   }
 
+  .bar nav .account.button {
+    padding: 4px 12px 6px;
+    text-align: center;
+  }
+}
+
+/* the profile and map heroes step down while the big title and its facts would still crowd */
+@media (max-width: 1200px) {
   .hero {
     grid-template-columns: 340px 1fr;
     gap: 40px;
@@ -2441,7 +2502,6 @@ html.calm .name.blend {
     grid-column: 2;
   }
 
-
   .well {
     padding: 12px;
   }
@@ -2473,8 +2533,6 @@ html.calm .name.blend {
     font-size: 36px;
     line-height: 40px;
   }
-
-
 
   .pill {
     white-space: normal;
@@ -2892,7 +2950,7 @@ html.calm .name.blend {
 /* activity: the game's own HUD, the chat log on the left, toasts and the scoreboard on the right */
 
 .world {
-  transition: opacity 600ms ease-out;
+  transition: opacity 1s ease-in-out;
 }
 
 .world.fresh {
@@ -3795,14 +3853,28 @@ html.calm .follow:hover > .name.blend {
   mask-image: linear-gradient(90deg, #000 calc(100% - 60px), transparent calc(100% - 36px));
 }
 
+/* group heads stick under the top bar while their maps scroll by, as Activity's day bars do
+   (Texyle's request), so the eye always knows which list it is in */
+.map-group {
+  margin-top: 40px;
+}
+
+.map-group:first-child {
+  margin-top: 24px;
+}
+
 .list-head {
+  position: sticky;
+  top: var(--bar, 70px);
+  z-index: 2;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: 4px 16px;
-  margin: 40px 0 16px;
-  padding-bottom: 8px;
+  margin: 0 0 16px;
+  padding: 6px 12px 8px;
+  background: var(--deep);
   border-bottom: 2px solid var(--d37);
   font-size: 27px;
   line-height: 36px;
@@ -3816,14 +3888,17 @@ html.calm .follow:hover > .name.blend {
   text-shadow: 2px 2px 0 #2a2a2a;
 }
 
-.list-head:first-child {
-  margin-top: 24px;
-}
-
+/* a sub-group's heading stops right under its group's heading */
 .sub-head {
+  position: sticky;
+  top: calc(var(--bar, 70px) + var(--group-head, 52px));
+  z-index: 1;
   margin: 24px 0 12px;
+  padding: 4px 12px 6px;
   font-size: 18px;
   font-weight: 700;
+  background: var(--deep);
+  border-bottom: 2px solid var(--d37);
 }
 
 .sub-head span {
@@ -4031,9 +4106,28 @@ a.map-link:focus-visible {
   }
 
   .list-head {
+    flex-wrap: nowrap;
+    padding: 4px 10px 6px;
     font-size: 18px;
     line-height: 28px;
     text-shadow: 2px 2px 0 #3f3f3f;
+  }
+
+  .list-head > span {
+    white-space: nowrap;
+  }
+
+  .head-more {
+    display: none;
+  }
+
+  .sub-head {
+    padding: 4px 10px 6px;
+  }
+
+  /* on a phone the sub-head keeps to its name, so it stays one line; each map's tooltip says what the list is */
+  .sub-head > span {
+    display: none;
   }
 
   /* phones keep the map, its tier and its victors */
@@ -4054,7 +4148,7 @@ a.map-link:focus-visible {
     width: 84px;
   }
 
-  .thumb {
+  .map-table .thumb {
     display: none;
   }
 
@@ -4067,5 +4161,1395 @@ a.map-link:focus-visible {
 
   .map-cell {
     padding: 4px 0;
+  }
+}
+
+/* home: a stage that turns through the six hardest maps, over the world of the one shown; then the
+   search, a door to each part of the site, the newest victories as a hotbar and a beacon */
+
+/* the world of the map on the stage, veiled by its brightness (index.js) and darker still on the
+   left, behind the words, so the sharp picture in its frame is the brightest thing on the page */
+.home .world {
+  background:
+    linear-gradient(90deg, rgba(10, 10, 10, 0.6), rgba(10, 10, 10, 0) 62%),
+    linear-gradient(var(--home-veil, rgba(16, 16, 16, 0.6), rgba(16, 16, 16, 0.8))),
+    var(--world) center / cover no-repeat,
+    #101010;
+}
+
+/* past the stage the world darkens, as the game's panorama does behind its other screens */
+.home::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: rgba(16, 16, 16, 0.5);
+  pointer-events: none;
+  transition: opacity 600ms ease-out;
+}
+
+.home.stage-on::after {
+  opacity: 0;
+}
+
+/* the bar is solid here, so the screens scrolling under it never mix with its text */
+.home .bar {
+  background: #0c0c0c;
+}
+
+/* the bar's search button, for phones only */
+.bar-find {
+  display: none;
+  place-items: center;
+  padding: 4px 10px 6px;
+}
+
+.bar-find .icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* the top bar's search waits while the big one is on screen */
+.home .bar .search {
+  transition: opacity 200ms ease-out, visibility 200ms;
+}
+
+.home.hero-search-on .bar .search {
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* the tier materials, for the beacon's layers */
+.home .m1 { --mat: url("assets/gui/mat-1.png"); }
+.home .m2 { --mat: url("assets/gui/mat-2.png"); }
+.home .m3 { --mat: url("assets/gui/mat-3.png"); }
+.home .m4 { --mat: url("assets/gui/mat-4.png"); }
+.home .m5 { --mat: url("assets/gui/mat-5.png"); }
+.home .m6 { --mat: url("assets/gui/mat-6.png"); }
+.home .m7 { --mat: url("assets/gui/mat-7.png"); }
+.home .m8 { --mat: url("assets/gui/mat-8.png"); }
+.home .m9 { --mat: url("assets/gui/mat-9.png"); }
+.home .m10 { --mat: url("assets/gui/mat-10.png"); }
+
+/* The home is a column of sections, each opened by a centred heading: the title, then the six
+   hardest maps, then the search and doors, then the newest victories and the climb. Sections stand
+   56px apart near the top and 96px further down, the things inside one 12 to 20px apart, so the
+   eye sees the blocks before the things in them.
+   The stage shows one of the six hardest maps at a time. Its world fills the page behind; under its
+   heading, its sharp picture sits in a frame on the right with the player in front of it, and the
+   words on the left say how much of it is left, or who beat it first. The words keep the height of
+   the longest of the six (index.js), so nothing under the stage moves when it turns. */
+.stage {
+  display: grid;
+  grid-template-columns: minmax(0, 520px) minmax(0, 600px);
+  grid-template-areas: "title title" "words side";
+  justify-content: space-between;
+  align-items: start;
+  gap: 20px 72px;
+  max-width: 1240px;
+  margin: 56px auto 0;
+}
+
+.stage-title {
+  grid-area: title;
+  justify-self: center;
+  text-align: center;
+}
+
+.stage-side {
+  grid-area: side;
+  display: grid;
+  gap: 20px;
+}
+
+.stage-words {
+  grid-area: words;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding-top: 20px;
+}
+
+/* the map's name is the stage's heading, a step under the site's title above it */
+.stage-name {
+  --lift: 6px;
+  margin: 0;
+  font-size: 54px;
+  line-height: 60px;
+  font-weight: 700;
+}
+
+/* a name that would take three lines steps down a size */
+.stage-name.long {
+  --lift: 5px;
+  font-size: 45px;
+  line-height: 52px;
+}
+
+.stage-name a {
+  color: inherit;
+}
+
+/* the game's shadow: one glyph pixel down and right, a quarter of the name's own brightness */
+.stage-name .name {
+  text-shadow: none;
+  filter: drop-shadow(var(--lift) var(--lift) 0 color-mix(in srgb, var(--c1) 25%, #000));
+}
+
+.stage-sub {
+  margin: 0;
+  color: var(--face);
+}
+
+.stage-line {
+  display: flex;
+  justify-content: space-between;
+  color: var(--face);
+}
+
+.stage-line b {
+  color: var(--white);
+}
+
+/* the boss bar, large: the share still to beat in the map's VICTOR colours, notched in twenty */
+.stage-bar {
+  position: relative;
+  display: block;
+  height: 24px;
+  background: #1e1e1e;
+  border: 3px solid var(--black);
+}
+
+.stage-bar i {
+  display: block;
+  width: var(--left);
+  height: 100%;
+  background: linear-gradient(90deg, var(--c1), var(--c2), var(--c3));
+  box-shadow: inset 0 3px rgba(255, 255, 255, 0.4), inset 0 -3px rgba(0, 0, 0, 0.3);
+}
+
+.stage-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 calc(5% - 3px), rgba(0, 0, 0, 0.55) calc(5% - 3px) 5%);
+}
+
+.stage-faces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stage-faces .head {
+  width: 40px;
+  height: 40px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.stage-faces a:hover .head,
+.stage-faces a:focus-visible .head {
+  outline: 2px solid var(--white);
+}
+
+.stage-faces a:focus-visible {
+  outline: none;
+}
+
+.stage-who {
+  margin: 0;
+  color: var(--face);
+  font-size: 27px;
+  line-height: 36px;
+}
+
+.stage-who .head {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+  vertical-align: -6px;
+}
+
+.stage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.stage-actions .button {
+  padding: 6px 20px 8px;
+}
+
+/* the map itself, sharp, in the frame of its tier as on the Maps page; a new picture fades in over
+   the one before */
+.stage-view {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: var(--d37);
+  border-style: solid;
+  border-width: 8px;
+  border-image: var(--frame, url("assets/gui/tile-0.png")) 4 / 8px;
+  image-rendering: pixelated;
+}
+
+.stage-shot {
+  position: absolute;
+  inset: 0;
+  background: var(--shot) center / cover no-repeat;
+  image-rendering: auto;
+  transition: opacity 600ms ease-out;
+}
+
+.stage-shot.fresh {
+  opacity: 0;
+}
+
+/* the player stands in front of the frame's lower left corner, as if stepping out of the map */
+.stage-player {
+  position: absolute;
+  z-index: 2;
+  left: -112px;
+  bottom: -6px;
+  width: 200px;
+  height: 300px;
+  pointer-events: none;
+}
+
+.stage-figure {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  opacity: 0;
+  transition: opacity 250ms ease-out;
+  pointer-events: none;
+}
+
+.stage-figure.shown {
+  opacity: 1;
+}
+
+.stage-player .pose-shadow {
+  bottom: -6px;
+  width: 64px;
+  height: 14px;
+}
+
+/* the game's floating name tag over the player */
+.stage-tag {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  translate: -50% 0;
+  padding: 0 6px;
+  background: rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+}
+
+.stage-flat {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  translate: -50% 0;
+}
+
+.stage-flat .head {
+  width: 96px;
+  height: 96px;
+}
+
+/* the six maps under the frame, the one on the stage framed like a picked slot */
+.stage-picks {
+  display: grid;
+  gap: 22px;
+}
+
+.stage-picks ol {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stage-picks li {
+  position: relative;
+}
+
+/* the time to the next turn under the shown map, filling like the game's experience bar */
+.pick-time {
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  bottom: -14px;
+  height: 6px;
+  background: #1e1e1e;
+  border: 1px solid var(--black);
+}
+
+.pick-time i {
+  display: block;
+  height: 100%;
+  background: #e9e9e9;
+  transform-origin: left;
+  transform: scaleX(var(--time, 0));
+  transition: transform 100ms linear;
+}
+
+.stage-pick {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  padding: 0;
+  background: var(--shot) center / cover no-repeat, var(--d37);
+  border: 2px solid var(--black);
+  box-shadow: inset 0 0 0 2px rgba(139, 139, 139, 0.5);
+  filter: brightness(0.7);
+  cursor: pointer;
+}
+
+.stage-pick:hover,
+.stage-pick:focus-visible {
+  filter: none;
+  outline: 2px solid var(--white);
+}
+
+.stage-pick[aria-pressed="true"] {
+  filter: none;
+  outline: 4px solid #e9e9e9;
+  outline-offset: 2px;
+}
+
+.stage-pick[aria-pressed="true"]:focus-visible {
+  outline-color: var(--hover);
+}
+
+.stage-pick i {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  height: 6px;
+  background: #1e1e1e;
+  border: 1px solid var(--black);
+}
+
+.stage-pick i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: var(--left);
+  background: linear-gradient(90deg, var(--c1), var(--c2), var(--c3));
+}
+
+.stage-pick b {
+  position: absolute;
+  right: 4px;
+  bottom: 0;
+  font-size: 18px;
+  text-shadow: 2px 2px 0 #3f3f3f;
+}
+
+/* under the stage: the site's name and what it is, the big search, and a door to each part of it */
+/* the figures' canvases are wider than the figures; they never widen the page */
+body.home {
+  overflow-x: clip;
+}
+
+/* the site's name first, over the stage: room above it, under the top bar, for the jumps and
+   Texyle's sideflip as the title is written */
+.home-intro {
+  display: grid;
+  gap: 4px;
+  max-width: 1240px;
+  margin: 160px auto 0;
+  text-align: center;
+}
+
+/* "Welcome to" small before "Parkour Progress!" on one line; on a phone the two parts stack.
+   antoultrav writes the second part running along it and Texyle brings "Welcome to" (index.js).
+   They are as tall as two of its letters, as a player is two blocks tall, so they can jump on it
+   under the top bar */
+.home-name {
+  --tall: 117px;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 16px;
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+
+.welcome {
+  font-size: 27px;
+  line-height: 36px;
+  font-weight: 400;
+  color: var(--face);
+  text-shadow: 3px 3px 0 #2a2a2a;
+}
+
+/* without Texyle it fades in once the title is built */
+.home-name:not(.building) .welcome {
+  transition: opacity 500ms ease-out;
+}
+
+.build-line {
+  position: relative;
+  /* its own stack, so the glint blends with its letters only */
+  isolation: isolate;
+  font-size: 72px;
+  line-height: 80px;
+  text-shadow: 8px 8px 0 #3f3f3f;
+  white-space: pre;
+}
+
+/* "Parkour Progress!" is enchanted: once the title is built, the game's glint, a slow purple sheen
+   in two layers, drifts over its letters and only them (a copy of the line clipped to its glyphs) */
+.build-line::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: transparent;
+  text-shadow: none;
+  background-image:
+    linear-gradient(105deg, transparent 38%, rgba(160, 96, 255, 0.6) 46%, transparent 54%),
+    linear-gradient(72deg, transparent 56%, rgba(112, 72, 232, 0.45) 63%, transparent 70%);
+  background-size: 250% 100%, 320% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 900ms ease-out;
+  animation: enchant 9s linear infinite;
+}
+
+.home-name.building .build-line::after {
+  opacity: 0;
+  transition: none;
+}
+
+@keyframes enchant {
+  from { background-position: 100% 0, 0% 0; }
+  to { background-position: 0% 0, 100% 0; }
+}
+
+html.calm .build-line::after {
+  display: none;
+}
+
+/* while the title is built, "Welcome to" waits for Texyle to bring it, and each letter waits to be
+   set down like a block, from one glyph pixel up (index.js) */
+.home-name.building .welcome:not(.placed) {
+  opacity: 0;
+}
+
+/* in Texyle's hand, over him, and in front of him until he has jumped off it */
+.welcome.carried {
+  position: relative;
+  z-index: 3;
+}
+
+.home-name.building .welcome.carried {
+  opacity: 1;
+}
+
+.letter {
+  display: inline-block;
+}
+
+.home-name.building .letter:not(.set) {
+  opacity: 0;
+}
+
+.letter.set {
+  animation: set-down 160ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes set-down {
+  from { opacity: 0; translate: 0 -0.11em; }
+}
+
+/* antoultrav and Texyle: index.js moves each box, whose bottom is where the feet are */
+.title-builder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 0;
+  height: var(--tall);
+  pointer-events: none;
+}
+
+/* a square one and a half figures wide, around the middle of the figure, with room for a flip */
+.title-figure {
+  position: absolute;
+  bottom: calc(var(--tall) * -0.2575);
+  left: calc(var(--tall) * -0.75);
+  width: calc(var(--tall) * 1.5);
+  height: calc(var(--tall) * 1.5);
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+
+.title-figure.shown {
+  opacity: 1;
+}
+
+.title-tag {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  translate: -50% 0;
+  padding: 0 6px;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 400;
+  text-shadow: 2px 2px 0 #2a2a2a;
+  background: rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+}
+
+/* below 960px the 72px line no longer fits its column with antoultrav beside it */
+@media (max-width: 960px) {
+  .home-name {
+    --tall: 88px;
+  }
+
+  .build-line {
+    font-size: 54px;
+    line-height: 60px;
+    text-shadow: 6px 6px 0 #3f3f3f;
+  }
+}
+
+/* dust where a letter is set down and where "Welcome to" is placed */
+.scrape {
+  position: absolute;
+  background: #d9d4c4;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+}
+
+/* the signed-out door: the faces of players already on the list, behind its words */
+.door {
+  isolation: isolate;
+}
+
+.door > .face-wall {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  image-rendering: pixelated;
+}
+
+.face-wall img {
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+/* the words keep clear of the strip, however much they wrap */
+.door.faces {
+  padding-top: 56px;
+}
+
+.home-under {
+  display: grid;
+  /* one column the width of the page: the search field would otherwise ask for 600px */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  max-width: 1240px;
+  margin: 56px auto 0;
+}
+
+/* two short lines: what the site is, then its numbers, each wrapped evenly on a phone */
+.home-intro .dim {
+  display: grid;
+  margin: 0;
+  color: var(--face);
+  text-wrap: balance;
+}
+
+/* two doors a row, wide enough for their lines to be read whole */
+.doors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* the two doors of a row keep one height */
+.doors > li {
+  display: grid;
+}
+
+.door {
+  position: relative;
+  display: grid;
+  align-content: end;
+  min-height: 168px;
+  padding: 14px 16px;
+  overflow: hidden;
+  color: var(--white);
+  background: var(--art) center / cover no-repeat, var(--d37);
+  border: 2px solid var(--black);
+  box-shadow: inset 0 0 0 2px rgba(139, 139, 139, 0.55);
+}
+
+.door::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.1) 70%);
+}
+
+.door > * {
+  position: relative;
+}
+
+.door b {
+  font-size: 27px;
+  line-height: 36px;
+}
+
+/* a door's lines wrap whole when they don't fit, and the door grows with them; nothing is cut */
+.door-line {
+  color: var(--face);
+  text-wrap: pretty;
+}
+
+.door b {
+  margin-bottom: 2px;
+}
+
+/* the badge pill inside a door line, small enough for the line */
+.door-pill {
+  gap: 6px;
+  padding: 0 8px 0 6px;
+  vertical-align: 2px;
+}
+
+.door-pill .dot {
+  width: 10px;
+  height: 10px;
+}
+
+/* what is new or notable, in the game's hover yellow */
+.home .hl {
+  color: var(--hover);
+  text-shadow: 2px 2px 0 #404028;
+}
+
+.door:hover,
+.door:focus-visible {
+  outline: 2px solid var(--white);
+  color: var(--white);
+}
+
+.door:hover b,
+.door:focus-visible b {
+  color: var(--hover);
+}
+
+/* the leaderboards' door: the top three on a dark royal gold, as on the podium */
+.door.gold {
+  background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url("assets/gui/mat-5.png") 0 0 / 48px 48px;
+  image-rendering: pixelated;
+}
+
+.door-podium {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.door-place {
+  display: grid;
+  justify-items: center;
+}
+
+.door-place img {
+  width: 32px;
+  height: 32px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* each face stands on a block of its place's material, the first highest */
+.door-place i {
+  display: block;
+  width: 40px;
+  height: var(--rise);
+  background: var(--mat) 0 0 / 20px 20px;
+  box-shadow: inset 0 2px rgba(255, 255, 255, 0.3), inset 0 -2px rgba(0, 0, 0, 0.45);
+  image-rendering: pixelated;
+}
+
+.door-place.p1 { --rise: 28px; --mat: url("assets/gui/mat-5.png"); }
+.door-place.p2 { --rise: 18px; --mat: url("assets/gui/mat-4.png"); }
+.door-place.p3 { --rise: 10px; --mat: url("assets/gui/mat-3.png"); }
+
+.door-face {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 1180px) {
+  .stage {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 480px);
+    column-gap: 48px;
+  }
+
+  .stage-who {
+    font-size: 18px;
+    line-height: 28px;
+  }
+
+  .stage-who .head {
+    width: 24px;
+    height: 24px;
+    vertical-align: -5px;
+  }
+
+  /* the two buttons share a line in the narrower words column */
+  .stage-actions .button {
+    padding: 4px 14px 6px;
+  }
+
+  .stage-player {
+    left: -36px;
+    width: 160px;
+    height: 230px;
+  }
+}
+
+/* on a short desktop screen the title steps down to 54px, so the whole stage still shows under it */
+@media (min-width: 961px) and (max-height: 940px) {
+  .home-intro {
+    margin-top: 108px;
+  }
+
+  .home-name {
+    --tall: 88px;
+  }
+
+  .build-line {
+    font-size: 54px;
+    line-height: 60px;
+    text-shadow: 6px 6px 0 #3f3f3f;
+  }
+
+  .home-intro .dim {
+    line-height: 24px;
+  }
+
+  /* still clearly further apart than the things inside a section */
+  .stage {
+    margin-top: 32px;
+    row-gap: 12px;
+  }
+
+  /* under a 54px title the map's name goes down too */
+  .stage-name {
+    --lift: 5px;
+    font-size: 45px;
+    line-height: 52px;
+  }
+
+  .stage-name.long {
+    --lift: 4px;
+    font-size: 36px;
+    line-height: 40px;
+  }
+}
+
+/* narrower, the picture comes first and the words follow under it */
+@media (max-width: 960px) {
+  .stage {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "title" "side" "words";
+    row-gap: 16px;
+  }
+
+  /* under the 54px title */
+  .stage-name {
+    --lift: 5px;
+    font-size: 45px;
+    line-height: 52px;
+  }
+
+  .stage-name.long {
+    --lift: 4px;
+    font-size: 36px;
+    line-height: 40px;
+  }
+
+  .stage-words {
+    padding-top: 8px;
+  }
+
+  /* the player stands inside the frame, its feet on the frame's lower edge, clear of the picks */
+  .stage-player {
+    left: 8px;
+    bottom: 4px;
+  }
+}
+
+/* above the doors, so its results open over them */
+.hero-search {
+  z-index: 5;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.hero-search label {
+  padding: 10px 14px;
+  font-size: 27px;
+  line-height: 36px;
+}
+
+.hero-search .icon {
+  width: 24px;
+  height: 24px;
+}
+
+.hero-search .results {
+  text-align: left;
+}
+
+/* the screens further down: a white title over each, as on the game's own screens */
+.screen {
+  display: grid;
+  justify-items: center;
+  gap: 20px;
+  margin: 96px auto 0;
+  text-align: center;
+}
+
+.screen-title {
+  margin: 0 0 4px;
+  font-size: 27px;
+  line-height: 36px;
+  font-weight: 700;
+  text-shadow: 3px 3px 0 #3f3f3f;
+}
+
+/* Featured: the biggest of the last 30 days, a card each (the map's screenshot in its tier frame,
+   its name, and who did what), and the newest victories under */
+.featured {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 300px));
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.feature {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+}
+
+.feature .tile {
+  margin-bottom: 8px;
+}
+
+.feature:hover .tile,
+.feature:focus-visible .tile {
+  translate: 0 -4px;
+}
+
+.feature-map {
+  font-weight: 700;
+}
+
+.feature-who .head {
+  width: 24px;
+  height: 24px;
+  margin-right: 6px;
+  vertical-align: -5px;
+}
+
+.newest {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+/* narrower, the three cards share the width; on a phone each is a row, its picture on the left */
+@media (max-width: 960px) {
+  .featured {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .featured {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .feature {
+    grid-template-columns: 128px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+
+  .feature .tile {
+    grid-row: span 2;
+    margin: 0;
+  }
+}
+
+/* The hotbar: nine slots in the game's dark strip, the selected one in its white frame and its
+   name over the strip, as the game shows an item's name when you pick it. */
+.item-name {
+  min-height: 28px;
+  margin: 0;
+}
+
+.item-name .flag {
+  margin: 0 4px;
+}
+
+.hotbar {
+  --slot: 72px;
+  display: flex;
+  padding: 2px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid var(--black);
+  box-shadow: inset 0 0 0 2px #6b6b6b;
+}
+
+.hotbar li {
+  padding: 4px;
+  box-shadow: inset 0 0 0 2px rgba(139, 139, 139, 0.45);
+}
+
+.hot-slot {
+  position: relative;
+  display: block;
+  width: var(--slot);
+  height: var(--slot);
+  background: var(--art) center / cover no-repeat, var(--d37);
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+.hot-slot .head {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  width: 24px;
+  height: 24px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* the victor number sits where the game puts a stack's count */
+.hot-count {
+  position: absolute;
+  right: 4px;
+  bottom: 0;
+  font-weight: 700;
+  color: var(--white);
+  text-shadow: 2px 2px 0 #3f3f3f;
+}
+
+.hot-slot.first-victor .hot-count {
+  color: var(--hover);
+  text-shadow: 2px 2px 0 #404028;
+}
+
+.hot-slot.selected::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border: 4px solid #e9e9e9;
+  box-shadow: 0 0 0 2px var(--black), inset 0 0 0 2px var(--black);
+}
+
+.hot-slot:focus-visible {
+  outline: none;
+}
+
+/* The beacon: a layer per tier of the tier's own blocks, Tier X the beacon block on top with its
+   beam, the label of each layer just past its right end and "you" just past its left. */
+.beacon {
+  --block: 24px;
+  position: relative;
+  display: grid;
+  width: 100%;
+  padding-top: 240px;
+}
+
+.beacon-row {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  height: var(--block);
+}
+
+/* lit from above like a block in the game, so even the dark netherite layer keeps its edges */
+.layer {
+  position: relative;
+  display: block;
+  width: calc(var(--w, 1) * var(--block));
+  height: var(--block);
+  background: var(--mat) 0 0 / var(--block) var(--block);
+  box-shadow: inset 0 2px rgba(255, 255, 255, 0.3), inset 0 -2px rgba(0, 0, 0, 0.45), 0 2px rgba(0, 0, 0, 0.35);
+  image-rendering: pixelated;
+}
+
+.layer:hover,
+.layer:focus-visible {
+  z-index: 1;
+  filter: brightness(1.25);
+  outline: 2px solid var(--white);
+}
+
+/* the beam rises from the beacon block once the beacon comes into view, and its light runs up */
+.beacon-row.summit .layer::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 20%;
+  width: 60%;
+  height: 240px;
+  background:
+    linear-gradient(to top, rgba(255, 220, 220, 0.75), rgba(255, 255, 255, 0) 80%) center / 34% 100% no-repeat,
+    repeating-linear-gradient(to top, rgba(255, 255, 255, 0.08) 0 16px, rgba(255, 255, 255, 0) 16px 48px),
+    linear-gradient(to top, rgba(255, 40, 40, 0.95), rgba(239, 0, 11, 0.5) 60%, rgba(239, 0, 11, 0));
+  background-position: center 0, 0 0, 0 0;
+  /* the whole beam fades out at its top, its light with it */
+  -webkit-mask-image: linear-gradient(to top, #000 55%, transparent);
+  mask-image: linear-gradient(to top, #000 55%, transparent);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: beam 1.6s linear infinite;
+  pointer-events: none;
+}
+
+.beacon.lit .beacon-row.summit .layer::before {
+  transform: scaleY(1);
+}
+
+@keyframes beam {
+  to { background-position: center 0, 0 -96px, 0 0; }
+}
+
+/* the beam's glow, a wider and fainter column around it */
+.beacon-row.summit .layer::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: -20%;
+  width: 140%;
+  height: 240px;
+  background: linear-gradient(to top, rgba(239, 0, 11, 0.4), rgba(239, 0, 11, 0) 85%);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.beacon.lit .beacon-row.summit .layer::after {
+  transform: scaleY(1);
+}
+
+html.calm .beacon-row.summit .layer::before,
+html.calm .beacon-row.summit .layer::after {
+  transition: none;
+  animation: none;
+}
+
+.layer-label,
+.beacon-tags {
+  position: absolute;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: min(18px, var(--block));
+  line-height: var(--block);
+  white-space: nowrap;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.layer-label {
+  left: calc(50% + var(--w, 1) * var(--block) / 2 + 12px);
+}
+
+.layer-label .sword {
+  width: min(20px, var(--block));
+  height: min(20px, var(--block));
+}
+
+.layer-name,
+.layer-count {
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+}
+
+.layer-count {
+  color: var(--white);
+  text-shadow: var(--shadow);
+}
+
+.beacon.short .layer-name {
+  display: none;
+}
+
+.beacon-tags {
+  right: calc(50% + var(--w, 1) * var(--block) / 2 + 12px);
+  gap: 12px;
+}
+
+/* on a phone the labels give way to a key under the pyramid */
+.beacon-key {
+  display: none;
+}
+
+.beacon.legend .layer-label {
+  display: none;
+}
+
+.beacon.legend .beacon-tags {
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.beacon.legend .beacon-key {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 16px;
+  margin-top: 24px;
+  text-align: left;
+}
+
+.beacon-key li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.beacon-key .sword {
+  width: 20px;
+  height: 20px;
+}
+
+.beacon-key .layer-count {
+  margin-left: auto;
+}
+
+/* a name tag as the game draws one over a player: white on a dark wash */
+.beacon-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.beacon-tag .head {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 760px) {
+  /* on a phone the big search is the search; the bar's own waits for the next page */
+  .home .bar .search {
+    display: none;
+  }
+
+  .home:not(.hero-search-on) .bar-find {
+    display: inline-grid;
+  }
+
+  /* brand, search button and Menu share the bar down to 360px */
+  .home .bar {
+    column-gap: 8px;
+  }
+
+  .home .bar nav {
+    gap: 8px;
+  }
+
+  .bar-find {
+    padding: 4px 8px 6px;
+  }
+
+  .hero-search label {
+    padding: 6px 10px;
+    font-size: 18px;
+    line-height: 28px;
+  }
+
+  /* room for Texyle's sideflip with the sign held up, under the top bar */
+  .home-intro {
+    margin-top: 72px;
+  }
+
+  .stage {
+    margin-top: 40px;
+    row-gap: 12px;
+  }
+
+  /* on a phone "Welcome to" sits over the line the two of them sit on, and they are a little
+     larger beside the smaller title */
+  .home-name {
+    --tall: 59px;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .welcome {
+    font-size: 18px;
+    line-height: 28px;
+    text-shadow: 2px 2px 0 #2a2a2a;
+  }
+
+  .build-line {
+    font-size: 27px;
+    line-height: 36px;
+    text-shadow: 3px 3px 0 #3f3f3f;
+  }
+
+  /* section headings step down to 18px, under the 27px title */
+  .screen-title {
+    font-size: 18px;
+    line-height: 28px;
+    text-shadow: 2px 2px 0 #3f3f3f;
+  }
+
+  /* the title's own 27px: there is no nine pixel size between it and the body's 18px, and on a
+     phone the title already leads from the top of the screen, the name being under the picture */
+  .stage-name,
+  .stage-name.long {
+    --lift: 3px;
+    font-size: 27px;
+    line-height: 36px;
+  }
+
+  .stage-faces .head {
+    width: 32px;
+    height: 32px;
+  }
+
+  .stage-picks ol {
+    gap: 6px;
+  }
+
+  .stage-pick b {
+    font-size: 14px;
+  }
+
+  .stage-player {
+    width: 120px;
+    height: 170px;
+  }
+
+  .stage-actions .button {
+    padding: 4px 12px 6px;
+  }
+
+  .home-under {
+    margin-top: 40px;
+  }
+
+  /* one door a row on a phone, each tall enough for its title and line under the face */
+  .doors {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  /* on a phone a door grows with its lines, which wrap instead of fading, under the face */
+  .door {
+    height: auto;
+    min-height: 128px;
+    padding: 64px 12px 10px;
+  }
+
+  .door-line {
+    white-space: normal;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .door-podium {
+    top: 10px;
+    right: 10px;
+  }
+
+  .door-place img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .door-place i {
+    width: 30px;
+    background-size: 15px 15px;
+  }
+
+  .door-place.p1 { --rise: 18px; }
+  .door-place.p2 { --rise: 12px; }
+  .door-place.p3 { --rise: 6px; }
+
+  .door b {
+    font-size: 18px;
+    line-height: 28px;
+  }
+
+  .door-face {
+    top: 12px;
+    right: 12px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .screen {
+    margin-top: 64px;
+  }
+
+  /* on a phone the slots keep a readable size and the strip scrolls sideways */
+  .hotbar {
+    --slot: 56px;
+    max-width: 100%;
+    padding: 6px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    scrollbar-color: var(--g8b) transparent;
+  }
+
+  .hotbar li {
+    scroll-snap-align: center;
+  }
+
+  .hot-slot .head {
+    width: 20px;
+    height: 20px;
+  }
+
+  .beacon {
+    padding-top: 160px;
+  }
+
+  .beacon-row.summit .layer::before,
+  .beacon-row.summit .layer::after {
+    height: 160px;
   }
 }

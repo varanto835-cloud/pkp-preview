@@ -7,7 +7,7 @@ const COUNTRIES = {
   cn: "China", cz: "Czechia", de: "Germany", dk: "Denmark", ec: "Ecuador", ee: "Estonia", es: "Spain", fi: "Finland",
   fm: "Micronesia", fr: "France", gb: "United Kingdom", gr: "Greece", hk: "Hong Kong", hr: "Croatia", hu: "Hungary",
   id: "Indonesia", ie: "Ireland", il: "Israel", it: "Italy", jo: "Jordan", jp: "Japan", kr: "South Korea", kz: "Kazakhstan", la: "Laos",
-  md: "Moldova", my: "Malaysia", nl: "Netherlands", no: "Norway", pe: "Peru", ph: "Philippines", pl: "Poland", ps: "Palestine", pt: "Portugal",
+  md: "Moldova", mg: "Madagascar", my: "Malaysia", nl: "Netherlands", no: "Norway", pe: "Peru", ph: "Philippines", pl: "Poland", ps: "Palestine", pt: "Portugal",
   ro: "Romania", rs: "Serbia", ru: "Russia", se: "Sweden", sg: "Singapore", sk: "Slovakia", th: "Thailand", tw: "Taiwan",
   ua: "Ukraine", us: "United States",
 };
@@ -125,8 +125,9 @@ function socket(tier, cls = "") {
   return h("span", { class: `socket ${cls}`.trim() }, sword(tier, "sword small"));
 }
 
+// a flag for every country here; the bot keeps "idk" for a player who never set one
 function flag(code, cls = "flag") {
-  if (!code) return null;
+  if (!COUNTRIES[code]) return null;
   return h("img", { class: cls, src: asset(`assets/flag/${code}.png`), alt: COUNTRIES[code] || code.toUpperCase(), title: COUNTRIES[code] || "" });
 }
 
@@ -433,18 +434,20 @@ function setWorld(slug, light) {
   worldNow = slug;
   const old = [...document.querySelectorAll(".world")];
   const next = h("div", { class: "world fresh", style: `--world: url('${asset(`assets/world/${slug}.jpg`)}'); ${veil(light)}` });
-  document.body.prepend(next);
+  // the new world goes on top of the old ones, so its fade is what the eye sees
+  if (old.length) old[old.length - 1].after(next);
+  else document.body.prepend(next);
   const done = () => old.forEach((w) => w.remove());
   if (first || calm.matches) {
     next.classList.remove("fresh");
     done();
     return;
   }
-  // wait for the picture so the swap never flashes the bare night
+  // the picture loads first, then fades in over 1s, as on the current parkourprogress.space
   const img = new Image();
   img.onload = img.onerror = () => {
-    requestAnimationFrame(() => next.classList.remove("fresh"));
-    setTimeout(done, 700);
+    requestAnimationFrame(() => requestAnimationFrame(() => next.classList.remove("fresh")));
+    setTimeout(done, 1100);
   };
   img.src = asset(`assets/world/${slug}.jpg`);
 }
@@ -470,9 +473,13 @@ function holdCard(card) {
 
 // search
 
+// every search field on the page works the same way (the home has a big one too)
 function initSearch() {
-  const form = document.querySelector(".search");
-  if (!form || typeof directory === "undefined") return;
+  if (typeof directory === "undefined") return;
+  document.querySelectorAll(".search").forEach(initSearchField);
+}
+
+function initSearchField(form) {
   const input = form.querySelector("input");
   const list = form.querySelector(".results");
   let items = [];
@@ -501,7 +508,7 @@ function initSearch() {
       const page = PAGES[name];
       const extra = row.map
         ? h("small", {}, `${row.map[1]}${row.map[3] ? `, ${plural(row.map[3], "victor")}` : ""}`)
-        : h("small", {}, COUNTRIES[row.player[1]] || (row.player[1] || "").toUpperCase());
+        : h("small", {}, COUNTRIES[row.player[1]] || "No country set");
       const label = row.map ? name : nameTag(name);
       const lead = row.map ? (sword(tierOf(row.map[2]), "sword") || h("span", { class: "sword" })) : flag(row.player[1]) || h("span", { class: "flag" });
       const item = page
@@ -587,8 +594,44 @@ function initByline() {
 
 initByline();
 
+// The player signed in with Discord. In this mockup "Sign in" stands in for Discord: it signs you in
+// as wlatr, the one player whose profile is built, and the browser keeps it until "Sign out".
+const signedIn = (() => {
+  try {
+    const asked = new URLSearchParams(location.search).get("me");
+    if (asked !== null) {
+      if (asked) localStorage.setItem("pkp-me", asked);
+      else localStorage.removeItem("pkp-me");
+    }
+    return localStorage.getItem("pkp-me") || "";
+  } catch {
+    return "";
+  }
+})();
+
+// the last item of the top bar: Sign in, or the signed-in player's face and name
+function initAccount() {
+  const list = document.getElementById("nav-list");
+  if (!list) return;
+  const item = signedIn
+    ? h("a", { class: "account", href: PAGES[signedIn] || "profile.html", title: "Your profile" }, head(signedIn), nameTag(signedIn))
+    : h("a", { class: "button account", href: "index.html?me=wlatr" }, "Sign in");
+  list.append(h("li", { class: "account-item" }, item));
+}
+
+// sticky headings (Activity's day bars, the Maps group heads) stop right under the top bar,
+// which is taller on phones; its height is read once the byline is in it
+function measureBar() {
+  const bar = document.querySelector(".bar");
+  if (bar) document.documentElement.style.setProperty("--bar", `${bar.offsetHeight}px`);
+}
+
+addEventListener("resize", measureBar);
+measureBar();
+
 document.addEventListener("DOMContentLoaded", () => {
   document.body.append(tooltip);
   initSearch();
   initMenu();
+  initAccount();
 });
