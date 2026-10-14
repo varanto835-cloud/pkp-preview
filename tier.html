@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tier - Parkour Progress</title>
+  <meta name="description" content="A Parkour Progress tier: every badge in it, easiest first, and the players whose hardest badge stopped there.">
+  <meta property="og:site_name" content="Parkour Progress">
+  <link rel="stylesheet" href="site.css?v=2610148400">
+</head>
+<body>
+  <svg class="sprites" aria-hidden="true">
+    <symbol id="i-search" viewBox="0 0 8 8"><path d="M1 0h4v1h-4zM0 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM5 2h1v1h-1zM0 3h1v1h-1zM5 3h1v1h-1zM1 4h4v1h-4zM5 5h2v1h-2zM6 6h2v1h-2z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 8 8"><path d="M7 1h1v1h-1zM6 2h1v1h-1zM5 3h1v1h-1zM0 4h1v1h-1zM4 4h1v1h-1zM1 5h1v1h-1zM3 5h1v1h-1zM2 6h1v1h-1z"/></symbol>
+  </svg>
+  <div class="world" id="world"></div>
+
+  <header class="bar">
+    <a class="brand" href="index.html">Parkour Progress</a>
+    <form class="search" role="search" autocomplete="off" onsubmit="return false">
+      <label>
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" placeholder="Search players and maps" aria-label="Search players and maps">
+      </label>
+      <div class="results" role="listbox" hidden></div>
+    </form>
+    <nav aria-label="Main">
+      <button class="button menu" type="button" aria-expanded="false" aria-controls="nav-list">Menu</button>
+      <ul id="nav-list">
+        <li><a href="maps.html">Maps</a></li>
+        <li><a href="profile.html">Players</a></li>
+        <li><a href="leaderboards.html">Leaderboards</a></li>
+        <li><a href="activity.html">Activity</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero badge-hero tier-hero" aria-label="Tier">
+      <div class="hero-side" id="side"></div>
+    </section>
+
+    <section class="block" aria-labelledby="badges-title">
+      <h2 class="win-title" id="badges-title"></h2>
+      <div class="win material" id="badges-win">
+        <ol class="well tier-badges" id="badges"></ol>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="stopped-title">
+      <h2 class="win-title" id="stopped-title">Stopped here <small id="stopped-note"></small></h2>
+      <div class="win">
+        <ol class="well holders stopped" id="stopped"></ol>
+      </div>
+    </section>
+
+    <footer class="foot dim">
+      <p>Real data from a copy of the ProgressBot database, 2 Oct 2026.</p>
+      <p>Mockup: signed in as wlatr, so wlatr's badges are marked.</p>
+    </footer>
+  </main>
+
+  <script src="data/search.js?v=2610148400"></script>
+  <script src="data/names.js?v=2610148400"></script>
+  <script src="data/tiers.js?v=2610148400"></script>
+  <script src="site.js?v=2610148400"></script>
+  <script src="tier.js?v=2610148400"></script>
+</body>
+</html>

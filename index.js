@@ -1,6 +1,7 @@
-// The home: a stage that turns through the six hardest maps, each with the player closest to it or
-// the one who beat it first, standing in 3D in front of the map; then the search, a door to each
-// part of the site, the newest victories as a hotbar and a beacon for the whole community.
+// The home: a stage that turns through the hardest beaten map of each gamemode, each with the
+// player who beat it first standing in 3D in front of it for that gamemode's players; then the
+// search, a door to each part of the site, the newest victories as a hotbar and a beacon for the
+// whole community.
 
 function shortDay(iso) {
   const [, m, d] = iso.split("-").map(Number);
@@ -273,24 +274,27 @@ function wakeIdle() {
   requestAnimationFrame(tick);
 }
 
-// The title is written by its two makers in a parkour run. antoultrav, who made the site, sprints
-// in from the left and writes "Parkour Progress!" with his feet: each letter goes down just ahead
-// of him as he runs along the line, with a jump up onto the "P", one over the gap between the
-// words, and a last hop that turns him round and sits him on the "!". Texyle, who runs the site,
-// comes in after him with "Welcome to" in one hand, sideflips up onto the "P" as antoultrav sits,
-// sets it down in its place and sits there too. The flip is keyed by hand, as the podium's moves
-// are, and every other pose eases on springs. It plays once, the first time the title comes into
-// view; with animations off it is all simply there, the two of them sitting on it.
+// The title is written by its two makers in a parkour run. antoultrav, who made the site, drops in
+// from over the page onto the "P", already running, and writes "Parkour Progress!" with his feet:
+// each letter goes down just ahead of him as he runs along the line, with a jump over the gap
+// between the words and a last hop that turns him round and sits him on the "!". Texyle, who runs
+// the site, drops in after him with "Welcome to" held up in one hand, turning a sideflip on the way
+// down, sets it in its place and sits on the "P". Dropping in from the top, they take the same time
+// on every screen, a little under 4s. The flip is keyed by hand, as the podium's moves are, and
+// every other pose eases on springs. It plays once, the first time the title comes into view; with
+// animations off it is all simply there, the two of them sitting on it.
 const BUILDER = "antoultrav";
 const FRIEND = "Texyle";
-// they run as fast as a sprint-jump in the game, in figure heights a second
-const RUN = 4;
-// antoultrav's jump onto the "P", his jump over the gap and his hop round onto the "!"
-const JUMP_MS = 380;
-const GAP_MS = 400;
-const HOP_MS = 500;
-// Texyle's sideflip, and how far it carries him, in figure heights
-const FLIP_MS = 820;
+// a little faster than a sprint-jump in the game, in figure heights a second (Texyle asked for the
+// whole title about 1.1 times quicker)
+const RUN = 4.4;
+// antoultrav's drop onto the "P", his jump over the gap and his hop round onto the "!"
+const FALL_MS = 455;
+const GAP_MS = 365;
+const HOP_MS = 455;
+// Texyle's drop with the sideflip in it, and how far to the left of his landing it starts, in
+// figure heights
+const FLIP_MS = 745;
 const FLIP_LENGTH = 2.6;
 // how long they stay alive once seated, breathing and looking around
 const LIFE_MS = 20000;
@@ -677,29 +681,29 @@ async function buildTitle(line, spots, still = false) {
   };
   const blend = (a, b, k) => Object.fromEntries(Object.keys(a).map((key) => [key, a[key] + (b[key] - a[key]) * k]));
 
-  // antoultrav's run, at one pace from off the left of the screen until the hop, which eases off
-  // into the seat; each letter goes down as his front foot comes near it
+  // antoultrav's run: he drops from behind the top bar onto the "P", moving at his running pace
+  // already, and keeps it until the hop, which eases off into the seat; each letter goes down as
+  // his front foot comes near it
   for (const f of them) f.seat = seatOf(f);
+  // the top of the page, in the line's box
+  const sky = -lineBox.top;
   const land1 = middleOf(0) + m.cell * 0.1;
-  const take1 = land1 - v * JUMP_MS;
+  const x0 = land1 - v * FALL_MS;
   const take2 = middleOf(space) - (v * GAP_MS) / 2;
   const land2 = middleOf(space) + (v * GAP_MS) / 2;
   const take3 = anto.seat[0] - (v * HOP_MS) / 2;
-  const x0 = Math.min(-lineBox.left - tall * 0.8, take1 - tall);
   const when = (x) => (x - x0) / v;
-  const jumps = [
-    { from: when(take1), to: when(land1), y: arc(m.base, topOf(0), tall * 0.14) },
-    { from: when(take2), to: when(land2), y: arc(topOf(cellAt(take2)), topOf(cellAt(land2)), tall * 0.2) },
-  ];
+  const jumps = [{ from: when(take2), to: when(land2), y: arc(topOf(cellAt(take2)), topOf(cellAt(land2)), tall * 0.2) }];
   const tHop = when(take3);
   const tSat = tHop + HOP_MS;
   const hopY = arc(topOf(cellAt(take3)), anto.seat[1], tall * 0.15);
   const lead = tall * 0.15 + m.cell * 0.3;
 
-  // Texyle's: the same pace in, holding "Welcome to" up over his head like a sign. It stands on his
-  // fist and turns with him as a held thing does, so it can't be carried close to him: it is wider
-  // than he is tall. Where its place is beside the line, on the floor (desktop), the sideflip lands
-  // him right there; he sneaks down, lowers it in front of him and lets it drop the last bit, then
+  // Texyle's: he drops in from behind the top bar too, up and to the left of where he lands, holding
+  // "Welcome to" up over his head like a sign and turning a sideflip on the way down. It stands on
+  // his fist and turns with him as a held thing does, so it can't be carried close to him: it is
+  // wider than he is tall. Where its place is beside the line, on the floor (desktop), he lands
+  // right there; he sneaks down, lowers it in front of him and lets it drop the last bit, then
   // jumps up onto the "P" and sits. Where it goes over the line (narrow screens), he lands on the
   // "P" and lobs it from over his head, so it never crosses him, and sits there
   welcome.style.translate = "";
@@ -717,10 +721,10 @@ async function buildTitle(line, spots, still = false) {
   const out = floor || slot[0] < flipLand ? -1 : 1;
   const hand = out < 0 ? ["ra", "raz", "la", "laz"] : ["la", "laz", "ra", "raz"];
   const arm = out < 0 ? "rightArm" : "leftArm";
-  const tFlip = tSat - 120;
-  const tEnter = tFlip - (flipTake - x0) / v;
+  // he drops in while antoultrav is on his last steps
+  const tFlip = tSat - 300;
   const tLand = tFlip + FLIP_MS;
-  const tRelease = tLand + (floor ? 300 : 60);
+  const tRelease = tLand + (floor ? 270 : 55);
   // the game's gravity is about 15 figure heights a second squared, here in pixels a millisecond
   // squared; the rest of the timeline is set when he lets go
   const gravity = (15 * tall) / 1e6;
@@ -730,45 +734,9 @@ async function buildTitle(line, spots, still = false) {
   let tRest = Infinity;
   // the fist covers the bottom of what it holds by this much
   const grip = 6;
-  // where his fist is from his middle, holding it up, for the flip's height below
   const c = texyle.s.canvas;
-  const middle = tall - c.offsetTop - c.offsetHeight / 2;
-  const fist = (() => {
-    const s = texyle.s;
-    builderPose(s, { ...STILL, turn: 0.15, [hand[1]]: out * 2.55 });
-    paintBuilder(s);
-    const [hx, hy] = pointOf(s, s.playerObject.skin[arm], out, -10, 0);
-    return [hx - s.width / 2, hy - s.height / 2];
-  })();
-  // the flip goes as high as the top bar allows, with room for him and for the sign turning with
-  // him: its highest corner, turned by a, from his middle. The fist is measured in one pose, so
-  // the sign keeps a margin under the bar
-  const ceiling = document.querySelector(".bar").getBoundingClientRect().bottom - lineBox.top;
-  const signTop = (a) => {
-    let top = Infinity;
-    for (const sx of [-wb.width / 2, wb.width / 2]) {
-      for (const sy of [grip, grip - wb.height]) top = Math.min(top, (fist[0] + sx) * Math.sin(a) + (fist[1] + sy) * Math.cos(a));
-    }
-    return top;
-  };
-  const fits = (lift) => {
-    const y = arc(m.base, landY, lift);
-    for (let u = 0; u <= 1; u += 0.02) {
-      if (y(u) < ceiling + tall * 1.11 + 6 || y(u) - middle + signTop(TAU * wheel(u)) < ceiling + 16) return false;
-    }
-    return true;
-  };
-  let low = tall * 0.05;
-  let high = tall * 0.55;
-  if (!fits(high)) {
-    for (let i = 0; i < 12; i++) {
-      const mid = (low + high) / 2;
-      if (fits(mid)) low = mid;
-      else high = mid;
-    }
-    high = low;
-  }
-  const flipY = arc(m.base, landY, high);
+  // the drop: from the top of the page, gaining speed as a fall does
+  const fallY = (u) => sky + (landY - sky) * (0.25 * u + 0.75 * u * u);
   // his jump from the floor up onto the "P", over the sign's right half, into the seat
   const jumpY = arc(m.base, texyle.seat[1], tall * 0.6);
   // where the sign's middle is, standing on his fist, upright to his body turned by a
@@ -804,12 +772,8 @@ async function buildTitle(line, spots, still = false) {
     return [b.left + b.width / 2, b.top + b.height / 2];
   };
   // dust at the moments feet leave or meet the ground
-  const kicks = [
-    ...jumps.map((j) => ({ t: j.from, count: 3 })),
-    ...jumps.map((j) => ({ t: j.to, count: 5 })),
-    { t: tFlip, count: 4, x: flipTake, y: m.base },
-    { t: tLand, count: 6, x: flipLand, y: landY },
-  ];
+  const antoKicks = [{ t: FALL_MS, count: 5 }, ...jumps.map((j) => ({ t: j.from, count: 3 })), ...jumps.map((j) => ({ t: j.to, count: 5 }))];
+  const texyleKicks = [{ t: tLand, count: 6, x: flipLand, y: landY }];
   for (const f of them) {
     f.pose = { ...RUNNING };
     f.speed = Object.fromEntries(Object.keys(STILL).map((key) => [key, 0]));
@@ -853,22 +817,26 @@ async function buildTitle(line, spots, still = false) {
     } else {
       x = x0 + v * t;
       const jump = jumps.find((j) => t >= j.from && t < j.to);
-      if (jump) {
+      if (t < FALL_MS) {
+        // dropping in, arms a little up and out, looking down at where he lands
+        const u = t / FALL_MS;
+        y = sky + (topOf(0) - sky) * u * u;
+        f.feet = y;
+        f.feetSpeed = 0;
+        target = { ...RUNNING, ra: -0.5, la: -0.5, raz: -0.35, laz: 0.35, rl: -0.4, ll: 0.3, lean: 0.05, hx: 0.5 };
+      } else if (jump) {
         // in the air: one leg reaching for the landing, the arms opposite
         y = jump.y((t - jump.from) / (jump.to - jump.from));
         f.feet = y;
         f.feetSpeed = 0;
         target = { ...RUNNING, rl: -0.95, ll: 0.6, ra: 0.75, la: -0.85, lean: 0.2, hx: 0.35 };
       } else {
-        if (t < jumps[0].from) y = m.base;
-        else {
-          [f.feet, f.feetSpeed] = follow(f.feet, f.feetSpeed, ground(x, f.feet), dt, 12);
-          y = f.feet;
-        }
-        y = stride(f, x, y);
+        [f.feet, f.feetSpeed] = follow(f.feet, f.feetSpeed, ground(x, f.feet), dt, 12);
+        y = stride(f, x, f.feet);
         target = running(f.phase);
-        // a landing bends him for a moment
-        if (jumps.some((j) => t >= j.to && t < j.to + 130)) target.crouch = 0.3;
+        // a landing bends him for a moment, harder after the drop
+        if (t < FALL_MS + 130) target.crouch = 0.4;
+        else if (jumps.some((j) => t >= j.to && t < j.to + 120)) target.crouch = 0.3;
       }
     }
     f.lastX = x;
@@ -878,7 +846,7 @@ async function buildTitle(line, spots, still = false) {
         setDown(i);
       }
     }
-    for (const k of kicks.slice(0, 4)) if (lastT < k.t && t >= k.t) dust(x, y, k.count);
+    for (const k of antoKicks) if (lastT < k.t && t >= k.t) dust(x, y, k.count);
     ease(f, target, dt);
     builderPose(f.s, f.pose);
     place(f, x, y);
@@ -919,39 +887,27 @@ async function buildTitle(line, spots, still = false) {
     let y;
     let target;
     let roll = 0;
-    if (ms < 0) {
-      // running in, the sign held up
-      x = x0 + v * (t - tEnter);
-      y = stride(f, x, m.base);
-      target = running(f.phase);
-      hold(target, 0, 2.55);
-      // the skip into the flip: he turns to us, dips, swings the free arm up and a knee
-      if (ms > -220) target.turn = 0.15;
-      if (ms > -160) {
-        free(target, 2.5);
-        Object.assign(target, { rl: -0.6, ll: 0.2, hx: 0 });
-      }
-      if (ms > -160 && ms < -40) target.crouch = 0.35;
-    } else if (ms < FLIP_MS) {
-      // the sideflip: a whole turn about his front to back, slow at the start and the end, arms
-      // and legs out like a star, the sign held up all the way round
+    if (ms < FLIP_MS) {
+      // the drop: a whole turn about his front to back on the way down, once he is out from under
+      // the bar, slow at the start and the end, arms and legs out like a star, the sign held up
+      // all the way round
       const u = ms / FLIP_MS;
       x = flipTake + (flipLand - flipTake) * u;
-      y = flipY(u);
-      roll = -TAU * wheel(u);
+      y = fallY(u);
+      roll = -TAU * wheel(Math.max(0, (u - 0.15) / 0.85));
       target = { ...STILL, turn: 0.15, hx: 0.15 };
       hold(target, 0, 2.55);
-      free(target, ms < 80 ? 2.5 : ms > FLIP_MS - 220 ? 0.5 : 1.5);
-      if (ms > 100 && ms < FLIP_MS - 180) Object.assign(target, { rlz: -0.55, llz: 0.55 });
+      free(target, ms > FLIP_MS - 200 ? 0.5 : 1.5);
+      if (ms > 150 && ms < FLIP_MS - 160) Object.assign(target, { rlz: -0.55, llz: 0.55 });
     } else if (floor && t < tSit) {
       // down where the sign goes: he bends, sneaks down, lowers it in front of him and lets it
       // drop; once it is down he stands, looks up at the "P" and jumps
       x = flipLand;
       y = m.base;
       target = { ...STILL, lean: 0.04, hx: 0.45 };
-      if (t < tLand + 140) target.crouch = 0.45;
+      if (t < tLand + 130) target.crouch = 0.45;
       else if (!placed) target.crouch = 0.85;
-      if (t < tLand + 60) hold(target, 0, 2.55);
+      if (t < tLand + 55) hold(target, 0, 2.55);
       else if (t < tRelease) hold(target, -0.45, 0.2);
       else hold(target, -0.5, 0.15);
       free(target, 0.15);
@@ -968,7 +924,7 @@ async function buildTitle(line, spots, still = false) {
       x = flipLand;
       y = m.capTop;
       target = { ...STILL, lean: 0.04 };
-      if (t < tLand + 140) target.crouch = 0.45;
+      if (t < tLand + 130) target.crouch = 0.45;
       const yaw = Math.atan2(slot[0] - x, tall * 0.7);
       target.turn = yaw * 0.4;
       target.hy = Math.max(-1, Math.min(1, yaw * 0.6));
@@ -986,7 +942,7 @@ async function buildTitle(line, spots, still = false) {
       }
     }
     f.lastX = x;
-    for (const k of kicks.slice(4)) if (lastT < k.t && t >= k.t) dust(k.x, k.y, k.count);
+    for (const k of texyleKicks) if (lastT < k.t && t >= k.t) dust(k.x, k.y, k.count);
     ease(f, target, dt);
     builderPose(f.s, { ...f.pose, roll });
     place(f, x, y);
@@ -1000,10 +956,10 @@ async function buildTitle(line, spots, still = false) {
         if (!f.thrown) {
           f.thrown = [wx, wy];
           const fall = slot[1] - drop - wy;
-          toss = floor ? Math.max(120, Math.min(260, Math.sqrt((2 * Math.max(8, fall)) / gravity))) : Math.max(240, Math.min(420, 220 + Math.hypot(slot[0] - wx, fall) / 1.4));
+          toss = floor ? Math.max(110, Math.min(235, Math.sqrt((2 * Math.max(8, fall)) / gravity))) : Math.max(220, Math.min(380, 200 + Math.hypot(slot[0] - wx, fall) / 1.54));
           tPlaced = tRelease + toss;
-          tSit = tPlaced + (floor ? 200 : 120);
-          tRest = tSit + (floor ? HOP_MS : 450);
+          tSit = tPlaced + (floor ? 180 : 110);
+          tRest = tSit + (floor ? HOP_MS : 410);
         }
         const [sx, sy] = f.thrown;
         const k = Math.min(t - tRelease, toss);
@@ -1048,7 +1004,7 @@ async function buildTitle(line, spots, still = false) {
     lastFrame = now;
     const t = Math.max(0, now - t0);
     if (!anto.resting) moveAnto(t, dt);
-    if (!texyle.resting && t >= tEnter) moveTexyle(t, dt);
+    if (!texyle.resting && t >= tFlip) moveTexyle(t, dt);
     lastT = t;
     if (anto.resting && texyle.resting) over = true;
     else requestAnimationFrame(tick);
@@ -1120,7 +1076,7 @@ function fillWords(m) {
     h("a", { class: "button", href: m.victors ? "maps.html" : "maps.html?show=unbeaten" }, m.victors ? "All maps" : "Unbeaten maps"));
 }
 
-// The words keep the height of the tallest of the six, measured at this width, so the picks, the
+// The words keep the height of the tallest of them, measured at this width, so the picks, the
 // search and the doors never move when the stage turns.
 function fitStage() {
   const words = document.getElementById("stage-words");
@@ -1143,7 +1099,9 @@ function renderStage() {
     tip(pick, () => `<b>${esc(m.name)}</b><p>${m.victors ? `${m.victors} ${m.victors === 1 ? "victor" : "victors"}` : `Unbeaten, ${shareLeft(m)}% left`}</p>`);
     return h("li", {}, pick);
   });
-  document.getElementById("stage-picks").replaceChildren(...picks);
+  const list = document.getElementById("stage-picks");
+  list.replaceChildren(...picks);
+  list.style.setProperty("--picks", picks.length);
   // the time to the next turn, a bar under the shown map that fills like the game's experience bar
   const time = calm.matches ? null : h("span", { class: "pick-time", "aria-hidden": "true" }, h("i"));
   if (time) picks[0].append(time);
@@ -1373,37 +1331,38 @@ function renderHotbar() {
 }
 
 // The climb as a beacon: each layer is everyone whose hardest badge reached that tier or higher,
-// built from the tier's material and as wide as their number; Tier X is the beacon block itself.
-// Widths are whole blocks, odd so the pyramid has a middle, and each layer at least a block wider
-// on both sides than the one above; the labels give the exact counts.
+// built from the tier's material; Tier X is the beacon block itself. At rest it steps in a block a
+// side per layer, as a beacon does in the game. Hovered, or with its button, each layer eases to
+// its share of the players at the width of the base (CSS), a thin sliver at least, so the widths
+// are seen to mean something; the labels give the exact counts.
+const BEACON_BASE = 19;
 const BEACON_FITS = [
-  { block: 24, base: 37, room: 200, mode: "" },
-  { block: 16, base: 37, room: 200, mode: "" },
-  { block: 16, base: 29, room: 110, mode: "short" },
+  { block: 36, room: 240, mode: "" },
+  { block: 30, room: 220, mode: "" },
+  { block: 24, room: 200, mode: "" },
+  { block: 24, room: 110, mode: "short" },
   // on a phone the labels move into a key under the pyramid
-  { block: 12, base: 21, room: 0, mode: "legend" },
+  { block: 16, room: 0, mode: "legend" },
 ];
 
-function beaconWidths(base) {
+function beaconWidths() {
   const total = home.ladder[home.ladder.length - 1][1];
-  const widths = [];
-  for (const [, reached] of home.ladder) {
-    const raw = (reached / total) * base;
-    const odd = Math.max(1, 2 * Math.round((raw - 1) / 2) + 1);
-    widths.push(widths.length ? Math.max(odd, widths[widths.length - 1] + 2) : 1);
-  }
-  return widths;
+  return home.ladder.map(([, reached], i) => [2 * i + 1, Math.max(0.35, (reached / total) * BEACON_BASE)]);
 }
 
 function layoutBeacon() {
   const box = document.getElementById("beacon");
   const width = box.clientWidth;
-  const fit = BEACON_FITS.find((f) => f.block * f.base + 2 * f.room <= width) || BEACON_FITS[BEACON_FITS.length - 1];
-  const widths = beaconWidths(fit.base);
+  const fit = BEACON_FITS.find((f) => f.block * BEACON_BASE + 2 * f.room <= width) || BEACON_FITS[BEACON_FITS.length - 1];
+  const widths = beaconWidths();
   box.style.setProperty("--block", `${fit.block}px`);
   box.classList.toggle("short", fit.mode === "short");
   box.classList.toggle("legend", fit.mode === "legend");
-  [...box.querySelectorAll(".beacon-row")].forEach((row, i) => row.style.setProperty("--w", widths[i]));
+  [...box.querySelectorAll(".beacon-row")].forEach((row, i) => {
+    row.style.setProperty("--w", widths[i][0]);
+    row.style.setProperty("--p", widths[i][1].toFixed(3));
+    row.style.setProperty("--i", i);
+  });
 }
 
 function beaconTag(name, note) {
@@ -1413,15 +1372,17 @@ function beaconTag(name, note) {
 function renderBeacon() {
   const box = document.getElementById("beacon");
   const base = home.ladder[home.ladder.length - 1][1];
-  document.getElementById("climb-note").textContent = `Everyone whose hardest badge reached each tier or higher: ${base} players hold a tier.`;
+  const hover = matchMedia("(hover: hover)").matches;
+  document.getElementById("climb-note").textContent = `${base} players hold a tier. ${hover ? "Hover the beacon" : "Use the button"} to size each layer by the players who reached it, and ${hover ? "click" : "tap"} a layer for its badges.`;
   const rows = home.ladder.map(([tier, reached, here, names]) => {
-    const layer = h("a", { class: `layer m${tier}`, href: "leaderboards.html?by=difficulty", "aria-label": `Tier ${ROMAN[tier]} ${TIER_NAMES[tier]}: ${reached} ${reached === 1 ? "player" : "players"} reached it or higher` });
+    const href = `tier.html?t=${tier}`;
+    const layer = h("a", { class: `layer m${tier}`, href, "aria-label": `Tier ${ROMAN[tier]} ${TIER_NAMES[tier]}: ${reached} ${reached === 1 ? "player" : "players"} reached it or higher` });
     tip(layer, () => {
       const more = here > names.length ? ` and ${here - names.length} more` : "";
       const stopped = here ? `<p>${here} stopped here: ${names.map(([name]) => esc(name)).join(", ")}${more}</p>` : "";
-      return `<b style="color: var(--t${tier})">Tier ${ROMAN[tier]} ${esc(TIER_NAMES[tier])}</b><p>${reached} ${reached === 1 ? "player" : "players"} reached it or higher</p>${stopped}<p class="hint">Click for the hardest badges</p>`;
+      return `<b style="color: var(--t${tier})">Tier ${ROMAN[tier]} ${esc(TIER_NAMES[tier])}</b><p>${reached} ${reached === 1 ? "player" : "players"} reached it or higher</p>${stopped}<p class="hint">Click to see this tier's badges</p>`;
     });
-    const label = h("span", { class: "layer-label", "aria-hidden": "true" }, sword(tier, "sword small"),
+    const label = h("a", { class: "layer-label", href, tabindex: "-1", "aria-hidden": "true" }, sword(tier, "sword small"),
       h("span", { class: "layer-tier" }, ROMAN[tier]), h("span", { class: "layer-name" }, TIER_NAMES[tier]), h("span", { class: "layer-count" }, String(reached)));
     const row = h("div", { class: `beacon-row${tier === 10 ? " summit" : ""}` }, layer, label);
     const tags = [];
@@ -1430,10 +1391,17 @@ function renderBeacon() {
     if (tags.length) row.append(h("span", { class: "beacon-tags" }, tags));
     return row;
   });
+  // on a phone the key opens the tier pages, the thin layers being hard to tap
   const key = h("ol", { class: "beacon-key" }, home.ladder.map(([tier, reached]) =>
-    h("li", {}, sword(tier, "sword small"), h("span", {}, `Tier ${ROMAN[tier]}`), h("span", { class: "layer-count" }, String(reached)))));
+    h("li", {}, h("a", { href: `tier.html?t=${tier}` }, sword(tier, "sword small"), h("span", {}, `Tier ${ROMAN[tier]}`), h("span", { class: "layer-count" }, String(reached))))));
   box.replaceChildren(...rows, key);
   layoutBeacon();
+  const size = document.getElementById("beacon-size");
+  size.addEventListener("click", () => {
+    const counted = box.classList.toggle("counted");
+    size.setAttribute("aria-pressed", String(counted));
+    size.textContent = counted ? "Back to the beacon" : "Size by players";
+  });
   if ("ResizeObserver" in window) new ResizeObserver(layoutBeacon).observe(box);
   // the beam rises once, the first time the beacon comes into view
   if (calm.matches || !("IntersectionObserver" in window)) {

@@ -1310,6 +1310,91 @@ button.pill {
   max-width: 880px;
 }
 
+/* tier page: the ten tiers as a row of slots with this one lit; its name in its colour under its
+   sword and numeral; its badges in a window of its own material, easiest first, yours marked */
+.tier-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tier-steps .slot {
+  width: 48px;
+  height: 48px;
+}
+
+.tier-steps .slot:not(.here) img {
+  opacity: 0.5;
+}
+
+.tier-steps .slot:hover img,
+.tier-steps .slot:focus-visible img {
+  opacity: 1;
+}
+
+.tier-steps .slot.here {
+  outline: 2px solid var(--white);
+  outline-offset: 2px;
+}
+
+.hero h1.tier-name {
+  --lift: 8px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font-size: 72px;
+  line-height: 80px;
+}
+
+.tier-name .sword {
+  width: 72px;
+  height: 72px;
+  flex: none;
+}
+
+.tier-badges li {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 32px 112px 128px 88px;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.tier-badges .pill {
+  justify-self: start;
+}
+
+/* the EXP and the holders are columns of the row on a wide screen, a line under the badge on a phone */
+.tier-badges .meta {
+  display: contents;
+}
+
+.tier-badges .worth {
+  text-align: right;
+}
+
+.tier-badges li.none {
+  display: block;
+}
+
+.tier-badges .mine {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--t9);
+}
+
+.tier-badges .mine .icon {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* who stopped here: two columns only where a name and its badge fit side by side */
+.holders.stopped {
+  columns: 2 620px;
+}
+
 .tooltip .tip-pill {
   margin: 2px 0 4px;
 }
@@ -2558,6 +2643,62 @@ html.calm .name.blend {
   .holders li {
     grid-template-columns: 32px 24px minmax(0, 1fr);
     row-gap: 0;
+  }
+
+  .tier-badges li {
+    grid-template-columns: 28px minmax(0, 1fr);
+    row-gap: 0;
+  }
+
+  .tier-badges .mode-chip {
+    display: none;
+  }
+
+  /* the badge gets the first line, its EXP, holders and a tick if it is yours the second */
+  .tier-badges .meta {
+    display: flex;
+    gap: 12px;
+    grid-column: 2 / -1;
+    grid-row: 2;
+    white-space: nowrap;
+  }
+
+  .tier-badges .mine {
+    margin-left: auto;
+  }
+
+  .tier-badges .mine-word {
+    display: none;
+  }
+
+  .hero h1.tier-name {
+    --lift: 4px;
+    font-size: 36px;
+    line-height: 40px;
+  }
+
+  .hero h1.tier-name {
+    gap: 12px;
+  }
+
+  .tier-name .sword {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* the ten tiers keep to one row */
+  .tier-steps {
+    gap: 2px;
+  }
+
+  .tier-steps .slot {
+    width: 32px;
+    height: 32px;
+  }
+
+  .tier-steps .slot img {
+    width: 24px;
+    height: 24px;
   }
 
   .holders li > :last-child {
@@ -4458,7 +4599,9 @@ a.map-link:focus-visible {
   height: 96px;
 }
 
-/* the six maps under the frame, the one on the stage framed like a picked slot */
+/* the maps under the frame, the one on the stage framed like a picked slot; each keeps the size of
+   a sixth of the row, however many there are, so the stage keeps its height, and they sit in the
+   middle */
 .stage-picks {
   display: grid;
   gap: 22px;
@@ -4466,7 +4609,8 @@ a.map-link:focus-visible {
 
 .stage-picks ol {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--picks, 6), calc((100% - 50px) / 6));
+  justify-content: center;
   gap: 10px;
 }
 
@@ -5185,7 +5329,16 @@ html.calm .build-line::after {
 }
 
 /* The beacon: a layer per tier of the tier's own blocks, Tier X the beacon block on top with its
-   beam, the label of each layer just past its right end and "you" just past its left. */
+   beam, the label of each layer just past its right end and "you" just past its left. At rest it
+   steps in a block a side per layer, as a beacon does in the game; hovered, or with its button,
+   each layer eases to the width of the players who reached its tier or higher (index.js), so the
+   widths are seen to mean something. --at is the width in blocks it is at now. */
+@property --at {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
 .beacon {
   --block: 24px;
   position: relative;
@@ -5195,19 +5348,36 @@ html.calm .build-line::after {
 }
 
 .beacon-row {
+  --at: var(--w, 1);
   position: relative;
   display: flex;
   justify-content: center;
   height: var(--block);
+  transition: --at 520ms cubic-bezier(0.3, 0.7, 0.2, 1) calc(var(--i, 0) * 30ms);
+}
+
+.beacon.counted .beacon-row {
+  --at: var(--p, 1);
+}
+
+@media (hover: hover) {
+  .beacon:hover .beacon-row {
+    --at: var(--p, 1);
+  }
+}
+
+html.calm .beacon-row {
+  transition: none;
 }
 
 /* lit from above like a block in the game, so even the dark netherite layer keeps its edges */
 .layer {
   position: relative;
   display: block;
-  width: calc(var(--w, 1) * var(--block));
+  width: calc(var(--at) * var(--block));
   height: var(--block);
-  background: var(--mat) 0 0 / var(--block) var(--block);
+  /* the blocks are laid out from the middle, so a narrower layer loses them at both ends */
+  background: var(--mat) 50% 0 / var(--block) var(--block);
   box-shadow: inset 0 2px rgba(255, 255, 255, 0.3), inset 0 -2px rgba(0, 0, 0, 0.45), 0 2px rgba(0, 0, 0, 0.35);
   image-rendering: pixelated;
 }
@@ -5224,8 +5394,9 @@ html.calm .build-line::after {
   content: "";
   position: absolute;
   bottom: 100%;
-  left: 20%;
-  width: 60%;
+  left: 50%;
+  width: calc(var(--block) * 0.6);
+  margin-left: calc(var(--block) * -0.3);
   height: 240px;
   background:
     linear-gradient(to top, rgba(255, 220, 220, 0.75), rgba(255, 255, 255, 0) 80%) center / 34% 100% no-repeat,
@@ -5255,8 +5426,9 @@ html.calm .build-line::after {
   content: "";
   position: absolute;
   bottom: 100%;
-  left: -20%;
-  width: 140%;
+  left: 50%;
+  width: calc(var(--block) * 1.4);
+  margin-left: calc(var(--block) * -0.7);
   height: 240px;
   background: linear-gradient(to top, rgba(239, 0, 11, 0.4), rgba(239, 0, 11, 0) 85%);
   transform: scaleY(0);
@@ -5289,8 +5461,16 @@ html.calm .beacon-row.summit .layer::after {
   pointer-events: none;
 }
 
+/* the label opens the tier's page too, an easy target when its layer is thin */
 .layer-label {
-  left: calc(50% + var(--w, 1) * var(--block) / 2 + 12px);
+  left: calc(50% + var(--at) * var(--block) / 2 + 12px);
+  color: inherit;
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+.layer-label:hover .layer-name {
+  color: var(--hover);
 }
 
 .layer-label .sword {
@@ -5314,7 +5494,7 @@ html.calm .beacon-row.summit .layer::after {
 }
 
 .beacon-tags {
-  right: calc(50% + var(--w, 1) * var(--block) / 2 + 12px);
+  right: calc(50% + var(--at) * var(--block) / 2 + 12px);
   gap: 12px;
 }
 
@@ -5340,10 +5520,12 @@ html.calm .beacon-row.summit .layer::after {
   text-align: left;
 }
 
-.beacon-key li {
+.beacon-key a {
   display: flex;
   align-items: center;
   gap: 8px;
+  color: inherit;
+  text-decoration: none;
 }
 
 .beacon-key .sword {
@@ -5449,7 +5631,9 @@ html.calm .beacon-row.summit .layer::after {
     height: 32px;
   }
 
+  /* on a phone the page scrolls anyway: the picks share the row */
   .stage-picks ol {
+    grid-template-columns: repeat(var(--picks, 6), minmax(0, 1fr));
     gap: 6px;
   }
 
