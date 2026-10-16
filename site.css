@@ -4790,10 +4790,10 @@ html.calm .build-line::after {
   opacity: 0;
 }
 
-/* in Texyle's hand, over him, and in front of him until he has jumped off it */
+/* in Texyle's hand as he glides: behind both of them and the line, so where he flies over
+   antoultrav the sign hanging under him reads as further back */
 .welcome.carried {
   position: relative;
-  z-index: 3;
 }
 
 .home-name.building .welcome.carried {
@@ -4827,7 +4827,8 @@ html.calm .build-line::after {
   pointer-events: none;
 }
 
-/* a square one and a half figures wide, around the middle of the figure, with room for a flip */
+/* a square one and a half figures wide, around the middle of the figure, with room for the glide;
+   a seated figure can be hit, and index.js checks the click lands on its body */
 .title-figure {
   position: absolute;
   bottom: calc(var(--tall) * -0.2575);
@@ -4836,6 +4837,7 @@ html.calm .build-line::after {
   height: calc(var(--tall) * 1.5);
   opacity: 0;
   transition: opacity 200ms ease-out;
+  pointer-events: auto;
 }
 
 .title-figure.shown {

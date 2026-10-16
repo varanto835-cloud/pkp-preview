@@ -1,5 +1,4 @@
 const MODE_LIST = [["All", "All"], ["Rankup", "Rankup"], ["Segmented", "Segmented"], ["Onlysprint", "Onlysprint"], ["Miscellaneous", "Misc"]];
-const BANDS_RARITY = [[1, "1% or less"], [5, "Under 5%"], [15, "Under 15%"], [30, "Under 30%"], [Infinity, "30% or more"]];
 const narrow = matchMedia("(max-width: 900px)");
 const badgeMode = {};
 const mapMode = {};
@@ -48,20 +47,12 @@ const BOARDS = {
       { label: "Last beaten", by: "last", alt: "first", note: "The latest victory on the map.", altNote: "The first victory on the map." },
     ],
   },
-  badges: {
-    label: "Badges", find: "Find a badge",
-    columns: [
-      { label: "Badge", lead: true },
-      { label: "Map", wide: true },
-      { label: "Holders", by: "rarest", note: "Players holding the badge, out of everyone on the server." },
-    ],
-  },
 };
-const DEFAULT_BY = { players: "exp", countries: "victories", maps: "exp", badges: "rarest" };
+const DEFAULT_BY = { players: "exp", countries: "victories", maps: "exp" };
 const SORT_NAMES = {
   exp: "EXP", difficulty: "Hardest badge", victory: "Hardest victory", tiers: "Tiers", victories: "Victories", badges: "Badges",
   sky: "Sky fails", players: "Players", maps: "Maps", victors: "Victors", avg: "Avg fails", total: "Total fails",
-  last: "Last beaten", first: "First beaten", rarest: "Holders",
+  last: "Last beaten", first: "First beaten",
 };
 // what each order reads as, normal and reversed, like the bot's Descending button
 const MOST = ["Most first", "Fewest first"];
@@ -69,9 +60,8 @@ const ORDER = {
   exp: ["Highest first", "Lowest first"], difficulty: ["Hardest first", "Easiest first"], victory: ["Hardest first", "Easiest first"],
   tiers: MOST, victories: MOST, badges: MOST, sky: MOST, players: MOST, maps: MOST, victors: MOST, total: MOST,
   avg: ["Highest first", "Lowest first"], last: ["Newest first", "Oldest first"], first: ["Oldest first", "Newest first"],
-  rarest: ["Rarest first", "Most common first"],
 };
-const RISING = ["first", "rarest"];
+const RISING = ["first"];
 
 let state = readUrl();
 let rows = [];
@@ -88,11 +78,6 @@ function readUrl() {
   const by = sortKeys(board).includes(q.get("by")) ? q.get("by") : DEFAULT_BY[board];
   const mode = MODE_LIST.some(([m]) => m === q.get("mode")) ? q.get("mode") : "All";
   return { board, by, mode, country: q.get("country") || "", reverse: q.get("order") === "reverse", pick: q.get("pick") };
-}
-
-function share(holders) {
-  const pct = (holders / boardPlayers) * 100;
-  return pct < 1 ? pct.toFixed(1) : String(Math.round(pct));
 }
 
 function badgeRow(id) {
@@ -187,16 +172,6 @@ function mapList(by, mode, country) {
   return out;
 }
 
-function badgeList(by, mode) {
-  const out = [];
-  for (const [id, map, gamemode, value, holders] of badgeBoard) {
-    if (mode !== "All" && gamemode !== mode) continue;
-    const name = badgeTable[id][0];
-    out.push({ kind: "badge", id: name, name, badge: id, map, mode: gamemode, value, holders, key: holders ? [by === "rarest" ? -holders : holders] : null });
-  }
-  return out;
-}
-
 const byName = new Intl.Collator("en").compare;
 
 function compare(a, b) {
@@ -210,7 +185,7 @@ function compare(a, b) {
 function build(board, by, mode, country, reverse = false) {
   const id = [board, by, mode, country, reverse].join("|");
   if (cache.has(id)) return cache.get(id);
-  const all = { players: () => playerList(by, mode, country), countries: () => countryList(by, mode), maps: () => mapList(by, mode, country), badges: () => badgeList(by, mode) }[board]();
+  const all = { players: () => playerList(by, mode, country), countries: () => countryList(by, mode), maps: () => mapList(by, mode, country) }[board]();
   const sign = reverse ? -1 : 1;
   const ranked = all.filter((row) => row.key).sort((a, b) => sign * compare(a, b) || byName(String(a.name), String(b.name)));
   let rank = 0;
@@ -220,8 +195,8 @@ function build(board, by, mode, country, reverse = false) {
     row.rank = rank;
     row.tie = Boolean(prev && prev.key[0] === row.key[0] && prev.rank !== rank);
   });
-  // maps and badges keep their unranked rows at the end, players and countries leave them out
-  const rest = board === "maps" || board === "badges" ? all.filter((row) => !row.key).sort((a, b) => byName(a.name, b.name)) : [];
+  // maps keep their unranked rows at the end, players and countries leave them out
+  const rest = board === "maps" ? all.filter((row) => !row.key).sort((a, b) => byName(a.name, b.name)) : [];
   const result = { rows: ranked.concat(rest), missing: all.length - ranked.length };
   cache.set(id, result);
   return result;
@@ -238,11 +213,6 @@ function cardMode(name) {
   if (!best) return null;
   if (best[1] != null && badgeMode[best[1]]) return badgeMode[best[1]];
   return mapMode[bestLabels[best[2]].split(" | ")[0]] || null;
-}
-
-function band(row) {
-  if (!row.holders) return "Nobody yet";
-  return BANDS_RARITY.find(([limit]) => (row.holders / boardPlayers) * 100 <= limit)[1];
 }
 
 // cells
@@ -281,8 +251,7 @@ function cell(row, column) {
     const pair = state.by === "first" ? row.first : row.last;
     return pair ? short(pair[0]) : "-";
   }
-  if (column.wide) return h("span", { class: "dim" }, `${row.map}, ${row.mode}`);
-  return row.holders ? [String(row.holders), h("small", {}, ` ${share(row.holders)}%`)] : "0";
+  return "-";
 }
 
 // the value shown under a name on phones and on the podium
@@ -309,19 +278,17 @@ function valueOf(row, by = state.by) {
     if (by === "total") return `${row.fails} ${row.failsLabel} fails`;
     return date((by === "first" ? row.first : row.last)[0]);
   }
-  return row.holders === 1 ? "1 holder" : `${row.holders} holders, ${share(row.holders)}%`;
+  return "-";
 }
 
 function groupOf(row) {
   if ((row.kind === "player" || row.kind === "country") && state.by === "difficulty") return ["tier", tierOf(row.best[0])];
   if (row.kind === "player" && state.by === "victory") return ["tier", tierOf(row.victory[0])];
-  if (row.kind === "badge") return ["band", band(row)];
   if (row.kind === "map" && !row.key) return ["none", state.by === "exp" ? "No EXP value" : "Not counted on this board"];
   return null;
 }
 
 function rankCell(row, tag = "span") {
-  if (row.kind === "badge") return h(tag, { class: "rank" });
   const cellEl = h(tag, { class: "rank" }, row.rank === 1 && !state.reverse ? icon("crown", "first") : null, row.rank ? `${row.rank}` : "-");
   if (row.tie) {
     const why = state.by === "exp" ? "the hardest badge" : state.by === "difficulty" || state.by === "victory" ? "EXP" : "the tie-break";
@@ -590,7 +557,7 @@ function renderPodium() {
   const run = ++podiumRun;
   const top = rows.filter((row) => row.rank).slice(0, 3);
   // the podium is for the top, a reversed board has none
-  podium.hidden = state.board === "badges" || state.reverse || top.length < 3;
+  podium.hidden = state.reverse || top.length < 3;
   if (podium.hidden) return podium.replaceChildren();
   const steps = [[top[1], 2, 4], [top[0], 1, 5], [top[2], 3, 3]];
   podium.className = `podium podium-${state.board}`;
@@ -705,12 +672,12 @@ function renderTable(body) {
   const columns = BOARDS[state.board].columns;
   const tbody = h("tbody");
   body.append(h("table", { class: `lb-table board-${state.board}` },
-    h("thead", {}, h("tr", {}, h("th", { scope: "col", class: "c-rank" }, state.board === "badges" ? "" : "#"), columns.map(columnHead))),
+    h("thead", {}, h("tr", {}, h("th", { scope: "col", class: "c-rank" }, "#"), columns.map(columnHead))),
     tbody));
   fillRows(tbody,
     (group) => h("tr", { class: "group-row" }, h("td", { colspan: columns.length + 1 },
       group[0] === "tier" ? [socket(group[1]), tierText(group[1])] : group[1])),
-    (row, i) => h("tr", { class: `rank-line${row.rank && row.rank <= 3 && row.kind !== "badge" && !state.reverse ? " top" : ""}`, "data-i": i, onclick: () => openRow(i) },
+    (row, i) => h("tr", { class: `rank-line${row.rank && row.rank <= 3 && !state.reverse ? " top" : ""}`, "data-i": i, onclick: () => openRow(i) },
       h("td", { class: "c-rank" }, rankCell(row)),
       columns.map((column) => column.lead
         ? h("td", { class: "c-lead" }, h("button", { type: "button", class: "row-open", "aria-expanded": "false", onclick: (event) => { event.stopPropagation(); openRow(i); } }, lead(row)))
@@ -769,7 +736,7 @@ function renderBody() {
   filling = null;
   openIndex = -1;
   renderTitle();
-  if (!rows.some((r) => r.rank) && state.board !== "badges") renderEmpty(body);
+  if (!rows.some((r) => r.rank)) renderEmpty(body);
   else if (narrow.matches) renderList(body);
   else renderTable(body);
   markCut();
@@ -869,21 +836,8 @@ function mapDetail(row) {
     PAGES[row.name] ? h("a", { class: "button", href: PAGES[row.name] }, "Map page") : null);
 }
 
-function badgeDetail(row) {
-  const badge = badgeRow(row.badge);
-  const page = badgePages.includes(badgeKey(badge.name));
-  const tier = tierOf(row.value);
-  return detailFrame(socket(tier), h("strong", { class: `name${badge.end ? " blend" : ""}`, style: nameColours(badge.color, badge.end, badge.third) }, badge.name), `${row.mode}, ${band(row)}`, [
-    statRow("Tier", tier ? tierText(tier) : "none", null),
-    statRow("Holders", row.holders ? `${row.holders} of ${boardPlayers} players` : "nobody yet", null),
-  ], h("div", { class: "rarity" },
-    h("strong", {}, row.holders ? `${share(row.holders)}%` : "0%"),
-    h("span", { class: "meter", style: roleColours(badge) }, h("i", { style: `width:${row.holders ? Math.max(1, (row.holders / boardPlayers) * 100) : 0}%` }))),
-  page ? h("a", { class: "button", href: badgeHref(badge.name) }, "Badge page") : null);
-}
-
 function detailOf(row) {
-  return { player: playerDetail, country: countryDetail, map: mapDetail, badge: badgeDetail }[row.kind](row);
+  return { player: playerDetail, country: countryDetail, map: mapDetail }[row.kind](row);
 }
 
 function closeRow() {

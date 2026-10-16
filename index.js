@@ -274,36 +274,54 @@ function wakeIdle() {
   requestAnimationFrame(tick);
 }
 
-// The title is written by its two makers in a parkour run. antoultrav, who made the site, drops in
-// from over the page onto the "P", already running, and writes "Parkour Progress!" with his feet:
-// each letter goes down just ahead of him as he runs along the line, with a jump over the gap
-// between the words and a last hop that turns him round and sits him on the "!". Texyle, who runs
-// the site, drops in after him with "Welcome to" held up in one hand, turning a sideflip on the way
-// down, sets it in its place and sits on the "P". Dropping in from the top, they take the same time
-// on every screen, a little under 4s. The flip is keyed by hand, as the podium's moves are, and
-// every other pose eases on springs. It plays once, the first time the title comes into view; with
+// The title is written by its two makers, both at once. antoultrav, who made the site, drops from
+// over the page left of the line, sprints along the floor, jumps up onto the "P" and writes
+// "Parkour Progress!" with his feet: each letter goes down just ahead of him as he runs along it,
+// with a jump over the gap between the words and a last hop that turns him round and sits him on
+// the "!". Texyle, who runs the site, glides in on elytra from over the top right with "Welcome to"
+// held under him, passes high over antoultrav without ever touching him, turns round past the far
+// end of the line, lets the sign drop into its place on the way back and lands on the "P" (his own
+// idea, 2026-10-15). Starting from the top, they take about 2.5s on a phone and 3.3s on a wide
+// screen. Every pose eases on springs. A figure that is clicked flinches, is knocked back and goes
+// red, as in the game, and its hits heal after a while; ten hits and it falls over, goes up in
+// smoke and comes in again. It plays once, the first time the title comes into view; with
 // animations off it is all simply there, the two of them sitting on it.
 const BUILDER = "antoultrav";
 const FRIEND = "Texyle";
-// a little faster than a sprint-jump in the game, in figure heights a second (Texyle asked for the
-// whole title about 1.1 times quicker)
+// a little faster than a sprint-jump in the game, in figure heights a second
 const RUN = 4.4;
-// antoultrav's drop onto the "P", his jump over the gap and his hop round onto the "!"
+// antoultrav's drop, his jump up onto the "P", his jump over the gap and his hop round onto the "!"
 const FALL_MS = 455;
+const JUMP_MS = 345;
 const GAP_MS = 365;
 const HOP_MS = 455;
-// Texyle's drop with the sideflip in it, and how far to the left of his landing it starts, in
-// figure heights
-const FLIP_MS = 745;
-const FLIP_LENGTH = 2.6;
+// Texyle's glide, in figure heights a second: fast in the dive and along the top, slower round
+// the turn, slower again coming in to land
+const DIVE = 10;
+const TURN = 8;
+const LAND = 4.5;
+// how far his elytra open along the top, and how far above his middle he then reaches, in figure
+// heights: spread, and drawn in tight (below 0 they shut tighter than at rest, as in a dive) where
+// he shoots over antoultrav with the sign
+const SPREAD = 0.4;
+const SPREAD_TOP = 0.65;
+const TUCKED = -0.2;
+const TUCKED_TOP = 0.36;
+// how far back, in radians, the sign he carries swings as he flies
+const SWING = 0.08;
 // how long they stay alive once seated, breathing and looking around
 const LIFE_MS = 20000;
-// a figure's canvas is this many figure heights square, room for the flip
+// a figure's canvas is this many figure heights square, room for the glide
 const FIGURE_BOX = 1.5;
+// hits a figure takes before it falls over, and how long one takes to heal
+const HITS = 10;
+const HEAL_MS = 2000;
 // every joint at rest: standing, facing us
 const STILL = { ra: 0, la: 0, raz: 0, laz: 0, rl: 0, ll: 0, rlz: 0, llz: 0, lean: 0, turn: 0, hy: 0, hx: 0, crouch: 0, roll: 0 };
 // running to the right, turned three quarters to us, looking down at the letters
 const RUNNING = { ...STILL, lean: 0.12, turn: 1, hy: -0.25, hx: 0.25 };
+// gliding as in the game: arms down by the body a little apart, legs together, looking ahead
+const GLIDING = { ...STILL, ra: 0.15, la: 0.15, raz: -0.1, laz: 0.1, rl: 0.05, ll: -0.05, hx: -0.75 };
 // sitting on the "!", leaning back on both hands, turned to the line and to us
 const SITTING = { ...STILL, ra: 0.6, la: 0.6, raz: 0.15, laz: -0.15, rl: -1.3, ll: -1.6, rlz: 0.1, llz: -0.05, lean: -0.15, turn: -0.85, hy: 0.6, hx: -0.15 };
 // sitting on the "P", the same turned the other way
@@ -355,9 +373,26 @@ function builderPose(s, p) {
   sk.head.rotation.y = p.hy;
   sk.head.rotation.x = p.hx;
   sk.rotation.x = p.lean;
-  // turned first, then rolled about his own front to back, as in a sideflip
-  s.playerObject.rotation.order = "YXZ";
-  s.playerObject.rotation.set(0, p.turn, p.roll || 0);
+  // elytra, where worn: folded, spread by p.wings as in the game's glide, or below 0 shut tight
+  const elytra = s.playerObject.elytra;
+  if (elytra.parent) {
+    const w = p.wings || 0;
+    elytra.leftWing.rotation.set(0.2618 + 0.0873 * w, 0.01, 0.2618 + 1.1 * w);
+    elytra.updateRightWing();
+  }
+  // gliding, the whole figure is turned by p.q; otherwise turned, then rolled about his own front
+  // to back, as when he falls over
+  if (p.q) s.playerObject.quaternion.copy(p.q);
+  else {
+    s.playerObject.rotation.order = "YXZ";
+    s.playerObject.rotation.set(0, p.turn, p.roll || 0);
+  }
+}
+
+// the game's red flash on a hit, k from 0 to 1
+function tint(s, k) {
+  const sk = s.playerObject.skin;
+  for (const material of [sk.layer1Material, sk.layer1MaterialBiased, sk.layer2Material, sk.layer2MaterialBiased]) material.color.setRGB(1, 1 - 0.6 * k, 1 - 0.6 * k);
 }
 
 function paintBuilder(s) {
@@ -376,7 +411,7 @@ function paintBuilder(s) {
   }
   const camera = s.camera;
   camera.fov = 30;
-  // the canvas is larger than the figure, for the flip; the camera zooms out to match
+  // the canvas is larger than the figure, for the glide; the camera zooms out to match
   camera.zoom = 1.125 / FIGURE_BOX;
   s.gl.setViewport(0, 0, width, height);
   // a strong white rim from behind, so the dark skin keeps its outline on the dark page
@@ -461,11 +496,41 @@ function pointOf(s, part, x, y, z) {
   return [((p.x + 1) / 2) * s.width, ((1 - p.y) / 2) * s.height];
 }
 
+// distance by time through a few [time, distance] keys: smooth, never going back, and coming to a
+// stop at the last one (a monotone cubic, as Fritsch and Carlson give it)
+function timeline(keys) {
+  const n = keys.length;
+  const slopes = keys.slice(1).map(([t, d], i) => (d - keys[i][1]) / (t - keys[i][0]));
+  const tangents = keys.map((_, i) => (i === 0 ? slopes[0] : i === n - 1 ? 0 : slopes[i - 1] * slopes[i] <= 0 ? 0 : (slopes[i - 1] + slopes[i]) / 2));
+  slopes.forEach((slope, i) => {
+    if (!slope) return;
+    const a = tangents[i] / slope;
+    const b = tangents[i + 1] / slope;
+    if (a * a + b * b > 9) {
+      tangents[i] = (3 * a * slope) / Math.hypot(a, b);
+      tangents[i + 1] = (3 * b * slope) / Math.hypot(a, b);
+    }
+  });
+  return (t) => {
+    if (t <= keys[0][0]) return keys[0][1];
+    if (t >= keys[n - 1][0]) return keys[n - 1][1];
+    let i = 0;
+    while (t > keys[i + 1][0]) i++;
+    const [t0, d0] = keys[i];
+    const [t1, d1] = keys[i + 1];
+    const h = t1 - t0;
+    const u = (t - t0) / h;
+    return (2 * u ** 3 - 3 * u ** 2 + 1) * d0 + (u ** 3 - 2 * u ** 2 + u) * h * tangents[i] + (3 * u ** 2 - 2 * u ** 3) * d1 + (u ** 3 - u ** 2) * h * tangents[i + 1];
+  };
+}
+
 // A figure resting on the title: a slow breath, and now and then a look somewhere else, or at the
 // mouse while it moves, or at the other one while he is still moving (watch, a point on the
 // screen). That lasts LIFE_MS; then only the mouse turns the head. Its pose eases on springs, the
-// limbs quickly and the body slowly, so it settles into the rest from wherever it is. It draws at
-// about 30 frames a second, only while the title is in view and the tab is shown.
+// limbs quickly and the body slowly, so it settles into the rest from wherever it is. A hit makes
+// it flinch, jump back a little and go red for a moment, as a hit does in the game. It draws at about 30 frames a second, only while the
+// title is in view and the tab is shown. It hands back what a hit or a fall needs: hurt, stop and
+// the pose it is in.
 function rest(s, from, still, eyesOf, watch) {
   const pose = { ...from };
   const speed = Object.fromEntries(Object.keys(pose).map((key) => [key, 0]));
@@ -476,6 +541,9 @@ function rest(s, from, still, eyesOf, watch) {
   let nextLook = t0 + 1800;
   let last = 0;
   let running = false;
+  let stopped = false;
+  let hurtAt = -1e9;
+  let knock = 0;
   let eyes = eyesOf();
   // the turn of the head toward a point on the screen, d pixels in front of the figure: the body
   // faces still.turn, so the head turns by the rest, within what a neck allows
@@ -486,6 +554,10 @@ function rest(s, from, still, eyesOf, watch) {
     return [Math.max(-1.3, Math.min(1.3, yaw)), Math.max(-0.5, Math.min(0.5, pitch))];
   };
   const tick = (now) => {
+    if (stopped) {
+      running = false;
+      return;
+    }
     if (now - last < 33) {
       requestAnimationFrame(tick);
       return;
@@ -503,17 +575,23 @@ function rest(s, from, still, eyesOf, watch) {
     const seen = !following && watch && watch();
     const gaze = following ? mouse : seen ? toward(seen[0], seen[1], s.canvas.offsetHeight * 0.5) : life ? looking : [still.hy, still.hx];
     const breath = life ? Math.sin((2 * Math.PI * (now - t0)) / 3600) : 0;
-    const target = { ...still, hy: gaze[0], hx: gaze[1], lean: still.lean + 0.02 * breath, raz: still.raz + 0.015 * breath, laz: still.laz - 0.015 * breath };
+    const hurt = Math.max(0, 1 - (now - hurtAt) / 420);
+    const target = { ...still, hy: gaze[0], hx: gaze[1] - 0.35 * hurt, lean: still.lean + 0.02 * breath - 0.35 * hurt, raz: still.raz + 0.015 * breath, laz: still.laz - 0.015 * breath };
     for (const key of Object.keys(pose)) {
       // a glance of its own is slow, about half a second; what it follows it follows quickly
-      const hz = LIMBS.has(key) ? 14 : (key === "hy" || key === "hx") && !following && !seen ? 1.8 : 5;
+      const hz = LIMBS.has(key) ? 14 : (key === "hy" || key === "hx") && !following && !seen && !hurt ? 1.8 : 5;
       [pose[key], speed[key]] = follow(pose[key], speed[key], target[key], dt, hz);
     }
+    tint(s, Math.min(1, hurt * 1.6));
     builderPose(s, pose);
     paintBuilder(s);
+    // knocked away from the hit and a little up, then back onto the seat
+    const jump = Math.sin(Math.PI * Math.min(1, (now - hurtAt) / 360));
+    const tall = s.canvas.offsetHeight / FIGURE_BOX;
+    s.canvas.style.translate = jump > 0.001 ? `${(knock * 0.12 * tall * jump).toFixed(1)}px ${(-0.1 * tall * jump).toFixed(1)}px` : "";
     eyes = eyesOf();
     const box = s.canvas.getBoundingClientRect();
-    const resting = !life && !following && Object.values(speed).every((v) => Math.abs(v) < 0.002);
+    const resting = !life && !following && !hurt && Object.values(speed).every((v) => Math.abs(v) < 0.002);
     if (resting || document.hidden || box.bottom < 0 || box.top > innerHeight) {
       running = false;
       return;
@@ -521,25 +599,46 @@ function rest(s, from, still, eyesOf, watch) {
     requestAnimationFrame(tick);
   };
   const go = () => {
-    if (running) return;
+    if (running || stopped) return;
     running = true;
     requestAnimationFrame(tick);
   };
-  addEventListener("pointermove", (event) => {
+  const moved = (event) => {
     if (event.pointerType !== "mouse") return;
     const box = s.canvas.getBoundingClientRect();
     if (box.bottom < 0 || box.top > innerHeight) return;
     mouse = toward(event.clientX, event.clientY, 700);
     movedAt = performance.now();
     go();
-  });
-  document.documentElement.addEventListener("mouseleave", () => {
+  };
+  const left = () => {
     mouse = null;
     go();
-  });
+  };
+  addEventListener("pointermove", moved);
+  document.documentElement.addEventListener("mouseleave", left);
   document.addEventListener("visibilitychange", go);
-  if ("IntersectionObserver" in window) new IntersectionObserver(([entry]) => entry.isIntersecting && go()).observe(s.canvas);
+  const seen = "IntersectionObserver" in window && new IntersectionObserver(([entry]) => entry.isIntersecting && go());
+  if (seen) seen.observe(s.canvas);
   go();
+  return {
+    pose,
+    // way is 1 to be knocked to the right, -1 to the left
+    hurt(way) {
+      hurtAt = performance.now();
+      knock = way;
+      go();
+    },
+    stop() {
+      stopped = true;
+      tint(s, 0);
+      s.canvas.style.translate = "";
+      removeEventListener("pointermove", moved);
+      document.documentElement.removeEventListener("mouseleave", left);
+      document.removeEventListener("visibilitychange", go);
+      if (seen) seen.disconnect();
+    },
+  };
 }
 
 async function buildTitle(line, spots, still = false) {
@@ -575,7 +674,7 @@ async function buildTitle(line, spots, still = false) {
     dust(box.offsetLeft + box.offsetWidth / 2, m.base, 2);
   };
 
-  // the two of them, each from their own skin
+  // the two of them, each from their own skin; Texyle wears elytra
   const figure = async (name, spot, viewer) => {
     const s = await viewer;
     const key = name.toLowerCase();
@@ -585,6 +684,12 @@ async function buildTitle(line, spots, still = false) {
     spot.replaceChildren(s.canvas, tag);
     s.gl.compile(s.scene, s.camera);
     await shadersReady(s);
+    // put on after the shaders are made: the elytra's own object carries a material and no shape,
+    // which the renderer's compile step cannot take, though drawing it is fine
+    if (name === FRIEND) {
+      s.playerObject.add(s.playerObject.elytra);
+      s.loadCape(await picture(elytraSkin), { backEquipment: "elytra" });
+    }
     return { s, spot, tag };
   };
   let them;
@@ -607,6 +712,8 @@ async function buildTitle(line, spots, still = false) {
     return;
   }
   const [texyle, anto] = them;
+  // antoultrav runs in front of Texyle, who flies over him further back
+  anto.spot.style.zIndex = "3";
   // Texyle sits on the "P", antoultrav on the "!"
   texyle.at = 0;
   texyle.sits = SITTING_LEFT;
@@ -659,9 +766,6 @@ async function buildTitle(line, spots, still = false) {
   const asked = performance.now();
   while (stageBusy && performance.now() - asked < 6000) await new Promise((resolve) => setTimeout(resolve, 100));
   m = measure();
-  const tall = m.tall;
-  const v = (RUN * tall) / 1000;
-  const lineBox = line.getBoundingClientRect();
   const set = new Array(letters).fill(false);
   // the top of the letter at i: the capitals, the "!" and the tall small letters reach the top,
   // the other small letters stop lower; left of the line, and in the gap, it is the floor
@@ -670,7 +774,7 @@ async function buildTitle(line, spots, still = false) {
   // the ground under the feet at x: the highest letter top under them that is down already
   const ground = (x, y) => {
     let g = Infinity;
-    for (let i = cellAt(x - tall * 0.12); i <= cellAt(x + tall * 0.12); i++) if (i < 0 || set[i]) g = Math.min(g, topOf(i));
+    for (let i = cellAt(x - m.tall * 0.12); i <= cellAt(x + m.tall * 0.12); i++) if (i < 0 || set[i]) g = Math.min(g, topOf(i));
     return g === Infinity ? y : g;
   };
   // a jump's arc for the feet, from one height to another, rising lift above the higher one
@@ -680,173 +784,326 @@ async function buildTitle(line, spots, still = false) {
     return k * k * (3 - 2 * k);
   };
   const blend = (a, b, k) => Object.fromEntries(Object.keys(a).map((key) => [key, a[key] + (b[key] - a[key]) * k]));
-
-  // antoultrav's run: he drops from behind the top bar onto the "P", moving at his running pace
-  // already, and keeps it until the hop, which eases off into the seat; each letter goes down as
-  // his front foot comes near it
-  for (const f of them) f.seat = seatOf(f);
-  // the top of the page, in the line's box
-  const sky = -lineBox.top;
-  const land1 = middleOf(0) + m.cell * 0.1;
-  const x0 = land1 - v * FALL_MS;
-  const take2 = middleOf(space) - (v * GAP_MS) / 2;
-  const land2 = middleOf(space) + (v * GAP_MS) / 2;
-  const take3 = anto.seat[0] - (v * HOP_MS) / 2;
-  const when = (x) => (x - x0) / v;
-  const jumps = [{ from: when(take2), to: when(land2), y: arc(topOf(cellAt(take2)), topOf(cellAt(land2)), tall * 0.2) }];
-  const tHop = when(take3);
-  const tSat = tHop + HOP_MS;
-  const hopY = arc(topOf(cellAt(take3)), anto.seat[1], tall * 0.15);
-  const lead = tall * 0.15 + m.cell * 0.3;
-
-  // Texyle's: he drops in from behind the top bar too, up and to the left of where he lands, holding
-  // "Welcome to" up over his head like a sign and turning a sideflip on the way down. It stands on
-  // his fist and turns with him as a held thing does, so it can't be carried close to him: it is
-  // wider than he is tall. Where its place is beside the line, on the floor (desktop), he lands
-  // right there; he sneaks down, lowers it in front of him and lets it drop the last bit, then
-  // jumps up onto the "P" and sits. Where it goes over the line (narrow screens), he lands on the
-  // "P" and lobs it from over his head, so it never crosses him, and sits there
-  welcome.style.translate = "";
-  welcome.style.rotate = "";
-  const wb = welcome.getBoundingClientRect();
-  const slot = [wb.left + wb.width / 2 - lineBox.left, wb.top + wb.height / 2 - lineBox.top];
-  // it comes down into its place the last glyph pixel, as each letter does
-  const drop = parseFloat(getComputedStyle(welcome).fontSize) * 0.11;
-  const floor = slot[0] < 0 && slot[1] > 0 && slot[1] < line.offsetHeight;
-  const flipLand = floor ? slot[0] : middleOf(0);
-  const landY = floor ? m.base : m.capTop;
-  const flipTake = flipLand - tall * FLIP_LENGTH;
-  // -1 for the right hand, on our left: on the floor it goes down in front of him, either hand
-  // would do; tossed, it is the hand on its side
-  const out = floor || slot[0] < flipLand ? -1 : 1;
-  const hand = out < 0 ? ["ra", "raz", "la", "laz"] : ["la", "laz", "ra", "raz"];
-  const arm = out < 0 ? "rightArm" : "leftArm";
-  // he drops in while antoultrav is on his last steps
-  const tFlip = tSat - 300;
-  const tLand = tFlip + FLIP_MS;
-  const tRelease = tLand + (floor ? 270 : 55);
-  // the game's gravity is about 15 figure heights a second squared, here in pixels a millisecond
-  // squared; the rest of the timeline is set when he lets go
-  const gravity = (15 * tall) / 1e6;
-  let toss = 0;
-  let tPlaced = Infinity;
-  let tSit = Infinity;
-  let tRest = Infinity;
-  // the fist covers the bottom of what it holds by this much
-  const grip = 6;
-  const c = texyle.s.canvas;
-  // the drop: from the top of the page, gaining speed as a fall does
-  const fallY = (u) => sky + (landY - sky) * (0.25 * u + 0.75 * u * u);
-  // his jump from the floor up onto the "P", over the sign's right half, into the seat
-  const jumpY = arc(m.base, texyle.seat[1], tall * 0.6);
-  // where the sign's middle is, standing on his fist, upright to his body turned by a
-  const carried = (f, x, y, a) => {
-    const [hx, hy] = pointOf(f.s, f.s.playerObject.skin[arm], out, -10, 0);
-    const up = wb.height / 2 - grip;
-    return [x + c.offsetLeft + hx + Math.sin(a) * up, y - tall + c.offsetTop + hy - Math.cos(a) * up];
-  };
-  const placeWelcome = () => {
-    welcome.style.translate = "";
-    welcome.style.rotate = "";
-    welcome.classList.add("placed");
-    welcome.animate([{ translate: `0 ${(-drop).toFixed(1)}px` }, { translate: "0 0" }], { duration: 160, easing: "cubic-bezier(0.2, 0.8, 0.3, 1)" });
-    dust(slot[0], slot[1] + wb.height / 2, 10);
-  };
-
   const ease = (f, target, dt) => {
     for (const key of Object.keys(f.pose)) [f.pose[key], f.speed[key]] = follow(f.pose[key], f.speed[key], target[key], dt, LIMBS.has(key) ? 14 : 6);
-  };
-  // a stride every 1.8 figure heights; each step kicks up dust, as sprinting does in the game, and
-  // the body is highest between steps
-  const stride = (f, x, y) => {
-    f.phase += Math.abs(x - f.lastX) / (tall * 1.8);
-    const step = Math.floor(f.phase * 2);
-    if (step !== f.step) {
-      f.step = step;
-      dust(x - tall * 0.12, y, 2);
-    }
-    return y - (tall * 0.035 * (1 + Math.cos(4 * Math.PI * f.phase))) / 2;
   };
   const centreOf = (f) => {
     const b = f.s.canvas.getBoundingClientRect();
     return [b.left + b.width / 2, b.top + b.height / 2];
   };
-  // dust at the moments feet leave or meet the ground
-  const antoKicks = [{ t: FALL_MS, count: 5 }, ...jumps.map((j) => ({ t: j.from, count: 3 })), ...jumps.map((j) => ({ t: j.to, count: 5 }))];
-  const texyleKicks = [{ t: tLand, count: 6, x: flipLand, y: landY }];
-  for (const f of them) {
-    f.pose = { ...RUNNING };
-    f.speed = Object.fromEntries(Object.keys(STILL).map((key) => [key, 0]));
-    f.phase = 0;
-    f.lastX = x0;
-    // where his feet are on the letters, eased on a spring; the bob of the run is on top of it
-    f.feet = m.base;
-    f.feetSpeed = 0;
-  }
-  let over = false;
-  let placed = false;
-  let lastT = 0;
+  // how far above the spot's bottom a figure's middle is drawn: a glide is planned for the middle
+  const middle = (f) => m.tall - f.s.canvas.offsetTop - f.s.canvas.offsetHeight / 2;
 
+  // where "Welcome to" goes, in the line's box: on desktop beside the line, on the floor; on narrow
+  // screens over the line
+  welcome.style.translate = "";
+  welcome.style.rotate = "";
+  const wb = welcome.getBoundingClientRect();
+  const lb = line.getBoundingClientRect();
+  const slot = { x: wb.left + wb.width / 2 - lb.left, y: wb.top + wb.height / 2 - lb.top, left: wb.left - lb.left, w: wb.width, h: wb.height };
+  const floor = slot.x < 0 && slot.y > 0 && slot.y < line.offsetHeight;
+  // it comes down into its place the last glyph pixel, as each letter does
+  const drop = parseFloat(getComputedStyle(welcome).fontSize) * 0.11;
+  // the game's gravity is about 15 figure heights a second squared, here in pixels a millisecond
+  // squared
+  const gravity = () => (15 * m.tall) / 1e6;
+  let placed = false;
+  const placeWelcome = () => {
+    placed = true;
+    welcome.style.translate = "";
+    welcome.style.rotate = "";
+    welcome.style.transformOrigin = "";
+    welcome.classList.remove("carried");
+    welcome.classList.add("placed");
+    welcome.animate([{ translate: `0 ${(-drop).toFixed(1)}px` }, { translate: "0 0" }], { duration: 160, easing: "cubic-bezier(0.2, 0.8, 0.3, 1)" });
+    dust(slot.x, slot.y + slot.h / 2, 10);
+    if (anto.resting && anto.tag.hidden) named(anto);
+    whole();
+  };
+  // once the sign is down and every letter is written the title is whole, and the stage's player may
+  // come on; the letters still to come stay hidden until then
+  const whole = () => {
+    if (placed && set.every((down, i) => down || i === space)) done();
+  };
+
+  // antoultrav's run, planned afresh each time he comes in. Where the sign goes beside the line he
+  // drops left of it, as Texyle drew it, lands, and sprints in along the floor and up onto the
+  // "P"; where it goes over the line there is no room, and he drops onto the "P" already running.
+  // Coming in again, the sign is down and Texyle may be on the "P", so he drops onto the line past
+  // them both, or straight down into his seat where that leaves no room for a run. From the line
+  // he keeps one pace until the hop, which eases off into the seat
+  const planAnto = () => {
+    const tall = m.tall;
+    const v = (RUN * tall) / 1000;
+    const sky = -line.getBoundingClientRect().top;
+    anto.seat = seatOf(anto);
+    const take3 = anto.seat[0] - (v * HOP_MS) / 2;
+    const clear = placed ? Math.max(texyle.seat[0] + tall * 0.7, floor ? -Infinity : slot.left + slot.w + tall * 0.35) : 0;
+    const first = placed ? Math.max(0, Math.ceil(clear / m.cell - 0.5)) : 0;
+    const land1 = middleOf(first) + m.cell * 0.1;
+    if (placed && land1 > take3 - v * 150) {
+      // his feet from the top bar's edge, so the whole fall shows
+      const from = Math.max(sky, document.querySelector(".bar").getBoundingClientRect().bottom - line.getBoundingClientRect().top);
+      return {
+        v, sky, onFloor: false, runAt: 0, runX: anto.seat[0], dropX: null, jumps: [], take3: anto.seat[0], hop: 0, hopMs: FALL_MS, seated: FALL_MS,
+        hopY: (u) => from + (anto.seat[1] - from) * u * u, lead: 0, kicks: [],
+      };
+    }
+    const take1 = land1 - v * JUMP_MS;
+    const dropX = floor ? Math.max(slot.left - tall * 0.7, -line.getBoundingClientRect().left + tall * 0.5) : null;
+    const onFloor = !placed && floor && dropX < take1 - tall * 0.3;
+    // the run at one pace starts at runAt from runX
+    const runAt = onFloor ? FALL_MS + 100 : 0;
+    const runX = onFloor ? dropX : land1 - v * FALL_MS;
+    const when = (x) => runAt + (x - runX) / v;
+    const take2 = middleOf(space) - (v * GAP_MS) / 2;
+    const land2 = middleOf(space) + (v * GAP_MS) / 2;
+    const jumps = land1 < take2 ? [{ from: when(take2), to: when(land2), y: arc(topOf(cellAt(take2)), topOf(cellAt(land2)), tall * 0.2) }] : [];
+    if (onFloor) jumps.unshift({ from: when(take1), to: when(land1), y: arc(m.base, topOf(0), tall * 0.14) });
+    const hop = when(take3);
+    return {
+      v, sky, onFloor, runAt, runX, dropX, take1, when, jumps, take3, hop, hopMs: HOP_MS, seated: hop + HOP_MS,
+      hopY: arc(topOf(cellAt(take3)), anto.seat[1], tall * 0.15),
+      fallTo: onFloor ? m.base : topOf(first),
+      lead: tall * 0.15 + m.cell * 0.3,
+      kicks: [{ t: FALL_MS, count: 5 }, ...jumps.map((j) => ({ t: j.from, count: 3 })), ...jumps.map((j) => ({ t: j.to, count: 5 }))],
+    };
+  };
+
+  // Texyle's glide, planned afresh each time he comes in, as a smooth curve through a few points,
+  // for his middle: in from over the top right and down to just under the top bar, then along it
+  // fast with the sign held close under him. Where the sign goes beside the line he opens his
+  // wings wide as he turns round past its place, lets it drop on the way back and comes down onto
+  // the "P"; where it goes over the line there is no room left of the "P" to turn round in, so he
+  // lets it drop as he passes over it and comes down onto the "P" from the right. The first time,
+  // he passes high over antoultrav without touching him: on wide screens while antoultrav is still
+  // running along the floor, his wings spread until he draws them in and climbs to shoot over him;
+  // on narrow ones, wings in, before he lets the sign go, which waits until antoultrav has run on
+  // past its place
+  const planTexyle = () => {
+    const tall = m.tall;
+    const lbox = line.getBoundingClientRect();
+    const sky = -lbox.top;
+    const end = m.cell * letters;
+    // the far end of his turn: on a narrow desktop it may take him off the side of the screen for a
+    // moment, which the page clips
+    const left = -lbox.left - tall;
+    // as high as the top bar lets him fly, his drawn in wings just under it, and a little lower with
+    // them spread
+    const bar = document.querySelector(".bar").getBoundingClientRect().bottom - lbox.top;
+    const band = Math.min(-tall * 1.1, Math.max(-tall * 2.2, bar + tall * (TUCKED_TOP + 0.05)));
+    const spread = band + tall * (SPREAD_TOP - TUCKED_TOP);
+    // the sign hangs as far under him as still clears antoultrav's head as he passes over him: on the
+    // letters, or, on a wide screen where the top bar leaves too little room for that, on the floor
+    // as he runs in to the "P"
+    const deep = slot.h + (slot.w / 2) * Math.sin(SWING);
+    const roomy = floor && band + tall * 0.12 + deep < m.capTop - tall * 1.3;
+    const head = floor && !roomy ? m.base - tall * 1.1 : m.capTop - tall * (roomy ? 1.3 : 1.1);
+    const hang = Math.max(tall * 0.12, Math.min(tall * 0.6, head - band - deep));
+    const mid = middle(texyle);
+    texyle.seat = seatOf(texyle);
+    const landing = [middleOf(0), m.capTop - mid];
+    const turn = Math.max(left, slot.left - tall * 2);
+    const fast = (DIVE * tall) / 1000;
+    const p = anto.plan;
+    // where he passes over antoultrav on wide screens: far enough before the turn that the sign is
+    // past him before it goes down into it, and, where it only clears him on the floor, early
+    // enough that it is past him before he jumps up onto the "P" (a narrow desktop has not room for
+    // both, and it comes as close as it can)
+    const past = slot.w / 2 + tall * 0.5;
+    const after = turn + tall * 0.4 + past;
+    const before = !p.onFloor ? 0 : roomy ? Infinity : p.take1 - p.v * (past / (fast + p.v)) - tall * 0.1;
+    const over = !p.onFloor ? slot.left : after <= before ? Math.min(before, Math.max(after, (p.dropX + p.take1) / 2)) : (after + before) / 2;
+    // the first time, his wings are in and he is up by the time the sign reaches antoultrav
+    const shoot = floor && texyle.carrying && p.onFloor ? Math.min(end - tall * 1.5, over + fast * ((slot.w / 2 + tall * 0.4) / (fast + p.v))) : null;
+    const points = floor
+      ? [[end + tall * 2.6, sky - tall * 0.8], ...(shoot == null ? [[end - tall * 0.3, band]] : [[end - tall * 0.3, spread], [shoot + tall, spread], [shoot, band]]),
+        [turn + tall * 0.4, band], [turn, band + tall * 0.45], [turn + tall * 0.8, -tall * 0.55], [slot.x + tall * 0.3, -tall * 0.8], [landing[0] - tall * 0.25, landing[1] - tall * 0.5], landing]
+      : [[end + tall * 2.6, sky - tall * 0.8], [end - tall * 0.3, band], [slot.x - tall * 0.6, band], [landing[0] + tall * 1.1, landing[1] - tall * 0.5], landing];
+    // a centripetal Catmull-Rom curve through the points, sampled, with the distance along it
+    const path = [];
+    const knot = (a, b) => Math.sqrt(Math.hypot(b[0] - a[0], b[1] - a[1])) || 1e-3;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[Math.max(0, i - 1)];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[Math.min(points.length - 1, i + 2)];
+      const t1 = knot(p0, p1);
+      const t2 = t1 + knot(p1, p2);
+      const t3 = t2 + knot(p2, p3);
+      for (let j = 0; j < 40; j++) {
+        const t = t1 + ((t2 - t1) * j) / 40;
+        const mixAt = (a, b, ta, tb) => [0, 1].map((k) => ((tb - t) * a[k] + (t - ta) * b[k]) / (tb - ta));
+        const a1 = mixAt(p0, p1, 0, t1);
+        const a2 = mixAt(p1, p2, t1, t2);
+        const a3 = mixAt(p2, p3, t2, t3);
+        const b1 = mixAt(a1, a2, 0, t2);
+        const b2 = mixAt(a2, a3, t1, t3);
+        path.push(mixAt(b1, b2, t1, t2));
+      }
+    }
+    path.push(landing);
+    // past the dive the curve never rises above the top, where it would bend up into the bar
+    for (const q of path) if (q[0] < end - tall * 0.3) q[1] = Math.max(q[1], band);
+    const along = [0];
+    for (let i = 1; i < path.length; i++) along.push(along[i - 1] + Math.hypot(path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1]));
+    const total = along[along.length - 1];
+    const at = (d) => {
+      let i = 1;
+      while (i < along.length - 1 && along[i] < d) i++;
+      const k = (d - along[i - 1]) / (along[i] - along[i - 1] || 1);
+      const [x0, y0] = path[i - 1];
+      const [x1, y1] = path[i];
+      return { x: x0 + (x1 - x0) * k, y: y0 + (y1 - y0) * k, dx: x1 - x0, dy: y1 - y0 };
+    };
+    // how far along he first gets as far left as x
+    const reach = (x) => {
+      const i = path.findIndex((q) => q[0] <= x);
+      return i > 0 ? along[i] : total / 2;
+    };
+    // where he starts and ends his climb, drawing his wings in
+    const climbs = shoot == null ? 0 : reach(shoot + tall);
+    const climbed = shoot == null ? 0 : reach(shoot);
+    // the far end of the turn round, where there is one
+    const far = floor ? along[path.reduce((best, q, i) => (q[0] < path[best][0] ? i : best), 0)] : null;
+    // he lets the sign go the last time he passes over its place, where it would fall into it
+    let release = total * 0.75;
+    for (let i = path.length - 2; i > 0; i--) {
+      if ((path[i][0] - slot.x) * (path[i + 1][0] - slot.x) <= 0 && path[i][1] + hang + slot.h < slot.y - 4) {
+        release = along[i];
+        break;
+      }
+    }
+    // when he is how far along: fast in the dive and along the top, slower round the turn, slower
+    // again coming in, to a stop on his feet. The first time, the cue pairs a moment of his glide
+    // with one of antoultrav's run, to start the two of them so that these fall together
+    let keys;
+    let opens;
+    let cue = null;
+    if (floor) {
+      // brought back round, the sign is let go only once antoultrav is up on the "P", clear of its
+      // place
+      const passed = reach(over);
+      const then = passed / fast;
+      const off = texyle.carrying && p.onFloor ? p.when(slot.left + slot.w + tall * 0.35) - p.when(over) + 60 : 0;
+      const letGo = Math.max(then + (release - passed) / ((TURN * tall) / 1000), then + off);
+      keys = [[0, 0], [then, passed], [letGo, release], [letGo + (total - release) / ((LAND * tall) / 1000), total]];
+      opens = far - tall * 0.5;
+      if (texyle.carrying && p.onFloor) cue = [then, p.when(over)];
+    } else {
+      const letGo = release / fast;
+      keys = [[0, 0], [letGo, release], [letGo + (total - release) / ((LAND * tall) / 1000), total]];
+      // once he is on his way down, clear of the top bar
+      opens = release + tall;
+      if (texyle.carrying) cue = [letGo, p.when(slot.left + slot.w + tall * 0.35) + 60];
+    }
+    const [releaseAt] = keys[keys.length - 2];
+    return {
+      at, total, hang, landing, mid, sky, cue, releaseAt,
+      dist: timeline(keys),
+      glide: keys[keys.length - 1][0],
+      bank: (d) => (far == null ? 0 : smooth(1 - Math.abs(d - far) / (tall * 1.2))),
+      // his wings spread on the way in, drawn in as he climbs to shoot over antoultrav, and open wide
+      // as he banks into the turn, or once the sign is gone and he heads down
+      wings: (d) => (shoot != null && d < climbed ? SPREAD + (TUCKED - SPREAD) * smooth((d - climbs) / (climbed - climbs)) : TUCKED + (1 - TUCKED) * smooth((d - opens) / (tall * 1.5))),
+    };
+  };
+
+  // a glider's turn, from the way it flies across the page: head that way, back to us, so its
+  // spread elytra show, belly a little down, nose not as far down as the way he goes, as a glider
+  // holds itself. Turning round (bank from 0 to 1) he banks toward us rather than standing on his
+  // head, as a turn in the air goes
+  const Quaternion = texyle.s.playerObject.quaternion.constructor;
+  const Matrix = texyle.s.playerObject.matrix.constructor;
+  const Vector = texyle.s.playerObject.position.constructor;
+  const gliding = (dx, dy, bank = 0) => {
+    const head = new Vector(dx, -0.7 * dy, 0).normalize().multiplyScalar(1 - 0.8 * bank).add(new Vector(0, 0, 0.8 * bank)).normalize();
+    const belly = new Vector(0, -0.4, -1);
+    belly.addScaledVector(head, -belly.dot(head)).normalize();
+    const side = new Vector().crossVectors(head, belly);
+    return new Quaternion().setFromRotationMatrix(new Matrix().makeBasis(side, head, belly));
+  };
+  const standing = (turn) => {
+    const q = new Quaternion();
+    q.setFromAxisAngle(new Vector(0, 1, 0), turn);
+    return q;
+  };
+
+  const named = (f) => {
+    f.tag.hidden = false;
+    keepTag(line, f.tag, f.x);
+    f.tag.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing: "ease-out" });
+  };
   const settle = (f) => {
+    f.moving = false;
     f.resting = true;
     show(f);
+    // antoultrav's name waits for the sign: on narrow screens it hangs right where his name goes
+    if (f === anto && !placed) f.tag.hidden = true;
     place(f, ...f.seat);
-    f.tag.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing: "ease-out" });
+    if (!f.tag.hidden) named(f);
   };
 
   const moveAnto = (t, dt) => {
     const f = anto;
-    if (t >= tSat) {
+    const p = f.plan;
+    if (t >= p.seated) {
       // seated: the rest of the line goes down, and he watches Texyle until he sits too
       for (let i = 0; i < letters; i++) if (!set[i] && i !== space) setDown(i);
       set.fill(true);
+      whole();
       settle(f);
       dust(middleOf(f.at), m.capTop, 4);
-      rest(f.s, f.pose, SITTING, eyes(f), () => (texyle.resting ? null : centreOf(texyle)));
+      f.rest = rest(f.s, f.pose, SITTING, eyes(f), () => (texyle.resting ? null : centreOf(texyle)));
       return;
     }
     let x;
     let y;
     let target;
-    if (t >= tHop) {
+    if (t >= p.hop) {
       // up as in a leap, turning to us, then down into the seat
-      const u = (t - tHop) / HOP_MS;
-      x = take3 + (f.seat[0] - take3) * (2 * u - u * u);
-      y = hopY(u);
+      const u = (t - p.hop) / p.hopMs;
+      x = p.take3 + (f.seat[0] - p.take3) * (2 * u - u * u);
+      y = p.hopY(u);
       target = blend({ ...RUNNING, rl: -0.6, ll: 0.3, ra: -0.4, la: -0.4, lean: 0.1, turn: 0.2, hx: 0.2 }, SITTING, smooth((u - 0.35) / 0.5));
     } else {
-      x = x0 + v * t;
-      const jump = jumps.find((j) => t >= j.from && t < j.to);
+      x = t < p.runAt ? p.dropX : p.runX + p.v * (t - p.runAt);
+      const jump = p.jumps.find((j) => t >= j.from && t < j.to);
       if (t < FALL_MS) {
         // dropping in, arms a little up and out, looking down at where he lands
         const u = t / FALL_MS;
-        y = sky + (topOf(0) - sky) * u * u;
+        y = p.sky + (p.fallTo - p.sky) * u * u;
         f.feet = y;
         f.feetSpeed = 0;
-        target = { ...RUNNING, ra: -0.5, la: -0.5, raz: -0.35, laz: 0.35, rl: -0.4, ll: 0.3, lean: 0.05, hx: 0.5 };
+        target = { ...RUNNING, turn: p.onFloor ? 0.4 : 1, ra: -0.5, la: -0.5, raz: -0.35, laz: 0.35, rl: -0.4, ll: 0.3, lean: 0.05, hx: 0.5 };
       } else if (jump) {
         // in the air: one leg reaching for the landing, the arms opposite
         y = jump.y((t - jump.from) / (jump.to - jump.from));
         f.feet = y;
         f.feetSpeed = 0;
         target = { ...RUNNING, rl: -0.95, ll: 0.6, ra: 0.75, la: -0.85, lean: 0.2, hx: 0.35 };
+      } else if (t < p.runAt) {
+        // landed on the floor: a crouch, turning to run
+        y = m.base;
+        target = { ...RUNNING, crouch: 0.45, turn: 0.7 };
       } else {
         [f.feet, f.feetSpeed] = follow(f.feet, f.feetSpeed, ground(x, f.feet), dt, 12);
         y = stride(f, x, f.feet);
         target = running(f.phase);
         // a landing bends him for a moment, harder after the drop
         if (t < FALL_MS + 130) target.crouch = 0.4;
-        else if (jumps.some((j) => t >= j.to && t < j.to + 120)) target.crouch = 0.3;
+        else if (p.jumps.some((j) => t >= j.to && t < j.to + 120)) target.crouch = 0.3;
       }
     }
     f.lastX = x;
     for (let i = 0; i < letters; i++) {
-      if (!set[i] && i !== space && x >= i * m.cell - lead) {
+      if (!set[i] && i !== space && x >= i * m.cell - p.lead) {
         set[i] = true;
         setDown(i);
       }
     }
-    for (const k of antoKicks) if (lastT < k.t && t >= k.t) dust(x, y, k.count);
+    for (const k of p.kicks) if (f.lastT < k.t && t >= k.t) dust(x, y, k.count);
+    f.lastT = t;
     ease(f, target, dt);
     builderPose(f.s, f.pose);
     place(f, x, y);
@@ -855,161 +1112,241 @@ async function buildTitle(line, spots, still = false) {
 
   const moveTexyle = (t, dt) => {
     const f = texyle;
-    if (!f.on) {
-      f.on = true;
-      f.s.canvas.classList.add("shown");
-      welcome.classList.add("carried");
-    }
-    if (!placed && t >= tPlaced) {
-      placed = true;
-      placeWelcome();
-      // the title is whole: the stage's player may come on while he goes to sit
-      done();
-    }
+    const p = f.plan;
+    const tLand = p.glide;
+    const tSit = tLand + 150;
+    const tRest = tSit + 450;
     if (t >= tRest) {
       settle(f);
-      // the sign was in front of him until now
-      welcome.classList.remove("carried");
       dust(middleOf(0), m.capTop, 4);
-      rest(f.s, f.pose, SITTING_LEFT, eyes(f));
+      f.rest = rest(f.s, f.pose, SITTING_LEFT, eyes(f));
       return;
     }
-    const ms = t - tFlip;
-    const hold = (target, x, z) => {
-      target[hand[0]] = x;
-      target[hand[1]] = out * z;
-    };
-    const free = (target, z) => {
-      target[hand[2]] = 0;
-      target[hand[3]] = -out * z;
-    };
     let x;
     let y;
     let target;
-    let roll = 0;
-    if (ms < FLIP_MS) {
-      // the drop: a whole turn about his front to back on the way down, once he is out from under
-      // the bar, slow at the start and the end, arms and legs out like a star, the sign held up
-      // all the way round
-      const u = ms / FLIP_MS;
-      x = flipTake + (flipLand - flipTake) * u;
-      y = fallY(u);
-      roll = -TAU * wheel(Math.max(0, (u - 0.15) / 0.85));
-      target = { ...STILL, turn: 0.15, hx: 0.15 };
-      hold(target, 0, 2.55);
-      free(target, ms > FLIP_MS - 200 ? 0.5 : 1.5);
-      if (ms > 150 && ms < FLIP_MS - 160) Object.assign(target, { rlz: -0.55, llz: 0.55 });
-    } else if (floor && t < tSit) {
-      // down where the sign goes: he bends, sneaks down, lowers it in front of him and lets it
-      // drop; once it is down he stands, looks up at the "P" and jumps
-      x = flipLand;
-      y = m.base;
-      target = { ...STILL, lean: 0.04, hx: 0.45 };
-      if (t < tLand + 130) target.crouch = 0.45;
-      else if (!placed) target.crouch = 0.85;
-      if (t < tLand + 55) hold(target, 0, 2.55);
-      else if (t < tRelease) hold(target, -0.45, 0.2);
-      else hold(target, -0.5, 0.15);
-      free(target, 0.15);
-      if (placed) Object.assign(target, { turn: 0.5, hy: 0.4, hx: -0.1 });
-    } else if (floor) {
-      // the jump up onto the "P": a leap, turning to us, then down into the seat
-      const u = Math.min(1, (t - tSit) / (tRest - tSit));
-      x = flipLand + (f.seat[0] - flipLand) * smooth(u);
-      y = jumpY(u);
-      target = blend({ ...STILL, rl: -0.6, ll: 0.3, ra: -0.4, la: -0.4, lean: 0.1, turn: 0.5, hx: 0.2 }, SITTING_LEFT, smooth((u - 0.35) / 0.5));
+    let q = null;
+    let wings = 0;
+    if (t < tLand) {
+      // the glide; for its last 650ms he rights himself, folds his wings and puts his feet down
+      const d = p.dist(t);
+      const here = p.at(d);
+      const k = smooth(1 - (tLand - t) / 650);
+      // at the very end the path has no length left to give a way: the last one holds
+      if (Math.hypot(here.dx, here.dy) > 1e-6) f.way = [here.dx, here.dy];
+      const way = f.way || [-1, 0];
+      q = gliding(way[0], way[1], p.bank(d));
+      if (k > 0) q.slerp(standing(0.2), k);
+      wings = p.wings(d) * (1 - k);
+      x = here.x;
+      y = here.y + p.mid;
+      target = blend(GLIDING, { ...STILL, turn: 0.2, crouch: 0.3 }, k);
     } else {
-      // down on the "P": he bends, flicks the sign off over his head toward its place, follows
-      // through and watches it land, then sits
-      x = flipLand;
+      // down on the "P": a crouch, then he sits down as he goes down
+      x = middleOf(0);
       y = m.capTop;
-      target = { ...STILL, lean: 0.04 };
-      if (t < tLand + 130) target.crouch = 0.45;
-      const yaw = Math.atan2(slot[0] - x, tall * 0.7);
-      target.turn = yaw * 0.4;
-      target.hy = Math.max(-1, Math.min(1, yaw * 0.6));
-      target.hx = Math.max(-0.5, Math.min(0.6, Math.atan2(slot[1] - (y - tall * 0.85), tall * 0.7)));
-      if (t < tRelease) hold(target, -0.3, 2.2);
-      else if (!placed) hold(target, -0.4, 1.4);
-      else hold(target, 0, 0.15);
-      free(target, 0.15);
+      target = { ...STILL, turn: 0.2, crouch: t < tLand + 130 ? 0.45 : 0 };
       if (t >= tSit) {
-        // he sits down as he goes down, not before
         const k = smooth((t - tSit) / (tRest - tSit));
-        x = flipLand + (f.seat[0] - flipLand) * k;
-        y = m.capTop + (f.seat[1] - m.capTop) * k;
+        x += (f.seat[0] - x) * k;
+        y += (f.seat[1] - y) * k;
         target = blend(target, SITTING_LEFT, k);
       }
     }
-    f.lastX = x;
-    for (const k of texyleKicks) if (lastT < k.t && t >= k.t) dust(k.x, k.y, k.count);
+    if (f.lastT < tLand && t >= tLand) dust(middleOf(0), m.capTop, 6);
+    f.lastT = t;
     ease(f, target, dt);
-    builderPose(f.s, { ...f.pose, roll });
+    builderPose(f.s, { ...f.pose, q, wings });
     place(f, x, y);
     paintBuilder(f.s);
-    if (!placed) {
-      // held, it turns with him; let go, it falls under gravity to just over its place, a short
-      // drop from in front of him or a lob from over his head, and drops in
-      let a = -roll;
-      let [wx, wy] = carried(f, x, y, a);
-      if (t >= tRelease) {
-        if (!f.thrown) {
-          f.thrown = [wx, wy];
-          const fall = slot[1] - drop - wy;
-          toss = floor ? Math.max(110, Math.min(235, Math.sqrt((2 * Math.max(8, fall)) / gravity))) : Math.max(220, Math.min(380, 200 + Math.hypot(slot[0] - wx, fall) / 1.54));
-          tPlaced = tRelease + toss;
-          tSit = tPlaced + (floor ? 180 : 110);
-          tRest = tSit + (floor ? HOP_MS : 410);
-        }
-        const [sx, sy] = f.thrown;
-        const k = Math.min(t - tRelease, toss);
-        const lift = (slot[1] - drop - sy - 0.5 * gravity * toss * toss) / toss;
-        wx = sx + ((slot[0] - sx) * k) / toss;
-        wy = sy + lift * k + 0.5 * gravity * k * k;
-        a = floor ? 0 : Math.sign(slot[0] - sx) * 0.2 * Math.sin((Math.PI * k) / toss);
-      }
-      welcome.style.translate = `${(wx - slot[0]).toFixed(1)}px ${(wy - slot[1]).toFixed(1)}px`;
-      welcome.style.rotate = `${a.toFixed(3)}rad`;
+    if (!f.carrying) return;
+    // the sign hangs by its top from his hand under him, swinging back a little as he flies; let
+    // go, it keeps a little of his way and falls into its place
+    const cx = x;
+    const cy = y - p.mid;
+    if (t < p.releaseAt) {
+      // the faster he flies, the further back it swings
+      const [wx, wy] = f.way || [-1, 0];
+      const across = ((p.dist(t + 8) - p.dist(t - 8)) / 16) * (wx / Math.hypot(wx, wy)) * (1000 / m.tall);
+      const swing = Math.max(-SWING, Math.min(SWING, 0.008 * across));
+      f.hanging = [cx, cy + p.hang, swing];
+      welcome.style.translate = `${(cx - slot.x).toFixed(1)}px ${(cy + p.hang + slot.h / 2 - slot.y).toFixed(1)}px`;
+      welcome.style.rotate = `${swing.toFixed(3)}rad`;
+      return;
+    }
+    if (!f.thrown) {
+      const [hx, hy, a] = f.hanging || [cx, cy + p.hang, 0];
+      const fall = slot.y - drop - (hy + slot.h / 2);
+      f.thrown = { hx, hy, a, at: t, toss: Math.max(140, Math.min(420, Math.sqrt((2 * Math.max(8, fall)) / gravity()))) };
+    }
+    const { hx, hy, a, at, toss } = f.thrown;
+    const k = Math.min(1, (t - at) / toss);
+    const sx = hx + (slot.x - hx) * (1 - (1 - k) ** 2);
+    const sy = hy + slot.h / 2 + (slot.y - drop - hy - slot.h / 2) * k * k;
+    welcome.style.translate = `${(sx - slot.x).toFixed(1)}px ${(sy - slot.y).toFixed(1)}px`;
+    welcome.style.rotate = `${(a * (1 - k)).toFixed(3)}rad`;
+    if (k >= 1) {
+      f.carrying = false;
+      placeWelcome();
     }
   };
 
-  // a window that changes size mid-run skips to the end: everything down, both of them seated
-  const finish = () => {
-    over = true;
-    boxes.forEach((box) => box.classList.add("set"));
-    if (!placed) {
-      placed = true;
-      welcome.style.translate = "";
-      welcome.style.rotate = "";
-      welcome.classList.add("placed");
+  // a stride every 1.8 figure heights; each step kicks up dust, as sprinting does in the game, and
+  // the body is highest between steps
+  const stride = (f, x, y) => {
+    f.phase += Math.abs(x - f.lastX) / (m.tall * 1.8);
+    const step = Math.floor(f.phase * 2);
+    if (step !== f.step) {
+      f.step = step;
+      dust(x - m.tall * 0.12, y, 2);
     }
-    welcome.classList.remove("carried");
-    done();
+    return y - (m.tall * 0.035 * (1 + Math.cos(4 * Math.PI * f.phase))) / 2;
+  };
+
+  // one clock for whoever is coming in
+  let looping = false;
+  let lastFrame = 0;
+  const tick = (now) => {
+    const dt = lastFrame ? Math.max(0, Math.min(1 / 30, (now - lastFrame) / 1000)) : 1 / 60;
+    lastFrame = now;
+    for (const f of them) if (f.moving) (f === anto ? moveAnto : moveTexyle)(Math.max(0, now - f.start), dt);
+    if (them.some((f) => f.moving)) requestAnimationFrame(tick);
+    else looping = false;
+  };
+  // a figure comes in, the first time or after it fell; the letters and the sign stay where they are
+  const enter = (f) => {
+    m = measure();
+    f.moving = true;
+    f.resting = false;
+    f.dying = false;
+    f.tag.hidden = true;
+    f.start = performance.now();
+    f.lastT = -1;
+    f.pose = { ...(f === anto ? RUNNING : GLIDING) };
+    f.speed = Object.fromEntries(Object.keys(STILL).map((key) => [key, 0]));
+    f.phase = 0;
+    f.step = undefined;
+    f.feet = m.base;
+    f.feetSpeed = 0;
+    f.thrown = null;
+    f.way = null;
+    f.carrying = f === texyle && !placed;
+    if (f.carrying) {
+      welcome.style.transformOrigin = "50% 0";
+      welcome.classList.add("carried");
+    }
+    f.plan = f === anto ? planAnto() : planTexyle();
+    f.lastX = f === anto ? f.plan.runX : 0;
+    f.s.canvas.classList.add("shown");
+    if (!looping) {
+      looping = true;
+      lastFrame = 0;
+      requestAnimationFrame(tick);
+    }
+  };
+
+  // ten hits: he falls over on his side, red, then goes up in smoke and comes in again, as players
+  // do in the game. He turns to us as he tips over about where he sits, toward the line, so he ends
+  // up lying along it
+  const hips = (f) => {
+    f.s.playerObject.updateMatrixWorld(true);
+    const sk = f.s.playerObject.skin;
+    return new Vector().setFromMatrixPosition(sk.rightLeg.matrixWorld).add(new Vector().setFromMatrixPosition(sk.leftLeg.matrixWorld)).multiplyScalar(0.5);
+  };
+  const die = (f) => {
+    f.rest.stop();
+    f.resting = false;
+    f.dying = true;
+    f.tag.hidden = true;
+    const from = { ...f.rest.pose };
+    const side = f === anto ? 1 : -1;
+    builderPose(f.s, from);
+    const seat = hips(f);
+    const t0 = performance.now();
+    const fallOver = (now) => {
+      if (!f.dying) return;
+      const k = Math.min(1, (now - t0) / 450);
+      f.s.playerObject.position.set(0, 0, 0);
+      builderPose(f.s, { ...from, turn: from.turn * (1 - smooth(k)), roll: side * (Math.PI / 2) * k * k });
+      f.s.playerObject.position.copy(seat).sub(hips(f));
+      tint(f.s, 1);
+      paintBuilder(f.s);
+      if (now - t0 < 900) {
+        requestAnimationFrame(fallOver);
+        return;
+      }
+      smoke(line, f.x, line.offsetHeight - f.y, m.tall, m.tall / 220);
+      f.s.canvas.classList.remove("shown");
+      f.s.playerObject.position.set(0, 0, 0);
+      tint(f.s, 0);
+      setTimeout(() => f.dying && enter(f), 600);
+    };
+    requestAnimationFrame(fallOver);
+  };
+  // a click lands on a figure where its body is drawn, not anywhere on its square canvas
+  const struck = (f, event) => {
+    const sk = f.s.playerObject.skin;
+    const points = [
+      pointOf(f.s, sk.head, -4, 8, 0), pointOf(f.s, sk.head, 4, 8, 0), pointOf(f.s, sk.head, 0, 0, 4),
+      pointOf(f.s, sk.body, 0, -6, 0), pointOf(f.s, sk.rightArm, 0, -10, 0), pointOf(f.s, sk.leftArm, 0, -10, 0),
+      pointOf(f.s, sk.rightLeg, 0, -12, 0), pointOf(f.s, sk.leftLeg, 0, -12, 0),
+    ];
+    const box = f.s.canvas.getBoundingClientRect();
+    const x = event.clientX - box.left;
+    const y = event.clientY - box.top;
+    const pad = m.tall * 0.06;
+    return x > Math.min(...points.map((p) => p[0])) - pad && x < Math.max(...points.map((p) => p[0])) + pad
+      && y > Math.min(...points.map((p) => p[1])) - pad && y < Math.max(...points.map((p) => p[1])) + pad;
+  };
+  for (const f of them) {
+    f.hits = 0;
+    f.hitAt = 0;
+    const c = f.s.canvas;
+    c.addEventListener("pointermove", (event) => {
+      c.style.cursor = f.resting && struck(f, event) ? "pointer" : "";
+    });
+    c.addEventListener("pointerdown", (event) => {
+      if (!f.resting || !struck(f, event)) return;
+      const now = performance.now();
+      f.hits = Math.max(0, f.hits - Math.floor((now - f.hitAt) / HEAL_MS)) + 1;
+      f.hitAt = now;
+      const box = c.getBoundingClientRect();
+      if (f.hits < HITS) f.rest.hurt(event.clientX < box.left + box.width / 2 ? 1 : -1);
+      else {
+        f.hits = 0;
+        die(f);
+      }
+    });
+  }
+
+  // a window that changes size while someone is coming in skips them to the end: everything down,
+  // seated
+  const finish = () => {
+    boxes.forEach((box) => box.classList.add("set"));
+    set.fill(true);
+    if (!placed) placeWelcome();
+    whole();
     for (const f of them) {
       if (f.resting) continue;
+      f.moving = false;
+      f.dying = false;
       f.resting = true;
+      f.s.playerObject.position.set(0, 0, 0);
+      tint(f.s, 0);
       show(f);
-      rest(f.s, f.pose, f.sits, eyes(f));
+      f.rest = rest(f.s, f.pose, f.sits, eyes(f));
     }
     seatBoth();
   };
-  addEventListener("resize", () => (over ? requestAnimationFrame(seatBoth) : finish()));
+  addEventListener("resize", () => (them.every((f) => f.resting) ? requestAnimationFrame(seatBoth) : finish()));
 
-  anto.s.canvas.classList.add("shown");
-  const t0 = performance.now();
-  let lastFrame = 0;
-  const tick = (now) => {
-    if (over) return;
-    const dt = lastFrame ? Math.max(0, Math.min(1 / 30, (now - lastFrame) / 1000)) : 1 / 60;
-    lastFrame = now;
-    const t = Math.max(0, now - t0);
-    if (!anto.resting) moveAnto(t, dt);
-    if (!texyle.resting && t >= tFlip) moveTexyle(t, dt);
-    lastT = t;
-    if (anto.resting && texyle.resting) over = true;
-    else requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
+  // both come in together, one a moment after the other, so that they pass each other where there
+  // is room
+  enter(anto);
+  enter(texyle);
+  const [glided, ran] = texyle.plan.cue || [0, 0];
+  if (ran > glided) texyle.start += ran - glided;
+  else anto.start += glided - ran;
 }
 
 // The panorama shows through more than on other pages, as much as each map's brightness allows:
