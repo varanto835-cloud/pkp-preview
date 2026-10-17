@@ -270,6 +270,10 @@ ol {
   color: var(--white);
 }
 
+.search label > .icon {
+  cursor: pointer;
+}
+
 .search input {
   flex: 1;
   min-width: 0;
@@ -655,42 +659,101 @@ a.pill {
   white-space: nowrap;
 }
 
-/* card */
+/* the profile's hero: the player in 3D from their own skin, standing on a small floating island of
+   their hardest badge's tier material with fragments broken off it, all drawn in the same 3D scene;
+   its tip is level with the foot of Tiers acquired beside it (the user, 2026-10-17: "tipo un
+   piedistallo", then "qualcosa di piu carino con frammenti") */
 
-.held-card {
+.player-stand {
+  --cube: 40px;
+  --cap: 10px;
+  --slab: calc(var(--cube) + var(--cap));
   position: relative;
   width: 400px;
-  aspect-ratio: 5 / 7;
-  transform: perspective(1200px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
-  filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.55));
-  will-change: transform;
+  height: var(--floor, 380px);
+  margin: 0;
 }
 
-.held-card.live {
-  transition-duration: 120ms;
-}
+.player-stand.m1 { --tex: url("assets/gui/mat-1.png"); }
+.player-stand.m2 { --tex: url("assets/gui/mat-2.png"); }
+.player-stand.m3 { --tex: url("assets/gui/mat-3.png"); }
+.player-stand.m4 { --tex: url("assets/gui/mat-4.png"); }
+.player-stand.m5 { --tex: url("assets/gui/mat-5.png"); }
+.player-stand.m6 { --tex: url("assets/gui/mat-6.png"); }
+.player-stand.m7 { --tex: url("assets/gui/mat-7.png"); }
+.player-stand.m8 { --tex: url("assets/gui/mat-8.png"); }
+.player-stand.m9 { --tex: url("assets/gui/mat-9.png"); }
+.player-stand.m10 { --tex: url("assets/gui/mat-10.png"); }
 
-.held-card img {
-  display: block;
-  width: 100%;
-  height: auto;
-  image-rendering: auto;
-}
-
-.card-glint {
+/* the player and the island, never taller than beside a three-row Tiers acquired: where its ladders
+   stack and the column grows, the room left is over their head; a drag turns them */
+.ps-model {
   position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-radius: 4.4% / 3.14%;
-  background: linear-gradient(115deg, transparent 41%, rgba(170, 110, 255, 0.45) 46.5%, rgba(255, 245, 255, 0.78) 50%, rgba(170, 110, 255, 0.45) 53.5%, transparent 59%) 120% 0 / 300% 100% no-repeat;
-  mix-blend-mode: screen;
-  animation: glint 700ms cubic-bezier(0.4, 0, 0.2, 1) 400ms both;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: min(640px, 100%);
+  opacity: 0;
+  transition: opacity 300ms ease-out;
+  cursor: grab;
+  touch-action: pan-y;
 }
 
-@keyframes glint {
-  from { background-position-x: 120%; }
-  to { background-position-x: -20%; }
+.ps-model.shown {
+  opacity: 1;
+}
+
+.ps-model:active {
+  cursor: grabbing;
+}
+
+.ps-model:focus-visible {
+  outline: 2px solid var(--hover);
+  outline-offset: -2px;
+}
+
+/* without 3D, a slab stands in for the island: its texture shaded on the face and lifted on the
+   top, as a podium block's */
+.ps-slab {
+  position: absolute;
+  inset: auto 0 0;
+  height: var(--slab);
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.28)),
+    var(--tex, url("assets/gui/mat-1.png")) 0 var(--cap) / var(--cube) var(--cube) repeat;
+  image-rendering: pixelated;
+}
+
+.ps-slab::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--cap);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)),
+    var(--tex, url("assets/gui/mat-1.png")) 0 0 / var(--cube) var(--cap) repeat-x;
+  image-rendering: pixelated;
+}
+
+/* the player's shadow on the top */
+.ps-slab::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 30%;
+  right: 30%;
+  height: calc(var(--cap) + 4px);
+  background: radial-gradient(50% 100% at 50% 0, rgba(0, 0, 0, 0.5), transparent);
+}
+
+/* without 3D, the player's face standing in for them above the slab */
+.player-stand .ps-face {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--slab) + 48px);
+  width: 192px;
+  height: 192px;
+  translate: -50% 0;
 }
 
 /* tiles */
@@ -2402,7 +2465,6 @@ li.detail-row {
 }
 
 /* animations off, from the settings */
-html.calm .held-card,
 html.calm .tile,
 html.calm .podium-stage {
   transition: none;
@@ -2410,7 +2472,6 @@ html.calm .podium-stage {
 
 html.calm .slot.held::after,
 html.calm .rank-line.flash,
-html.calm .card-glint,
 html.calm .splash,
 html.calm .hero h1.blend,
 html.calm .name.blend {
@@ -2466,7 +2527,7 @@ html.calm .name.blend {
     gap: 40px;
   }
 
-  .held-card {
+  .player-stand {
     width: 340px;
   }
 
@@ -2561,7 +2622,7 @@ html.calm .name.blend {
     width: 100%;
   }
 
-  .held-card {
+  .player-stand {
     width: min(340px, 100%);
   }
 
@@ -5737,5 +5798,481 @@ html.calm .beacon-row.summit .layer::after {
   .beacon-row.summit .layer::before,
   .beacon-row.summit .layer::after {
     height: 160px;
+  }
+}
+
+/* the top bar's search list ends with a way to every result, badges too */
+.results > a.all {
+  display: flex;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 2px solid rgba(255, 255, 255, 0.12);
+  color: var(--dim);
+}
+
+.results > a.all .icon {
+  margin: 0 8px;
+}
+
+/* alone, with nothing typed, it needs no line over it */
+.results > a.all:only-child {
+  margin-top: 0;
+  padding-top: 4px;
+  border-top: 0;
+}
+
+/* search: the game's Multiplayer server list, with the creative inventory's tabs on its top edge */
+
+.find-page .page-title {
+  font-size: 54px;
+  line-height: 60px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.find {
+  max-width: 936px;
+  margin: 28px auto 0;
+}
+
+/* the tabs: the picked one is part of the window and covers its edge, the others sit behind it */
+.find-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 12px;
+}
+
+.find-tab {
+  position: relative;
+  z-index: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: -8px;
+  padding: 4px 14px 14px;
+  border-style: solid;
+  border-width: 8px 8px 0;
+  border-image: url("assets/gui/win.png") 4 fill / 8px 8px 0;
+  image-rendering: pixelated;
+  font: inherit;
+  color: var(--label);
+  text-shadow: none;
+  background: none;
+  cursor: pointer;
+  filter: brightness(0.72);
+  translate: 0 3px;
+}
+
+.find-tab:hover,
+.find-tab:focus-visible {
+  filter: brightness(0.86);
+}
+
+.find-tab[aria-selected="true"] {
+  z-index: 2;
+  filter: none;
+  translate: 0 0;
+}
+
+.find-tab small {
+  font-size: inherit;
+  color: var(--g55);
+}
+
+.find-tab-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+}
+
+.find-tab-icon > img,
+.find-tab-icon > .head {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+}
+
+.find-tab-icon > .icon {
+  width: 18px;
+  height: 18px;
+  filter: none;
+}
+
+.find-win {
+  position: relative;
+  z-index: 1;
+  padding: 8px 10px 10px;
+}
+
+.find-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 2px 2px 10px;
+}
+
+.find-field {
+  flex: 1 1 240px;
+  width: auto;
+  min-width: 0;
+  padding: 5px 10px;
+}
+
+.find-field input {
+  width: 100%;
+}
+
+.find-count {
+  color: var(--label);
+  text-shadow: none;
+  white-space: nowrap;
+}
+
+/* the list scrolls inside itself, as the game's does, so the buttons stay under it */
+.find-list {
+  height: clamp(300px, calc(100vh - 420px), 640px);
+  padding: 4px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.find-group + .find-group {
+  margin-top: 8px;
+}
+
+.find-group-title {
+  margin: 6px 10px 4px;
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+}
+
+.find-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 14px;
+  padding: 6px 12px 6px 6px;
+  color: var(--white);
+  scroll-margin: 4px;
+}
+
+.find-row:hover {
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* the game's outline on the picked server: white, with black inside it */
+.find-row.on {
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0 0 2px var(--white), inset 0 0 0 4px #000;
+}
+
+.find-row:focus-visible {
+  outline: none;
+}
+
+.find-row.off {
+  cursor: default;
+}
+
+.find-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+}
+
+.find-icon > img,
+.find-icon > .head {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+}
+
+/* over the icon of a row that opens, the game's play arrow */
+.find-play {
+  position: absolute;
+  inset: 12px;
+  width: 24px;
+  height: 24px;
+  opacity: 0;
+}
+
+.find-row:is(.on, :hover) .find-icon:has(.find-play)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.find-row:is(.on, :hover) .find-play {
+  z-index: 1;
+  opacity: 1;
+}
+
+.find-icon:hover .find-play {
+  color: var(--hover);
+}
+
+.find-text {
+  display: grid;
+  min-width: 0;
+}
+
+/* a player's name with their hardest badge beside it, as Discord shows a role */
+.find-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 14px;
+  min-width: 0;
+}
+
+.find-name > .pill {
+  max-width: 100%;
+}
+
+.find-facts {
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+}
+
+.find-tier {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 56px;
+  justify-content: flex-end;
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+}
+
+.find-tier .sword {
+  width: 24px;
+  height: 24px;
+}
+
+.find-blank {
+  width: 48px;
+  height: 48px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.find-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px;
+  border: 0;
+  font: inherit;
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+  background: none;
+  cursor: pointer;
+}
+
+.find-more:hover,
+.find-more:focus-visible {
+  color: var(--hover);
+}
+
+.find-more .chev {
+  width: 12px;
+  height: 12px;
+}
+
+/* a search that finds nothing: the game's server that cannot be reached */
+.find-row.none .find-facts {
+  color: #ff5555;
+}
+
+.find-unknown {
+  width: 32px;
+  height: 32px;
+  color: var(--g8b);
+}
+
+.find-cross {
+  width: 18px;
+  height: 18px;
+  color: #ff5555;
+}
+
+/* under the list, the game's button row: Open, then the filters */
+.find-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin-top: 10px;
+}
+
+.find-buttons .gui-select > .dim {
+  color: var(--label);
+  text-shadow: none;
+}
+
+.find-open {
+  min-width: 198px;
+}
+
+/* the page's field is the search: the bar's waits while it is on screen */
+.finding.field-on .bar .search {
+  visibility: hidden;
+  opacity: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.find-open:disabled {
+  color: var(--g8b);
+  filter: brightness(0.62);
+  cursor: default;
+}
+
+@media (max-width: 760px) {
+  .finding .bar .search {
+    display: none;
+  }
+
+  .finding:not(.field-on) .bar-find {
+    display: inline-grid;
+  }
+
+  .finding .bar {
+    column-gap: 8px;
+  }
+
+  .finding .bar nav {
+    gap: 8px;
+  }
+
+  .find-page .page-title {
+    font-size: 36px;
+    line-height: 44px;
+  }
+
+  .find {
+    margin-top: 18px;
+  }
+
+  .find-tabs {
+    gap: 3px;
+    padding: 0 4px;
+  }
+
+  /* on a phone the tabs are icons and counts, as the game's are icons, and share the width */
+  .find-tab {
+    flex: 1 1 0;
+    justify-content: center;
+    gap: 6px;
+    min-width: 0;
+    padding: 4px 4px 14px;
+  }
+
+  .find-tab > span:not(.find-tab-icon) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .find-head {
+    flex-wrap: wrap;
+    gap: 6px 12px;
+  }
+
+  /* the list flows with the page, and the button row stays at the bottom of the screen */
+  .find-list {
+    height: auto;
+    overflow: visible;
+  }
+
+  .find-row {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    column-gap: 10px;
+    padding: 6px 8px 6px 6px;
+  }
+
+  .find-icon,
+  .find-icon > img,
+  .find-icon > .head,
+  .find-blank {
+    width: 32px;
+    height: 32px;
+  }
+
+  .find-play {
+    inset: 8px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .find-tier {
+    min-width: 0;
+  }
+
+  .find-tier span {
+    display: none;
+  }
+
+  /* a badge goes on its own line under the name, and wraps there whole as in the collections */
+  .find-name > .pill {
+    flex-basis: auto;
+  }
+
+  .find-buttons {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    margin: 10px -10px -10px;
+    padding: 10px;
+    background: #c6c6c6;
+    box-shadow: 0 -2px 0 #555;
+  }
+
+  /* a tap opens a row, so the phone keeps only the filters at the bottom, on one line, their
+     labels said by their first option */
+  .find-open {
+    display: none;
+  }
+
+  .find-buttons {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .find-buttons .gui-select {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .find-buttons .gui-select > .dim {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .find-buttons .select-face {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .find-buttons .select-face select {
+    width: 100%;
+    max-width: none;
+    padding-right: 30px;
+  }
+
+  .find-country {
+    display: none;
   }
 }

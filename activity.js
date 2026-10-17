@@ -830,14 +830,6 @@ function renderBusy(shown) {
 
 // controls on the world, outside the panels
 
-function guiSelect(label, options, value, onPick) {
-  return h("label", { class: "gui-select" }, h("span", { class: "dim" }, label),
-    h("span", { class: "button select-face" },
-      h("select", { onchange: (event) => onPick(event.currentTarget.value) },
-        options.map(([option, text]) => h("option", { value: option, selected: option === value }, text))),
-      icon("arrow", "chev")));
-}
-
 function seg(label, options, value, onPick) {
   return [h("div", { class: "seg", role: "group", "aria-label": label },
     h("span", { class: "dim" }, label),

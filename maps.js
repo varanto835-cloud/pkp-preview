@@ -287,14 +287,6 @@ function renderCatalog() {
   for (const span of catalog.querySelectorAll(".map-card .builder")) span.classList.toggle("cut", span.scrollWidth > span.clientWidth);
 }
 
-function guiSelect(label, options, value, onPick) {
-  return h("label", { class: "gui-select" }, h("span", { class: "dim" }, label),
-    h("span", { class: "button select-face" },
-      h("select", { onchange: (event) => onPick(event.currentTarget.value) },
-        options.map(([option, text]) => h("option", { value: option, selected: option === value }, text))),
-      icon("arrow", "chev")));
-}
-
 function seg(label, options, value, onPick) {
   return [h("div", { class: "seg", role: "group", "aria-label": label },
     h("span", { class: "dim" }, label),

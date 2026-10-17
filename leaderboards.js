@@ -918,14 +918,6 @@ function renderTabs() {
   document.getElementById("panel").setAttribute("aria-labelledby", `tab-${state.board}`);
 }
 
-function guiSelect(label, options, value, onPick) {
-  return h("label", { class: "gui-select" }, h("span", { class: "dim" }, label),
-    h("span", { class: "button select-face" },
-      h("select", { onchange: (event) => onPick(event.currentTarget.value) },
-        options.map(([option, text]) => h("option", { value: option, selected: option === value }, text))),
-      icon("arrow", "chev")));
-}
-
 function renderFilters() {
   const filters = document.getElementById("filters");
   const parts = [h("div", { class: "seg", role: "group", "aria-label": "Gamemode" },

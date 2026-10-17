@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Search - Parkour Progress</title>
+  <meta name="description" content="Find any player, map or badge of Parkour Progress, or browse every player, hardest badge first.">
+  <meta property="og:title" content="Search">
+  <meta property="og:description" content="Every player, map and badge of Parkour Progress">
+  <meta property="og:site_name" content="Parkour Progress">
+  <meta name="theme-color" content="#eaee57">
+  <link rel="stylesheet" href="site.css?v=2610161200">
+</head>
+<body class="finding">
+  <svg class="sprites" aria-hidden="true">
+    <symbol id="i-search" viewBox="0 0 8 8"><path d="M1 0h4v1h-4zM0 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM5 2h1v1h-1zM0 3h1v1h-1zM5 3h1v1h-1zM1 4h4v1h-4zM5 5h2v1h-2zM6 6h2v1h-2z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 8 8"><path d="M4 0h1v1h-1zM4 1h2v1h-2zM0 2h7v1h-7zM0 3h8v1h-8zM0 4h7v1h-7zM4 5h2v1h-2zM4 6h1v1h-1z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 8 8"><path d="M2 0h1v8h-1zM3 1h1v6h-1zM4 2h1v4h-1zM5 3h1v2h-1z"/></symbol>
+    <symbol id="i-unknown" viewBox="0 0 8 8"><path d="M2 0h4v1h-4zM1 1h2v1h-2zM5 1h2v1h-2zM5 2h2v1h-2zM4 3h2v1h-2zM3 4h2v1h-2zM3 6h2v2h-2z"/></symbol>
+    <symbol id="i-cross" viewBox="0 0 8 8"><path d="M1 1h2v1h-2zM5 1h2v1h-2zM2 2h2v1h-2zM4 2h2v1h-2zM3 3h2v2h-2zM2 5h2v1h-2zM4 5h2v1h-2zM1 6h2v1h-2zM5 6h2v1h-2z"/></symbol>
+  </svg>
+  <div class="world" style="--world: url('assets/world/halloflegends.jpg')"></div>
+
+  <header class="bar">
+    <a class="brand" href="index.html">Parkour Progress</a>
+    <form class="search" role="search" autocomplete="off" onsubmit="return false">
+      <label>
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" placeholder="Search players and maps" aria-label="Search players and maps">
+      </label>
+      <div class="results" role="listbox" hidden></div>
+    </form>
+    <nav aria-label="Main">
+      <button class="button bar-find" type="button" aria-label="Search players, maps and badges"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></button>
+      <button class="button menu" type="button" aria-expanded="false" aria-controls="nav-list">Menu</button>
+      <ul id="nav-list">
+        <li><a href="maps.html">Maps</a></li>
+        <li><a href="tier.html">Badges</a></li>
+        <li><a href="leaderboards.html">Leaderboards</a></li>
+        <li><a href="activity.html">Activity</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="find-page">
+    <h1 class="page-title" id="title">Players</h1>
+
+    <section class="find" aria-labelledby="title">
+      <div class="find-tabs" role="tablist" aria-label="What to find" id="tabs"></div>
+      <div class="win find-win">
+        <div class="find-head">
+          <label class="field find-field">
+            <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+            <input type="search" id="q" placeholder="Players, maps and badges" aria-label="Search players, maps and badges" aria-controls="list" autocomplete="off" spellcheck="false">
+          </label>
+          <span class="find-count" id="count" aria-live="polite"></span>
+        </div>
+        <div class="well find-list" id="list" role="listbox" aria-labelledby="title"></div>
+        <div class="find-buttons" id="buttons"></div>
+      </div>
+    </section>
+
+    <footer class="foot dim">
+      <p>Real data from a copy of the ProgressBot database, 2 Oct 2026.</p>
+      <p>In this mockup only wlatr's profile, the Magnum Opus page and the badge pages open.</p>
+    </footer>
+  </main>
+
+  <script src="data/search.js?v=2610161200"></script>
+  <script src="data/names.js?v=2610161200"></script>
+  <script src="data/boards.js?v=2610161200"></script>
+  <script src="data/maps.js?v=2610161200"></script>
+  <script src="site.js?v=2610161200"></script>
+  <script src="search.js?v=2610161200"></script>
+</body>
+</html>

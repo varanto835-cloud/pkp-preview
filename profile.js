@@ -27,16 +27,124 @@ function rarity(holders) {
   return `Held by ${plural(holders, "player")} of ${player.players} (${pct < 1 ? pct.toFixed(1) : Math.round(pct)}%)`;
 }
 
+// The hero: the player in 3D from their own skin, standing on a small floating island of their
+// hardest badge's tier material; everything else about them is beside it
 function renderCard() {
-  const card = document.getElementById("card");
-  const top = player.modes[best.gamemode].top;
-  const file = asset(`assets/card/${player.name.toLowerCase()}.webp`);
-  card.append(
-    h("img", { src: file, width: 500, height: 700, alt: `${player.name}'s card: ${best.label}, Tier ${ROMAN[best.tier]}, TOP ${top} in ${best.gamemode}` }),
-    h("span", { class: "card-glint", "aria-hidden": "true" }));
-  tip(card, () => roleTip(null, [`${player.name}'s card`, best.label, `Tier ${ROMAN[best.tier]}, TOP ${top} in ${best.gamemode}`],
-    "The card of the hardest badge, from Goldy's generator"));
-  holdCard(card);
+  const stand = document.getElementById("card");
+  stand.classList.add(`m${best.tier}`);
+  const canvas = h("canvas", { class: "ps-model", role: "img", tabindex: "0", "aria-label": `${player.name} in 3D, on an island of Tier ${ROMAN[best.tier]} blocks; drag or use the arrow keys to turn` });
+  stand.append(canvas);
+  standModel(canvas, best.tier);
+}
+
+// the island's tip is level with the foot of Tiers acquired beside it; with the two stacked, on a
+// phone, the player keeps a height of their own
+function levelStand() {
+  const stand = document.getElementById("card").getBoundingClientRect();
+  const tiers = document.querySelector(".hero-side > .win").getBoundingClientRect();
+  const beside = stand.right <= tiers.left;
+  document.getElementById("card").style.setProperty("--floor", beside ? `${Math.round(tiers.bottom - stand.top)}px` : "");
+}
+
+// The player stands still on the island, turned a little toward the words beside them, lit from
+// behind in their tier's colour; a drag, or the arrow keys, turns them and the island round, and they
+// stay as left. It draws only when it changes. Without 3D their face stands in for them, on a slab.
+async function standModel(canvas, tier) {
+  let s;
+  try {
+    await loadViewer();
+    s = makeViewer(canvas);
+    const key = player.name.toLowerCase();
+    s.loadSkin(await skinOf(key).then(picture), { model: skinSlim.includes(key) ? "slim" : "default" });
+  } catch {
+    const face = head(player.name);
+    face.classList.add("ps-face");
+    face.loading = "eager";
+    canvas.replaceWith(face, h("span", { class: "ps-slab", "aria-hidden": "true" }));
+    return;
+  }
+  const island = await islandOf(s, tier);
+  const rim = getComputedStyle(document.documentElement).getPropertyValue(`--t${tier}`).trim();
+  if (rim) {
+    s.rim.color.set(rim);
+    s.rim.intensity = 2.4;
+  }
+  const arms = s.playerObject.skin;
+  arms.rightArm.rotation.z = 0.06;
+  arms.leftArm.rotation.z = -0.06;
+  let yaw = 0.45;
+  const paint = () => {
+    const box = canvas.getBoundingClientRect();
+    const width = Math.round(box.width);
+    const height = Math.round(box.height);
+    if (!width || !height) return;
+    if (width !== s.width || height !== s.height) {
+      s.width = width;
+      s.height = height;
+      s.gl.setSize(width, height, false);
+    }
+    // level with the figure, from a little over its head down to the island's tip, wherever it
+    // is turned; a narrow lens, so the island's corners never reach past the edges
+    const camera = s.camera;
+    const half = 20.1;
+    const middle = -2.2;
+    camera.fov = 24;
+    camera.aspect = width / height;
+    camera.position.set(0, middle, half / Math.tan((12 * Math.PI) / 180));
+    camera.lookAt(0, middle, 0);
+    camera.updateProjectionMatrix();
+    s.playerObject.rotation.y = yaw;
+    island.rotation.y = yaw;
+    s.gl.render(s.scene, camera);
+  };
+  s.gl.compile(s.scene, s.camera);
+  await shadersReady(s);
+  // it comes in once, as one movement that slows to a stop, and then nothing moves on its own:
+  // the player and the island rise the last bit into place, the whole picture at once so the
+  // island's tip is never cut by the canvas edge, while the fragments break off the island
+  if (!calm.matches) island.settle(0);
+  paint();
+  canvas.classList.add("shown");
+  new ResizeObserver(paint).observe(canvas);
+  if (!calm.matches) {
+    let start = null;
+    const enter = (now) => {
+      if (start == null) {
+        start = now;
+        canvas.animate([{ translate: "0 24px" }, { translate: "0 0" }], { duration: 800, easing: "cubic-bezier(0.16, 1, 0.3, 1)" });
+      }
+      // close to the site's ease
+      const u = Math.min(1, (now - start) / 800);
+      island.settle(u < 1 ? 1 - 2 ** (-10 * u) : 1);
+      paint();
+      if (u < 1) requestAnimationFrame(enter);
+    };
+    requestAnimationFrame(enter);
+  }
+
+  let from = null;
+  canvas.addEventListener("pointerdown", (event) => {
+    from = event.clientX;
+    canvas.setPointerCapture(event.pointerId);
+  });
+  canvas.addEventListener("pointermove", (event) => {
+    if (from == null) return;
+    yaw += (event.clientX - from) * 0.012;
+    from = event.clientX;
+    paint();
+  });
+  const drop = () => {
+    from = null;
+  };
+  canvas.addEventListener("pointerup", drop);
+  canvas.addEventListener("pointercancel", drop);
+  canvas.addEventListener("keydown", (event) => {
+    const step = { ArrowLeft: -0.26, ArrowRight: 0.26 }[event.key];
+    if (!step) return;
+    event.preventDefault();
+    yaw += step;
+    paint();
+  });
 }
 
 function ladderSlot(mode, level) {
@@ -261,7 +369,99 @@ function renderCollection() {
   renderBadges();
 }
 
+// A small floating island under the player's feet, made of blocks of their tier's material a
+// little smaller than the player's, as the podium's are. The scene's unit is a skin pixel: the
+// player is 32 tall, feet at -16, and a block is 2. A few blocks broken off it hang around it.
+const ISLAND = [
+  // seen from above, a layer at a time from the top, one character a block
+  [" ##### ",
+   "#######",
+   "#######",
+   "#######",
+   "#######",
+   "#######",
+   " ##### "],
+  ["       ",
+   "  ###  ",
+   " ##### ",
+   " ######",
+   " ####  ",
+   "  ##   ",
+   "       "],
+  ["       ",
+   "       ",
+   "       ",
+   "   #   ",
+   "       ",
+   "       ",
+   "       "],
+];
+const BLOCK = 2;
+
+async function islandOf(s, tier) {
+  const skin = s.playerObject.skin;
+  const Mesh = skin.head.innerLayer.constructor;
+  const Box = skin.head.innerLayer.geometry.constructor;
+  const Material = skin.layer1Material.constructor;
+  const Texture = skin.layer1Material.map.constructor;
+  const Group = Object.getPrototypeOf(s.playerObject.constructor);
+  const map = new Texture(await picture(matData[tier]));
+  map.magFilter = map.minFilter = skin.layer1Material.map.magFilter;
+  map.colorSpace = skin.layer1Material.map.colorSpace;
+  map.wrapS = map.wrapT = 1000;
+  map.generateMipmaps = false;
+  map.needsUpdate = true;
+  const material = new Material({ map });
+  // a box whose faces show the texture once every `tile` units, so a row of blocks is one box
+  const box = (w, h, d, x, y, z, tile, turn = [0, 0, 0]) => {
+    const shape = new Box(w, h, d);
+    const uv = shape.attributes.uv;
+    const faces = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]];
+    for (let i = 0; i < uv.count; i++) uv.setXY(i, (uv.getX(i) * faces[i >> 2][0]) / tile, (uv.getY(i) * faces[i >> 2][1]) / tile);
+    const mesh = new Mesh(shape, material);
+    mesh.position.set(x, y, z);
+    mesh.rotation.set(...turn);
+    return mesh;
+  };
+  const island = new Group();
+  ISLAND.forEach((rows, layer) => {
+    const y = -16 - BLOCK / 2 - layer * BLOCK;
+    rows.forEach((row, j) => {
+      for (const run of row.matchAll(/#+/g)) {
+        const x = (run.index + run[0].length / 2 - row.length / 2) * BLOCK;
+        const z = (j + 0.5 - rows.length / 2) * BLOCK;
+        island.add(box(run[0].length * BLOCK, BLOCK, BLOCK, x, y, z, BLOCK));
+      }
+    });
+  });
+  // broken off it, each a whole block, most a little smaller; none hangs below the island's tip
+  const loose = [
+    box(2, 2, 2, -9, -17.2, 1.5, 2, [0.3, 0.5, 0.2]),
+    box(1.5, 1.5, 1.5, 8.6, -18.2, -1.5, 1.5, [0.5, 0.2, 0.6]),
+    box(1.5, 1.5, 1.5, -7.6, -11.5, -4, 1.5, [0.6, 0.3, 0.4]),
+    box(1.2, 1.2, 1.2, 8.2, -13.2, 3.5, 1.2, [0.1, 0.5, 0.7]),
+    box(1, 1, 1, 4.5, -19.8, 6.2, 1, [0.4, 0.2, 0.3]),
+  ];
+  island.add(...loose);
+  // on the way in, k going from 0 to 1: each fragment comes out of the island's top layer and
+  // drifts out to where it hangs, still turning
+  const rest = loose.map((block) => [block.position.clone(), block.rotation.clone()]);
+  island.settle = (k) => {
+    const out = 0.5 + 0.5 * k;
+    loose.forEach((block, i) => {
+      const [at, turn] = rest[i];
+      block.position.set(at.x * out, -17 + (at.y + 17) * k, at.z * out);
+      block.rotation.set(turn.x - 1.2 * (1 - k), turn.y - 0.9 * (1 - k), turn.z);
+    });
+  };
+  s.scene.add(island);
+  return island;
+}
+
 renderCard();
 renderSide();
+levelStand();
+document.fonts?.ready.then(levelStand);
+new ResizeObserver(levelStand).observe(document.getElementById("side"));
 renderProgress();
 renderCollection();

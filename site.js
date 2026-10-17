@@ -452,23 +452,13 @@ function setWorld(slug, light) {
   img.src = asset(`assets/world/${slug}.jpg`);
 }
 
-// card tilt
-
-function holdCard(card) {
-  if (calm.matches) return;
-  card.addEventListener("pointermove", (event) => {
-    const box = card.getBoundingClientRect();
-    const x = (event.clientX - box.left) / box.width;
-    const y = (event.clientY - box.top) / box.height;
-    card.classList.add("live");
-    card.style.setProperty("--ry", `${(x - 0.5) * 14}deg`);
-    card.style.setProperty("--rx", `${(0.5 - y) * 10}deg`);
-  });
-  card.addEventListener("pointerleave", () => {
-    card.classList.remove("live");
-    card.style.setProperty("--ry", "0deg");
-    card.style.setProperty("--rx", "0deg");
-  });
+// a select drawn as a game button, its label beside it
+function guiSelect(label, options, value, onPick) {
+  return h("label", { class: "gui-select" }, h("span", { class: "dim" }, label),
+    h("span", { class: "button select-face" },
+      h("select", { onchange: (event) => onPick(event.currentTarget.value) },
+        options.map(([option, text]) => h("option", { value: option, selected: option === value }, text))),
+      icon("arrow", "chev")));
 }
 
 // search
@@ -490,19 +480,19 @@ function initSearchField(form) {
     list.replaceChildren();
     items = [];
     active = -1;
+    // an empty field offers the whole list, which no menu entry leads to; not on that list's own page
     if (!q) {
-      list.hidden = true;
+      list.hidden = document.body.classList.contains("finding");
+      const browse = h("a", { class: "all", href: "search.html", role: "option" }, icon("search"), "Browse players and maps");
+      items.push(browse);
+      list.append(browse);
       return;
     }
     const rank = (name) => (name.toLowerCase().startsWith(q) ? 0 : 1);
     const maps = directory.maps.filter((m) => m[0].toLowerCase().includes(q)).sort((a, b) => rank(a[0]) - rank(b[0]));
     const players = directory.players.filter((p) => p[0].toLowerCase().includes(q)).sort((a, b) => rank(a[0]) - rank(b[0]));
     const rows = [...maps.slice(0, 4).map((m) => ({ map: m })), ...players.slice(0, 8 - Math.min(4, maps.length)).map((p) => ({ player: p }))];
-    if (!rows.length) {
-      list.append(h("span", { class: "off" }, `Nothing called "${input.value.trim()}"`));
-      list.hidden = false;
-      return;
-    }
+    if (!rows.length) list.append(h("span", { class: "off" }, `No player or map called "${input.value.trim()}"`));
     for (const row of rows) {
       const name = row.map ? row.map[0] : row.player[0];
       const page = PAGES[name];
@@ -512,12 +502,25 @@ function initSearchField(form) {
       const label = row.map ? name : nameTag(name);
       const lead = row.map ? (sword(tierOf(row.map[2]), "sword") || h("span", { class: "sword" })) : flag(row.player[1]) || h("span", { class: "flag" });
       const item = page
-        ? h("a", { href: page, role: "option" }, lead, label, extra)
+        ? h("a", { href: page, role: "option", "data-name": name }, lead, label, extra)
         : h("span", { class: "off", role: "option", title: "Not part of this mockup" }, lead, label, extra);
       items.push(item);
       list.append(item);
     }
+    // everything else, badges too, on the search page
+    const all = h("a", { class: "all", href: `search.html?q=${encodeURIComponent(input.value.trim())}`, role: "option" }, icon("search"), `All results for "${input.value.trim()}"`);
+    items.push(all);
+    list.append(all);
     list.hidden = false;
+  }
+
+  // Enter opens the row moved to, or a name typed in full; anything else goes to the search page,
+  // with nothing typed to the whole list
+  function go() {
+    const q = input.value.trim();
+    const pick = items[active] || items.find((item) => item.dataset.name && item.dataset.name.toLowerCase() === q.toLowerCase());
+    if (pick && pick.href) location.href = pick.href;
+    else location.href = q ? `search.html?q=${encodeURIComponent(q)}` : "search.html";
   }
 
   function move(step) {
@@ -531,12 +534,17 @@ function initSearchField(form) {
   input.addEventListener("keydown", (event) => {
     if (event.key === "ArrowDown") { event.preventDefault(); move(1); }
     if (event.key === "ArrowUp") { event.preventDefault(); move(-1); }
-    if (event.key === "Escape") { input.value = ""; render(); }
+    if (event.key === "Escape") { input.value = ""; render(); list.hidden = true; }
     if (event.key === "Enter") {
       event.preventDefault();
-      const pick = items[active] || items.find((item) => item.href);
-      if (pick && pick.href) location.href = pick.href;
+      go();
     }
+  });
+  // the magnifier does what Enter does
+  const lens = form.querySelector("label > .icon");
+  lens.addEventListener("click", (event) => {
+    event.preventDefault();
+    go();
   });
   document.addEventListener("click", (event) => {
     if (!form.contains(event.target)) list.hidden = true;
