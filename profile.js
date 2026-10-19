@@ -1,11 +1,15 @@
-const best = player.best;
-const [bestMap, bestToken] = best.label.split(" | ");
+// The player named in the address (?p=iamher0brine), wlatr without one; on the real site every
+// player has their own link. Their data loads first, then the page is drawn.
+const PLAYER_DATA = ["wlatr", "iamher0brine"];
+const askedPlayer = new URLSearchParams(location.search).get("p");
+const playerSlug = PLAYER_DATA.includes(askedPlayer) ? askedPlayer : "wlatr";
+const dataVersion = new URL(document.currentScript.src).search;
 const SORTS = [["tier", "Tier"], ["map", "Map"], ["colour", "Colour"], ["rarity", "Rarity"], ["date", "Date"]];
 const SHOWN = [["All", "All"], ["Rankup", "Rankup"], ["Segmented", "Segmented"], ["Onlysprint", "Onlysprint"], ["Miscellaneous", "Misc"]];
 const RARITY = [[1, "1% or less"], [5, "Under 5%"], [15, "Under 15%"], [30, "Under 30%"], [Infinity, "30% or more"]];
 const view = { sort: "tier", mode: "All", top: false };
 const picked = new URLSearchParams(location.search).get("fav");
-const favourite = badges.find((b) => badgeKey(b.name) === picked) || badges.find((b) => b.name === best.label) || badges[0];
+let best, bestMap, bestToken, favourite;
 
 function stepLabel(label) {
   return stripFlags(label).replace(/\s*\([^)]*\)\s*$/, "");
@@ -32,9 +36,22 @@ function rarity(holders) {
 function renderCard() {
   const stand = document.getElementById("card");
   stand.classList.add(`m${best.tier}`);
-  const canvas = h("canvas", { class: "ps-model", role: "img", tabindex: "0", "aria-label": `${player.name} in 3D, on an island of Tier ${ROMAN[best.tier]} blocks; drag or use the arrow keys to turn` });
+  const canvas = h("canvas", { class: "ps-model", role: "img", tabindex: "0", "aria-label": `${player.name} in 3D, on an island of Tier ${ROMAN[best.tier]} blocks; drag or use the arrow keys to turn and tilt` });
   stand.append(canvas);
   standModel(canvas, best.tier);
+}
+
+// a long name steps down the type scale until it holds on one line, rather than breaking in the
+// middle; a short one keeps the page's size
+const FITS = ["", "fit-72", "fit-54", "fit-45", "fit-36", "fit-27"];
+
+function fitName() {
+  const name = document.querySelector(".hero h1");
+  for (const step of FITS) {
+    name.classList.remove(...FITS.slice(1));
+    if (step) name.classList.add(step);
+    if (name.offsetHeight <= parseFloat(getComputedStyle(name).lineHeight) * 1.5) break;
+  }
 }
 
 // the island's tip is level with the foot of Tiers acquired beside it; with the two stacked, on a
@@ -47,8 +64,9 @@ function levelStand() {
 }
 
 // The player stands still on the island, turned a little toward the words beside them, lit from
-// behind in their tier's colour; a drag, or the arrow keys, turns them and the island round, and they
-// stay as left. It draws only when it changes. Without 3D their face stands in for them, on a slab.
+// behind in their tier's colour; a drag, or the arrow keys, turns them and the island round, or
+// tilts them up to 30 degrees either way, and they stay as left. It draws only when it changes.
+// Without 3D their face stands in for them, on a slab.
 async function standModel(canvas, tier) {
   let s;
   try {
@@ -73,6 +91,7 @@ async function standModel(canvas, tier) {
   arms.rightArm.rotation.z = 0.06;
   arms.leftArm.rotation.z = -0.06;
   let yaw = 0.45;
+  let tilt = 0;
   const paint = () => {
     const box = canvas.getBoundingClientRect();
     const width = Math.round(box.width);
@@ -83,16 +102,22 @@ async function standModel(canvas, tier) {
       s.height = height;
       s.gl.setSize(width, height, false);
     }
-    // level with the figure, from a little over its head down to the island's tip, wherever it
-    // is turned; a narrow lens, so the island's corners never reach past the edges
+    // the camera circles the figure's middle as it tilts, through a narrow lens, and one frame
+    // holds the whole figure and island at any turn and tilt (worked out over all of them): from
+    // a little over the head down to the island's tip
     const camera = s.camera;
-    const half = 20.1;
-    const middle = -2.2;
+    const half = 20.35;
+    const up = [Math.cos(tilt), -Math.sin(tilt)];
+    const aim = [-2.2 - 0.106 * up[0], -0.106 * up[1]];
+    const far = half / Math.tan((12 * Math.PI) / 180);
     camera.fov = 24;
     camera.aspect = width / height;
-    camera.position.set(0, middle, half / Math.tan((12 * Math.PI) / 180));
-    camera.lookAt(0, middle, 0);
+    camera.position.set(0, aim[0] + far * Math.sin(tilt), aim[1] + far * Math.cos(tilt));
+    camera.lookAt(0, aim[0], aim[1]);
     camera.updateProjectionMatrix();
+    // level, that frame leaves the tip a hair over its bottom edge; the canvas hangs as much
+    // lower, so the tip stays on the line of Tiers acquired
+    canvas.style.bottom = `${-Math.round((0.355 * height) / (2 * half))}px`;
     s.playerObject.rotation.y = yaw;
     island.rotation.y = yaw;
     s.gl.render(s.scene, camera);
@@ -122,15 +147,27 @@ async function standModel(canvas, tier) {
     requestAnimationFrame(enter);
   }
 
+  // the tilt moves freely up to 20 degrees, then slows to a stop at 30; back toward level it
+  // moves freely again
+  const TILT = Math.PI / 6;
+  const FREE = Math.PI / 9;
+  const tiltBy = (step) => {
+    const past = (Math.abs(tilt) - FREE) / (TILT - FREE);
+    const give = past > 0 && Math.sign(step) === Math.sign(tilt) ? 1 - past * past : 1;
+    tilt = Math.max(-TILT, Math.min(TILT, tilt + step * give));
+  };
+
   let from = null;
   canvas.addEventListener("pointerdown", (event) => {
-    from = event.clientX;
+    from = [event.clientX, event.clientY];
     canvas.setPointerCapture(event.pointerId);
   });
   canvas.addEventListener("pointermove", (event) => {
     if (from == null) return;
-    yaw += (event.clientX - from) * 0.012;
-    from = event.clientX;
+    // dragging down brings the top toward you, as if pulling the figure by its front
+    yaw += (event.clientX - from[0]) * 0.012;
+    tiltBy((event.clientY - from[1]) * 0.012);
+    from = [event.clientX, event.clientY];
     paint();
   });
   const drop = () => {
@@ -139,10 +176,12 @@ async function standModel(canvas, tier) {
   canvas.addEventListener("pointerup", drop);
   canvas.addEventListener("pointercancel", drop);
   canvas.addEventListener("keydown", (event) => {
-    const step = { ArrowLeft: -0.26, ArrowRight: 0.26 }[event.key];
-    if (!step) return;
+    const turn = { ArrowLeft: -0.26, ArrowRight: 0.26 }[event.key];
+    const lean = { ArrowUp: -0.26, ArrowDown: 0.26 }[event.key];
+    if (!turn && !lean) return;
     event.preventDefault();
-    yaw += step;
+    if (turn) yaw += turn;
+    else tiltBy(lean);
     paint();
   });
 }
@@ -174,8 +213,10 @@ function ladderSlot(mode, level) {
 }
 
 // favourite badge above the name
+// with no badge yet the name stays plain white and there is no favourite to show
 function paintName() {
   const name = document.querySelector(".hero h1");
+  if (!favourite) return;
   name.style.cssText = nameColours(favourite.color, favourite.end, favourite.third);
   name.classList.toggle("blend", Boolean(favourite.end));
   name.classList.toggle("holo", Boolean(favourite.third));
@@ -196,7 +237,7 @@ function renderSide() {
   });
   const acquired = Object.entries(player.modes).filter(([, m]) => m.tier).sort((a, b) => b[1].tier - a[1].tier)[0];
   const bestPill = tip(pill("a", { class: "pill", href: badgeHref(best.label) }, best.role, bestMap, bestToken),
-    () => roleTip(best.role, [`${best.gamemode}, ${tierText(best.tier)}`, `Beaten ${date(best.date)}`]));
+    () => roleTip(best.role, [`${best.gamemode}, ${tierText(best.tier)}`, `${bestToken === "VICTOR" ? "Beaten" : "Reached"} ${when(best.date)}`]));
 
   side.append(
     h("p", { class: "favourite", id: "favourite" }),
@@ -221,11 +262,14 @@ function renderSide() {
 
 function renderProgress() {
   const rail = document.getElementById("progress");
-  rail.style.setProperty("--n", player.progress.length);
+  // a short rail keeps its tiles the usual size, from the left, instead of stretching them
+  rail.style.setProperty("--n", Math.max(player.progress.length, 6));
   document.getElementById("progress-title").append(h("small", {}, `${player.progress.length} maps, hardest first`));
   for (const step of player.progress) {
     const href = PAGES[step.map] ? `${PAGES[step.map]}#step-${step.id}` : null;
-    const card = tile(href ? "a" : "div", { href }, `assets/tile/tile_${step.id}.jpg`, step.tier, "flag");
+    // a step with no screenshot of its own shows its map's
+    const art = step.card === false && step.world ? `assets/tile/map_${step.world}.jpg` : `assets/tile/tile_${step.id}.jpg`;
+    const card = tile(href ? "a" : "div", { href }, art, step.tier, "flag");
     tip(card, () => roleTip(null, [
       `${step.map} | ${stripFlags(step.code)}`,
       `${step.gamemode}, ${tierText(step.tier)}`,
@@ -381,12 +425,13 @@ const ISLAND = [
    "#######",
    "#######",
    " ##### "],
+  // rough underneath, but as heavy on one side as on the other
   ["       ",
    "  ###  ",
-   " ##### ",
-   " ######",
    " ####  ",
-   "  ##   ",
+   " ##### ",
+   "  #### ",
+   "  ###  ",
    "       "],
   ["       ",
    "       ",
@@ -458,10 +503,26 @@ async function islandOf(s, tier) {
   return island;
 }
 
-renderCard();
-renderSide();
-levelStand();
-document.fonts?.ready.then(levelStand);
-new ResizeObserver(levelStand).observe(document.getElementById("side"));
-renderProgress();
-renderCollection();
+function draw() {
+  best = player.best;
+  [bestMap, bestToken] = best.label.split(" | ");
+  favourite = badges.find((b) => badgeKey(b.name) === picked) || badges.find((b) => b.name === best.label) || badges[0] || null;
+  document.title = `${player.name} - Parkour Progress`;
+  if (best.art) document.getElementById("world").style.setProperty("--world", `url("${asset(`assets/world/${best.art}.jpg`)}")`);
+  renderCard();
+  renderSide();
+  fitName();
+  levelStand();
+  document.fonts?.ready.then(() => {
+    fitName();
+    levelStand();
+  });
+  addEventListener("resize", fitName);
+  new ResizeObserver(levelStand).observe(document.getElementById("side"));
+  renderProgress();
+  renderCollection();
+}
+
+// the player's file, then their badges, then the page
+const load = (file, then) => document.head.append(h("script", { src: asset(`data/${file}.js`) + dataVersion, onload: then }));
+load(playerSlug, () => load(`${playerSlug}-badges`, draw));

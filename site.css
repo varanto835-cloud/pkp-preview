@@ -917,6 +917,38 @@ main {
   line-height: 60px;
 }
 
+/* a long player name steps down the type scale until it holds on one line, rather than breaking
+   in the middle (fitName() in profile.js) */
+.hero h1.fit-72 {
+  --lift: 8px;
+  font-size: 72px;
+  line-height: 80px;
+}
+
+.hero h1.fit-54 {
+  --lift: 6px;
+  font-size: 54px;
+  line-height: 60px;
+}
+
+.hero h1.fit-45 {
+  --lift: 5px;
+  font-size: 45px;
+  line-height: 52px;
+}
+
+.hero h1.fit-36 {
+  --lift: 4px;
+  font-size: 36px;
+  line-height: 40px;
+}
+
+.hero h1.fit-27 {
+  --lift: 3px;
+  font-size: 27px;
+  line-height: 36px;
+}
+
 .favourite {
   display: flex;
   flex-wrap: wrap;
@@ -1065,6 +1097,31 @@ button.pill {
 
 .holders li.you a {
   color: var(--hover);
+}
+
+/* a map's victors: the date, and the fails under it where the map counts them */
+.victors .when {
+  display: grid;
+  justify-items: end;
+}
+
+.victors .when small {
+  font-size: inherit;
+}
+
+/* a map beaten by many keeps its window: the list scrolls inside the well */
+.victors {
+  max-height: 412px;
+  overflow-y: auto;
+}
+
+/* beside the route the furthest players keep their step; the day is in their tooltip */
+.split aside .furthest li {
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+}
+
+.split aside .furthest li > :last-child {
+  display: none;
 }
 
 .collection .tier-row {
@@ -2531,6 +2588,11 @@ html.calm .name.blend {
     width: 340px;
   }
 
+  /* tilted, the figure needs the frame a little wider than this column is for its full height */
+  .ps-model {
+    height: min(592px, 100%);
+  }
+
   .splash {
     left: calc(100% - 24px);
     bottom: 14px;
@@ -2672,6 +2734,16 @@ html.calm .name.blend {
     font-size: 18px;
     line-height: 24px;
     text-shadow: 2px 2px 0 #3f3f00;
+  }
+
+  /* room under the title for the splash's low end, so it never lands on the facts */
+  .map-hero .title {
+    margin-bottom: 28px;
+  }
+
+  .facts li.built {
+    flex-wrap: wrap;
+    row-gap: 4px;
   }
 
   .hero h1.badge-name {

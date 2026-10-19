@@ -11,7 +11,7 @@ const COUNTRIES = {
   ro: "Romania", rs: "Serbia", ru: "Russia", se: "Sweden", sg: "Singapore", sk: "Slovakia", th: "Thailand", tw: "Taiwan",
   ua: "Ukraine", us: "United States",
 };
-const PAGES = { wlatr: "profile.html", "Magnum Opus": "map.html" };
+const PAGES = { wlatr: "profile.html", IAMHER0BRINE: "profile.html?p=iamher0brine", "Magnum Opus": "map.html", "Juku Section": "map.html?m=juku-section" };
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 // Animations always play, whatever the system setting says: many people switch it off only to
 // make Windows feel faster, and then never see the podium (the user's call, 2026-10-06). A
