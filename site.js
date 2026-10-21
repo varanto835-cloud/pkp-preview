@@ -11,7 +11,9 @@ const COUNTRIES = {
   ro: "Romania", rs: "Serbia", ru: "Russia", se: "Sweden", sg: "Singapore", sk: "Slovakia", th: "Thailand", tw: "Taiwan",
   ua: "Ukraine", us: "United States",
 };
-const PAGES = { wlatr: "profile.html", IAMHER0BRINE: "profile.html?p=iamher0brine", "Magnum Opus": "map.html", "Juku Section": "map.html?m=juku-section" };
+// the clean links, so a link copied from inside the site keeps its own Discord preview; each sends
+// the visitor on to the page itself
+const PAGES = { wlatr: "p/wlatr.html", IAMHER0BRINE: "p/iamher0brine.html", "Magnum Opus": "m/magnum-opus.html", "Juku Section": "m/juku-section.html" };
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 // Animations always play, whatever the system setting says: many people switch it off only to
 // make Windows feel faster, and then never see the podium (the user's call, 2026-10-06). A
@@ -416,6 +418,14 @@ function favouriteLine(name) {
   const [badge, c1, c2, c3] = row;
   const colours = `--c1:${c1};--c2:${c2 || c1};--c3:${c3 || c2 || c1}`;
   return `<p>Favourite badge</p><p class="tip-pill"><span class="pill"><span class="dot${c2 ? " blend" : ""}" style="${colours}"></span><span>${esc(badge)}</span></span></p>`;
+}
+
+// a page that serves every player, map or badge takes its subject's tier colour once it knows it,
+// for the browser's bar on phones (the link preview keeps the site's own)
+function themeColour(tier) {
+  const meta = document.querySelector('meta[name="theme-color"]');
+  const colour = tier && getComputedStyle(document.documentElement).getPropertyValue(`--t${tier}`).trim();
+  if (meta && colour) meta.content = colour;
 }
 
 // the world behind the page can change to another map's screenshot: the new picture loads first,

@@ -24,6 +24,7 @@ function renderSide() {
   const owned = holders.some((row) => row[0] === "wlatr");
   const mapPage = PAGES[badge.map];
   document.title = `${badge.name} - Parkour Progress`;
+  themeColour(badge.tier);
   document.getElementById("world").style.setProperty("--world", `url("${asset(`assets/world/${slug(badge.map)}.jpg`)}")`);
 
   side.append(...[

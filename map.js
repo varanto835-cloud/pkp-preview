@@ -231,6 +231,7 @@ function draw() {
   roleSteps = steps.filter((step) => step.role);
   victorToken = token(map.role);
   document.title = `${map.name} - Parkour Progress`;
+  themeColour(map.tier);
   renderSide();
   renderRoles();
   renderRoute();

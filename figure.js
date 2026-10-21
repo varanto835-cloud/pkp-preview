@@ -80,6 +80,96 @@ function picture(src) {
   });
 }
 
+// A small floating island under the player's feet, made of blocks of their tier's material a
+// little smaller than the player's, as the podium's are. The scene's unit is a skin pixel: the
+// player is 32 tall, feet at -16, and a block is 2. A few blocks broken off it hang around it.
+const ISLAND = [
+  // seen from above, a layer at a time from the top, one character a block
+  [" ##### ",
+   "#######",
+   "#######",
+   "#######",
+   "#######",
+   "#######",
+   " ##### "],
+  // rough underneath, but as heavy on one side as on the other
+  ["       ",
+   "  ###  ",
+   " ####  ",
+   " ##### ",
+   "  #### ",
+   "  ###  ",
+   "       "],
+  ["       ",
+   "       ",
+   "       ",
+   "   #   ",
+   "       ",
+   "       ",
+   "       "],
+];
+const BLOCK = 2;
+
+async function islandOf(s, tier) {
+  const skin = s.playerObject.skin;
+  const Mesh = skin.head.innerLayer.constructor;
+  const Box = skin.head.innerLayer.geometry.constructor;
+  const Material = skin.layer1Material.constructor;
+  const Texture = skin.layer1Material.map.constructor;
+  const Group = Object.getPrototypeOf(s.playerObject.constructor);
+  const map = new Texture(await picture(matData[tier]));
+  map.magFilter = map.minFilter = skin.layer1Material.map.magFilter;
+  map.colorSpace = skin.layer1Material.map.colorSpace;
+  map.wrapS = map.wrapT = 1000;
+  map.generateMipmaps = false;
+  map.needsUpdate = true;
+  const material = new Material({ map });
+  // a box whose faces show the texture once every `tile` units, so a row of blocks is one box
+  const box = (w, h, d, x, y, z, tile, turn = [0, 0, 0]) => {
+    const shape = new Box(w, h, d);
+    const uv = shape.attributes.uv;
+    const faces = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]];
+    for (let i = 0; i < uv.count; i++) uv.setXY(i, (uv.getX(i) * faces[i >> 2][0]) / tile, (uv.getY(i) * faces[i >> 2][1]) / tile);
+    const mesh = new Mesh(shape, material);
+    mesh.position.set(x, y, z);
+    mesh.rotation.set(...turn);
+    return mesh;
+  };
+  const island = new Group();
+  ISLAND.forEach((rows, layer) => {
+    const y = -16 - BLOCK / 2 - layer * BLOCK;
+    rows.forEach((row, j) => {
+      for (const run of row.matchAll(/#+/g)) {
+        const x = (run.index + run[0].length / 2 - row.length / 2) * BLOCK;
+        const z = (j + 0.5 - rows.length / 2) * BLOCK;
+        island.add(box(run[0].length * BLOCK, BLOCK, BLOCK, x, y, z, BLOCK));
+      }
+    });
+  });
+  // broken off it, each a whole block, most a little smaller; none hangs below the island's tip
+  const loose = [
+    box(2, 2, 2, -9, -17.2, 1.5, 2, [0.3, 0.5, 0.2]),
+    box(1.5, 1.5, 1.5, 8.6, -18.2, -1.5, 1.5, [0.5, 0.2, 0.6]),
+    box(1.5, 1.5, 1.5, -7.6, -11.5, -4, 1.5, [0.6, 0.3, 0.4]),
+    box(1.2, 1.2, 1.2, 8.2, -13.2, 3.5, 1.2, [0.1, 0.5, 0.7]),
+    box(1, 1, 1, 4.5, -19.8, 6.2, 1, [0.4, 0.2, 0.3]),
+  ];
+  island.add(...loose);
+  // on the way in, k going from 0 to 1: each fragment comes out of the island's top layer and
+  // drifts out to where it hangs, still turning
+  const rest = loose.map((block) => [block.position.clone(), block.rotation.clone()]);
+  island.settle = (k) => {
+    const out = 0.5 + 0.5 * k;
+    loose.forEach((block, i) => {
+      const [at, turn] = rest[i];
+      block.position.set(at.x * out, -17 + (at.y + 17) * k, at.z * out);
+      block.rotation.set(turn.x - 1.2 * (1 - k), turn.y - 0.9 * (1 - k), turn.z);
+    });
+  };
+  s.scene.add(island);
+  return island;
+}
+
 // a skin file adds itself to skinData when loaded
 function skinOf(name) {
   if (skinData[name]) return Promise.resolve(skinData[name]);
