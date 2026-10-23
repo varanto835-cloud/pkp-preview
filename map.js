@@ -237,6 +237,8 @@ function draw() {
   renderRoute();
   renderAside();
   markTarget();
+  // the progress timeline, for a map that has one
+  document.head.append(h("script", { src: asset(`data/${mapSlug}-timeline.js`) + version, onload: renderTimeline }));
 }
 
 addEventListener("hashchange", markTarget);

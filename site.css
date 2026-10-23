@@ -6429,3 +6429,642 @@ html.calm .beacon-row.summit .layer::after {
     text-shadow: 2px 2px 0 #3f3f3f;
   }
 }
+
+/* the progress timeline on a map page (Texyle's idea): the map replayed from its release, in an
+   inventory window like the route's, dark inside as Texyle asked: the light face is only the
+   frame, and every control, scoreboard and the board sit in wells, where the players race, the
+   furthest on the left */
+
+.timeline {
+  margin-top: 48px;
+}
+
+.tl {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  grid-template-areas: "deck deck" "side main";
+  gap: 8px;
+}
+
+.tl-deck {
+  grid-area: deck;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 264px;
+  align-items: start;
+  gap: 8px 20px;
+  padding: 14px 18px 12px;
+}
+
+/* under the controls, across the well: who is followed, and Find */
+.tl-deck > .tl-bar {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 2px solid var(--d37);
+}
+
+/* Play and the speed line up with the day's slider, under the month bars */
+.tl-play {
+  min-width: 104px;
+  margin-top: 56px;
+  padding: 8px 12px 10px;
+}
+
+.tl-scrub,
+.tl-speed {
+  display: grid;
+  min-width: 0;
+}
+
+.tl-speed {
+  margin-top: 56px;
+}
+
+/* the month bars: how many steps were reached each month, the months already played lit; a
+   month with a victory in the VICTOR badge's colour */
+.tl-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 48px;
+  margin-bottom: 8px;
+}
+
+.tl-bars span {
+  flex: 1;
+  min-width: 1px;
+  height: calc(2px + var(--h, 0) * (100% - 2px));
+  background: var(--d37);
+}
+
+.tl-bars span.played {
+  background: var(--g8b);
+}
+
+.tl-bars span.win-month {
+  height: 100%;
+  background: var(--victor);
+  opacity: 0.35;
+}
+
+.tl-bars span.win-month.played {
+  opacity: 1;
+}
+
+/* the game's slider: a dark button with its value written on it, and a button for a handle */
+.tl-slider {
+  position: relative;
+  display: block;
+  height: 40px;
+}
+
+.tl-slider input {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 40px;
+  margin: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.tl-slider input::-webkit-slider-runnable-track {
+  height: 40px;
+  border-style: solid;
+  border-width: 4px;
+  border-image: url("assets/gui/button.png") 2 fill / 4px;
+  image-rendering: pixelated;
+  filter: brightness(0.55);
+}
+
+.tl-slider input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 40px;
+  margin-top: -4px;
+  border-style: solid;
+  border-width: 4px;
+  border-image: url("assets/gui/button.png") 2 fill / 4px;
+  image-rendering: pixelated;
+  filter: brightness(1.82);
+}
+
+.tl-slider input::-moz-range-track {
+  height: 32px;
+  border: 4px solid #2a2a2a;
+  background: #2f2f2f;
+}
+
+.tl-slider input::-moz-range-thumb {
+  width: 8px;
+  height: 32px;
+  border: 4px solid #000;
+  border-radius: 0;
+  background: var(--g8b);
+}
+
+.tl-slider input:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 0;
+}
+
+.tl-day {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--white);
+  text-shadow: var(--shadow);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.tl-axis {
+  position: relative;
+  height: 24px;
+  margin-top: 6px;
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+}
+
+.tl-axis span {
+  position: absolute;
+  top: 0;
+  left: calc(var(--at) * 100%);
+  translate: -50% 0;
+  white-space: nowrap;
+}
+
+.tl-axis span:first-child {
+  translate: 0 0;
+}
+
+.tl-axis span:last-child {
+  translate: -100% 0;
+}
+
+/* the scoreboard of the day shown and the victors so far, down the side; the side and the board
+   end level, so no bare window face shows under either */
+.tl-side {
+  grid-area: side;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+}
+
+.tl-side .score {
+  padding: 0;
+  background: none;
+}
+
+.tl-score .score-rows {
+  margin: 0;
+  list-style: none;
+}
+
+.tl-score li.tl-who {
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.tl-victors {
+  display: grid;
+  gap: 8px;
+  max-height: 360px;
+  margin: 0;
+  padding: 10px 12px 12px;
+  overflow: auto;
+  list-style: none;
+}
+
+.tl-victors li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  column-gap: 8px;
+  align-items: center;
+  line-height: 22px;
+}
+
+.tl-won {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tl-victors li[hidden],
+.tl-none[hidden] {
+  display: none;
+}
+
+.tl-none {
+  margin: 0;
+  padding: 10px 12px 12px;
+  text-align: center;
+}
+
+.tl-main {
+  grid-area: main;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+}
+
+.tl-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+}
+
+.tl-lock {
+  margin: 0;
+}
+
+.tl-find {
+  width: 260px;
+}
+
+/* the board scrolls inside its well, both ways, with the steps and the players kept in view;
+   it never grows past the window, so following someone keeps them on screen */
+.tl-well {
+  max-height: min(560px, calc(100svh - var(--bar, 70px) - 24px));
+  overflow: auto;
+  padding: 0;
+  scroll-margin: calc(var(--bar, 70px) + 12px) 0 12px;
+}
+
+/* the step column is sized in characters by timeline.js, to the longest step plus its count; a
+   player's column is just wide enough for their face */
+.tl-grid {
+  --lead: max(132px, calc((var(--code) + 2) * 1ch + 92px));
+  --col: 48px;
+  --head: 52px;
+  --row: 44px;
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--lead) calc(var(--cols) * var(--col));
+  grid-template-rows: var(--head) repeat(var(--rows), var(--row));
+  width: max-content;
+}
+
+.tl-corner,
+.tl-heads,
+.tl-step {
+  background: var(--deep);
+}
+
+.tl-corner {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  grid-row: 1;
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 12px 0 16px;
+  border-bottom: 2px solid var(--d37);
+  box-shadow: inset -2px 0 var(--d37);
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+}
+
+.tl-heads {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  grid-row: 1;
+  grid-column: 2;
+  border-bottom: 2px solid var(--d37);
+}
+
+/* the line-up: every player's face in race order, changing places as they pass each other */
+.tl-head {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: var(--col);
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  translate: calc(var(--c, 0) * var(--col)) 0;
+  transition: translate 450ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tl-head .head {
+  width: 32px;
+  height: 32px;
+}
+
+.tl-head.lit {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tl-head:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: -2px;
+}
+
+.tl-head.on {
+  box-shadow: inset 0 0 0 2px var(--hover);
+}
+
+.tl-head.won {
+  opacity: 0.5;
+}
+
+.tl-row {
+  grid-column: 1 / -1;
+}
+
+.tl-row.even {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* a step: its tier's colour down the edge and its sword in a socket, as the route has it */
+.tl-step {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 0 12px 0 16px;
+  white-space: nowrap;
+  box-shadow: inset 4px 0 var(--c1, transparent), inset -2px 0 var(--d37);
+}
+
+.tl-step.even {
+  background: linear-gradient(rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.03)), var(--deep);
+}
+
+.tl-step strong {
+  flex: 1;
+  min-width: 0;
+}
+
+.tl-count {
+  color: var(--hover);
+  font-weight: 700;
+  text-shadow: 2px 2px 0 #404028;
+}
+
+/* a player's lane down the board, moving with them: lit under the pointer, washed yellow while
+   they are followed; a click on it follows them */
+.tl-lane {
+  position: absolute;
+  top: var(--head);
+  left: var(--lead);
+  width: var(--col);
+  height: calc(var(--rows) * var(--row));
+  cursor: pointer;
+  translate: calc(var(--c, 0) * var(--col)) 0;
+  transition: translate 450ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tl-lane.lit {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tl-lane.on {
+  background: rgba(255, 255, 160, 0.06);
+}
+
+/* the locked player's climb, hanging from their first step on record: a hover-yellow mark on
+   each step reached, joined by a line that grows with their chip */
+.tl-trail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  pointer-events: none;
+  translate: calc(var(--lead) + var(--c, 0) * var(--col) + var(--col) / 2) calc(var(--head) + var(--low, 0) * var(--row) + var(--row) / 2);
+  transition: translate 450ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tl-climb {
+  position: absolute;
+  bottom: 0;
+  left: -1px;
+  width: 2px;
+  height: calc(var(--len, 0) * var(--row));
+  background: rgba(255, 255, 160, 0.5);
+  transition: height 450ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tl-trail b {
+  position: absolute;
+  top: calc(var(--up) * var(--row) * -1 - 4px);
+  left: -4px;
+  width: 8px;
+  height: 8px;
+  background: var(--hover);
+  box-shadow: 2px 2px 0 #404028;
+}
+
+.tl-trail.jump,
+.tl-trail.jump .tl-climb {
+  transition: none;
+}
+
+/* a chip: the player's face, outlined in black like an item, on the step they had reached that
+   day; it glides to its place and flashes when it steps up */
+.tl-chip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  padding: 2px;
+  background: var(--black);
+  cursor: pointer;
+  translate: calc(var(--lead) + (var(--col) - 36px) / 2 + var(--c, 0) * var(--col)) calc(var(--head) + (var(--row) - 36px) / 2 + var(--r, 0) * var(--row));
+  transition: translate 450ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease-out;
+}
+
+.tl-chip .head {
+  display: block;
+  width: 32px;
+  height: 32px;
+}
+
+.tl-chip.off {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tl-chip.locked {
+  z-index: 4;
+}
+
+.tl-chip.lit {
+  z-index: 5;
+  background: var(--white);
+}
+
+.tl-chip.on {
+  background: var(--hover);
+}
+
+/* the game's name tag over the face: the name and the day they got there. It starts at the
+   face and runs right, so the first column's never covers the steps; on the top step it hangs
+   under the face, clear of the line-up */
+.tl-tag {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: -2px;
+  display: none;
+  align-items: baseline;
+  gap: 10px;
+  padding: 2px 8px 4px;
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.62);
+  pointer-events: none;
+}
+
+.tl-chip.top .tl-tag {
+  top: calc(100% + 6px);
+  bottom: auto;
+}
+
+.tl-chip.locked .tl-tag,
+.tl-chip.lit .tl-tag {
+  display: flex;
+}
+
+.tl-when {
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+}
+
+.tl-chip.flash::after,
+.tl-victors li.flash::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 160, 0.4);
+  pointer-events: none;
+  animation: tl-flash 900ms ease-out forwards;
+}
+
+@keyframes tl-flash {
+  to {
+    opacity: 0;
+  }
+}
+
+html.calm .tl-head,
+html.calm .tl-lane,
+html.calm .tl-chip,
+html.calm .tl-trail,
+html.calm .tl-climb {
+  transition: none;
+}
+
+html.calm .tl-chip.flash::after,
+html.calm .tl-victors li.flash::after {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .tl-deck {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .tl-speed {
+    grid-column: 2;
+    width: min(100%, 360px);
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .tl {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "deck" "main" "side";
+  }
+
+  .tl-side {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+  }
+}
+
+/* phones: the day first, then Play and the speed, each across the well so the speed's words fit;
+   the board before the scoreboards, a step on two lines at most and its count gone, as the chips
+   show it */
+@media (max-width: 760px) {
+  .tl-deck {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "scrub" "play" "speed" "bar";
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .tl-scrub {
+    grid-area: scrub;
+  }
+
+  .tl-play {
+    grid-area: play;
+    margin-top: 0;
+  }
+
+  .tl-speed {
+    grid-area: speed;
+    width: auto;
+  }
+
+  .tl-deck > .tl-bar {
+    grid-area: bar;
+  }
+
+  .tl-axis span:not(:first-child):not(:last-child) {
+    display: none;
+  }
+
+  .tl-side {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tl-find {
+    width: 100%;
+  }
+
+  .tl-grid {
+    --lead: max(96px, calc(var(--code2) * 1ch + 32px));
+  }
+
+  .tl-step {
+    padding: 0 8px 0 12px;
+  }
+
+  .tl-step .tl-socket,
+  .tl-count {
+    display: none;
+  }
+
+  /* the name tag stacks the day under the name, to fit beside the steps */
+  .tl-tag {
+    flex-direction: column;
+    gap: 0;
+    line-height: 22px;
+  }
+
+  .tl-step strong {
+    white-space: normal;
+    line-height: 18px;
+  }
+}
