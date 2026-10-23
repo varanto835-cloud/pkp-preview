@@ -111,8 +111,10 @@ function renderStopped() {
     return;
   }
   stopped.forEach(([name, country, , , badge], i) => {
-    // their hardest badge, opening its page where it has one, or its map
-    let hardest = h("span");
+    // their hardest badge, opening its page where it has one, or its map; a player whose hardest
+    // step gives no badge yet says so, as the profile does
+    let hardest = tip(h("span", { class: "pill ghost" }, dot(null), h("span", {}, "no badge")),
+      () => `<b>No badge yet</b><p>${esc(name)}'s hardest step is in ${tierText(tier)},</p><p>but it gives no badge.</p>`);
     if (badge) {
       const [map, token] = badge[0].split(" | ");
       const known = tierBadges.find((b) => b[1] === badge[0]);

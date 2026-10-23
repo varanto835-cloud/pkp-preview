@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- GitHub Pages serves this page for any address it does not have, however deep, so on the
+       preview its files are read from the site's root; opened from disk they sit beside it -->
+  <script>if (location.protocol !== "file:") document.head.append(Object.assign(document.createElement("base"), { href: "/pkp-preview/" }));</script>
+  <title>Not found - Parkour Progress</title>
+  <meta name="description" content="This page of Parkour Progress does not exist.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#eaee57">
+  <link rel="stylesheet" href="site.css?v=2610231200">
+</head>
+<body>
+  <svg class="sprites" aria-hidden="true">
+    <symbol id="i-search" viewBox="0 0 8 8"><path d="M1 0h4v1h-4zM0 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM5 2h1v1h-1zM0 3h1v1h-1zM5 3h1v1h-1zM1 4h4v1h-4zM5 5h2v1h-2zM6 6h2v1h-2z"/></symbol>
+  </svg>
+  <div class="world" style="--world: url('assets/world/abyss.jpg')"></div>
+
+  <header class="bar">
+    <a class="brand" href="index.html">Parkour Progress</a>
+    <form class="search" role="search" autocomplete="off" onsubmit="return false">
+      <label>
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" placeholder="Search players and maps" aria-label="Search players and maps">
+      </label>
+      <div class="results" role="listbox" hidden></div>
+    </form>
+    <nav aria-label="Main">
+      <button class="button menu" type="button" aria-expanded="false" aria-controls="nav-list">Menu</button>
+      <ul id="nav-list">
+        <li><a href="maps.html">Maps</a></li>
+        <li><a href="tier.html">Badges</a></li>
+        <li><a href="leaderboards.html">Leaderboards</a></li>
+        <li><a href="activity.html">Activity</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="died" id="died">
+    <h1 class="died-title">You Died!</h1>
+    <p class="died-cause" id="cause">This page fell out of the world</p>
+    <p class="died-score">Score: <span>404</span></p>
+    <div class="died-buttons" id="buttons">
+      <a class="button" href="index.html" id="respawn" hidden>Respawn</a>
+      <a class="button" href="index.html">Title Screen</a>
+    </div>
+  </main>
+
+  <script src="data/search.js?v=2610231200"></script>
+  <script src="data/names.js?v=2610231200"></script>
+  <script src="site.js?v=2610231200"></script>
+  <script src="notfound.js?v=2610231200"></script>
+</body>
+</html>

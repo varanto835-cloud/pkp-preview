@@ -1474,7 +1474,7 @@ button.pill {
 
 .tier-badges li {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) 32px 112px 128px 88px;
+  grid-template-columns: 40px minmax(0, 1fr) 32px 112px 144px 88px;
   align-items: center;
   gap: 12px;
   padding: 4px 0;
@@ -1491,6 +1491,11 @@ button.pill {
 
 .tier-badges .worth {
   text-align: right;
+}
+
+/* "100 players" stays on one line */
+.tier-badges .meta > span {
+  white-space: nowrap;
 }
 
 .tier-badges li.none {
@@ -6346,5 +6351,81 @@ html.calm .beacon-row.summit .layer::after {
 
   .find-country {
     display: none;
+  }
+}
+
+/* not found: the game's death screen. Its own red wash (from 60500000 at the top to a0803030 at the
+   foot, as the game draws it) over the world, "You Died!", the cause of death and the score, then
+   its two buttons stacked at the game's width */
+
+.died {
+  min-height: calc(100vh - var(--bar, 72px));
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 24px;
+  padding: 40px 16px 96px;
+  text-align: center;
+}
+
+.died::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(rgba(80, 0, 0, 0.38), rgba(128, 48, 48, 0.63));
+  pointer-events: none;
+}
+
+.died-title {
+  margin: 0;
+  font-size: 72px;
+  line-height: 80px;
+  font-weight: 700;
+  text-shadow: 8px 8px 0 #3f3f3f;
+}
+
+.died-cause,
+.died-score {
+  margin: 0;
+  font-size: 27px;
+  line-height: 36px;
+  text-shadow: 3px 3px 0 #3f3f3f;
+  overflow-wrap: anywhere;
+}
+
+.died-score span {
+  color: #ffff55;
+  text-shadow: 3px 3px 0 #3f3f15;
+}
+
+.died-buttons {
+  display: grid;
+  gap: 8px;
+  width: min(400px, 100%);
+  margin-top: 24px;
+}
+
+.died-buttons .button {
+  padding: 6px 12px 8px;
+  text-decoration: none;
+}
+
+.died-buttons .button[hidden] {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .died-title {
+    font-size: 54px;
+    line-height: 60px;
+    text-shadow: 6px 6px 0 #3f3f3f;
+  }
+
+  .died-cause,
+  .died-score {
+    font-size: 18px;
+    line-height: 28px;
+    text-shadow: 2px 2px 0 #3f3f3f;
   }
 }

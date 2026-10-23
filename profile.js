@@ -381,12 +381,15 @@ function badgeRows(list) {
 
 function renderBadges() {
   const body = document.getElementById("badges");
-  let list = badges.filter((b) => view.mode === "All" || b.gamemode === view.mode);
-  if (view.top) list = highestOnly(list);
+  const shown = badges.filter((b) => view.mode === "All" || b.gamemode === view.mode);
+  const list = view.top ? highestOnly(shown) : shown;
   body.className = `well collection by-${view.sort}`;
   body.replaceChildren(...badgeRows(list).map(([label, pills]) =>
     h("div", { class: label ? "tier-row" : "tier-row bare" }, label, h("div", { class: "pills" }, pills))));
-  document.getElementById("badges-count").textContent = `${plural(list.length, "badge")} on ${plural(new Set(list.map((b) => b.map)).size, "map")}`;
+  // with one badge a map the count says so, so it never seems to disagree with the facts above
+  document.getElementById("badges-count").textContent = view.top && list.length < shown.length
+    ? `${list.length} of ${plural(shown.length, "badge")}, the highest on each map`
+    : `${plural(list.length, "badge")} on ${plural(new Set(list.map((b) => b.map)).size, "map")}`;
 }
 
 function renderCollection() {
