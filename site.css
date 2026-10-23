@@ -6480,34 +6480,74 @@ html.calm .beacon-row.summit .layer::after {
   margin-top: 56px;
 }
 
-/* the month bars: how many steps were reached each month, the months already played lit; a
-   month with a victory in the VICTOR badge's colour */
+/* the month bars: how many steps were reached each month, each as wide as its days, inset by half
+   the slider's handle so a day on the bars sits over the same day on the slider. Two copies, the
+   lit one cut off at the day shown, so exactly what the replay has passed is lit. A victory is a
+   line on its day in the VICTOR badge's colour; a followed player's steps are hover-yellow marks */
 .tl-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
   height: 48px;
   margin-bottom: 8px;
+  padding: 0 8px;
 }
 
-.tl-bars span {
-  flex: 1;
-  min-width: 1px;
-  height: calc(2px + var(--h, 0) * (100% - 2px));
-  background: var(--d37);
-}
-
-.tl-bars span.played {
-  background: var(--g8b);
-}
-
-.tl-bars span.win-month {
+.tl-bars-in {
+  position: relative;
   height: 100%;
-  background: var(--victor);
+}
+
+.tl-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+}
+
+.tl-layer.lit {
+  clip-path: inset(0 calc((1 - var(--now, 1)) * 100%) 0 0);
+}
+
+.tl-month {
+  flex: var(--days) 1 0px;
+  min-width: 0;
+  height: calc(2px + var(--h, 0) * (100% - 2px));
+  background: linear-gradient(90deg, var(--d37) calc(100% - 2px), transparent 0);
+}
+
+.lit .tl-month {
+  background-image: linear-gradient(90deg, var(--g8b) calc(100% - 2px), transparent 0);
+}
+
+.tl-win,
+.tl-marks i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--at) * 100% - 1px);
+  width: 2px;
   opacity: 0.35;
 }
 
-.tl-bars span.win-month.played {
+.tl-win {
+  background: var(--victor);
+}
+
+.tl-marks i {
+  top: 8px;
+  background: var(--hover);
+}
+
+.tl-marks i::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: -3px;
+  width: 8px;
+  height: 8px;
+  background: var(--hover);
+}
+
+.lit .tl-win,
+.lit .tl-marks i {
   opacity: 1;
 }
 
@@ -6629,23 +6669,42 @@ html.calm .beacon-row.summit .layer::after {
   min-height: 32px;
 }
 
+/* five victors in view, then the list scrolls (Texyle) */
 .tl-victors {
   display: grid;
   gap: 8px;
-  max-height: 360px;
+  max-height: 274px;
   margin: 0;
   padding: 10px 12px 12px;
   overflow: auto;
   list-style: none;
 }
 
+/* a victor is followed with a click, as on the board: lit under the pointer, washed yellow while
+   followed, like a followed scoreboard entry */
 .tl-victors li {
   position: relative;
   display: grid;
   grid-template-columns: 24px minmax(0, 1fr);
   column-gap: 8px;
   align-items: center;
+  margin: 0 -12px;
+  padding: 2px 12px;
   line-height: 22px;
+  cursor: pointer;
+}
+
+.tl-victors li:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tl-victors li.on {
+  background: rgba(255, 255, 160, 0.12);
+}
+
+.tl-victors li:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: -2px;
 }
 
 .tl-won {
@@ -6682,7 +6741,14 @@ html.calm .beacon-row.summit .layer::after {
 }
 
 .tl-lock {
+  flex: 1;
   margin: 0;
+}
+
+.tl .check {
+  color: var(--white);
+  text-shadow: var(--shadow);
+  white-space: nowrap;
 }
 
 .tl-find {
@@ -6703,7 +6769,7 @@ html.calm .beacon-row.summit .layer::after {
 .tl-grid {
   --lead: max(132px, calc((var(--code) + 2) * 1ch + 92px));
   --col: 48px;
-  --head: 52px;
+  --head: calc(var(--name) * 1ch + 60px);
   --row: 44px;
   position: relative;
   display: grid;
@@ -6743,17 +6809,22 @@ html.calm .beacon-row.summit .layer::after {
   border-bottom: 2px solid var(--d37);
 }
 
-/* the line-up: every player's face in race order, changing places as they pass each other */
+/* the line-up: every player's face in race order, their name read up over it like a book's
+   spine, changing places as they pass each other */
 .tl-head {
   position: absolute;
   top: 0;
   left: 0;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
   width: var(--col);
   height: 100%;
-  padding: 0;
+  padding: 0 0 8px;
   border: 0;
+  font: inherit;
   background: none;
   cursor: pointer;
   translate: calc(var(--c, 0) * var(--col)) 0;
@@ -6763,6 +6834,29 @@ html.calm .beacon-row.summit .layer::after {
 .tl-head .head {
   width: 32px;
   height: 32px;
+}
+
+/* turned to read upwards, so the shadow is set the other way round to fall down and right */
+.tl-spine {
+  line-height: 20px;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+  rotate: 180deg;
+  color: var(--white);
+  text-shadow: -2px -2px 0 #3f3f3f;
+}
+
+.tl-spine .name {
+  text-shadow: -2px -2px 0 color-mix(in srgb, var(--c1) 25%, #000);
+}
+
+.tl-spine .name.blend {
+  background: linear-gradient(0deg, var(--c1), var(--c2), var(--c3), var(--c1)) 0 0 / 100% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(-2px -2px 0 rgba(0, 0, 0, 0.6));
+  animation: none;
 }
 
 .tl-head.lit {
@@ -6778,8 +6872,10 @@ html.calm .beacon-row.summit .layer::after {
   box-shadow: inset 0 0 0 2px var(--hover);
 }
 
-.tl-head.won {
-  opacity: 0.5;
+.tl-head.gone,
+.tl-lane.gone,
+.tl-chip.gone {
+  display: none;
 }
 
 .tl-row {

@@ -38,7 +38,8 @@ function renderTimeline() {
   // everyone the history follows gets a column; the victors who only won live in the list
   const columns = players.filter((p) => p.days.length || p.undated != null)
     .sort((a, b) => (a.days[0]?.[0] ?? total + 1) - (b.days[0]?.[0] ?? total + 1));
-  const rows = [...timeline.steps].reverse();
+  // every progress step of the map, reached or not, so the board climbs as far as the map does
+  const rows = map.steps.map((_, index) => index).reverse();
   const victors = map.victors.map((v, i) => ({ ...v, day: v.date ? dayOf(v.date) : total, first: i === 0 && exact(v.date) }));
 
   // the race order on day n: climbers first, the furthest first and, on one step, whoever got
@@ -53,16 +54,34 @@ function renderTimeline() {
     return { p, i, now, key: keyOf(p, i, now) };
   }).sort(byKey);
 
-  // the month bars over the slider: how many steps were reached each month, the months already
-  // played lit; a month with a victory in the VICTOR badge's colour
+  // the month bars over the slider: how many steps were reached each month, each bar as wide as
+  // its days so the bars run with the slider. A victory is a line on its own day, in the VICTOR
+  // badge's colour, and a followed player's steps are hover-yellow marks on theirs (Texyle's
+  // idea). Everything the replay has passed is lit, up to the day shown and not a day further
   const months = new Map();
   for (const p of players) for (const [d] of p.days) months.set(isoOf(d).slice(0, 7), (months.get(isoOf(d).slice(0, 7)) || 0) + 1);
-  const spanMonths = [];
-  for (let d = new Date(first); d <= new Date(timeline.end); d.setUTCMonth(d.getUTCMonth() + 1, 1)) spanMonths.push(d.toISOString().slice(0, 7));
+  const spans = [];
+  for (let d = 0; d <= total;) {
+    const iso = isoOf(d);
+    const next = Math.min(total + 1, Math.round((Date.UTC(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)), 1) - first) / DAY_MS));
+    spans.push([iso.slice(0, 7), next - d]);
+    d = next;
+  }
   const peak = Math.max(1, ...months.values());
-  const wins = new Set(victors.map((v) => isoOf(v.day).slice(0, 7)));
-  const monthBars = spanMonths.map((month) => h("span", { class: wins.has(month) ? "win-month" : null, style: `--h:${(months.get(month) || 0) / peak}` }));
-  const bars = h("div", { class: "tl-bars", "aria-hidden": "true", style: `--victor:${map.role.color}` }, monthBars);
+  const layer = (cls) => h("div", { class: `tl-layer ${cls}` },
+    spans.map(([month, days]) => h("span", { class: "tl-month", style: `--days:${days};--h:${(months.get(month) || 0) / peak}` })),
+    victors.filter((v) => v.date).map((v) => h("i", { class: "tl-win", style: `--at:${v.day / total}` })),
+    h("span", { class: "tl-marks" }));
+  const layers = [layer("unlit"), layer("lit")];
+  const bars = h("div", { class: "tl-bars", "aria-hidden": "true", style: `--victor:${map.role.color}` }, h("div", { class: "tl-bars-in" }, layers));
+  let marked;
+  const markFollowed = () => {
+    if (marked === followed) return;
+    marked = followed;
+    const p = players.find((each) => each.name === followed);
+    const days = p ? [...p.days.map(([d]) => d), ...(p.won != null ? [p.won] : [])] : [];
+    for (const el of layers) el.querySelector(".tl-marks").replaceChildren(...days.map((d) => h("i", { style: `--at:${d / total}` })));
+  };
 
   // the game's slider: the day is written on it
   const slider = h("input", { type: "range", min: 0, max: total, value: total, "aria-label": "Day of the replay" });
@@ -96,18 +115,20 @@ function renderTimeline() {
 
   const play = h("button", { class: "button tl-play", type: "button" }, "Play");
 
-  // the board: steps as rows, highest on top, each with its tier; players as narrow columns, a
-  // face each, so the whole race fits in view and reads as a climb. Names come as the game's name
-  // tags, over the locked player and the one under the pointer. The font is monospaced, so the
-  // step column is sized in characters; on phones a step may take two lines, split where its
-  // longer half is shortest
+  // the board: steps as rows, highest on top, each with its tier; players as narrow columns, so
+  // the whole race fits in view and reads as a climb. Over each column the player's face, and
+  // their name read up the column like a book's spine (Texyle wanted it compact, with the names
+  // in view); the game's name tag adds the day, over the locked player and the one under the
+  // pointer. The font is monospaced, so the line-up and the step column are sized in characters;
+  // on phones a step may take two lines, split where its longer half is shortest
   const codes = rows.map((index) => stepAt(index).code);
   const twoLines = (code) => {
     const words = code.split(" ");
     return Math.min(...words.map((_, i) => Math.max(words.slice(0, i).join(" ").length, words.slice(i).join(" ").length)));
   };
   const grid = h("div", { class: "tl-grid", style: [`--cols:${columns.length}`, `--rows:${rows.length}`,
-    `--code:${Math.max(...codes.map((code) => code.length))}`, `--code2:${Math.max(...codes.map(twoLines))}`].join(";") });
+    `--name:${Math.max(...columns.map((p) => p.name.length))}`, `--code:${Math.max(...codes.map((code) => code.length))}`,
+    `--code2:${Math.max(...codes.map(twoLines))}`].join(";") });
   const headRow = h("div", { class: "tl-heads" });
   grid.append(h("span", { class: "tl-corner" }, "Step"), headRow);
   const rowCounts = rows.map((index, r) => {
@@ -132,7 +153,8 @@ function renderTimeline() {
   const trail = h("span", { class: "tl-trail", "aria-hidden": "true" }, climb, marks);
   grid.append(trail);
   const heads = columns.map((p, i) => {
-    const button = h("button", { class: "tl-head", type: "button", "aria-pressed": "false", "aria-label": p.name, "data-i": i }, head(p.name));
+    const button = h("button", { class: "tl-head", type: "button", "aria-pressed": "false", "aria-label": p.name, "data-i": i },
+      h("span", { class: "tl-spine" }, nameTag(p.name)), head(p.name));
     button.addEventListener("click", () => follow(p.name));
     tip(button, () => `<b>${esc(p.name)}</b><p>${esc(COUNTRIES[p.country] || "")}</p><p>${p.days.length ? `${plural(p.days.length, "step")} on record` : `No day on record: on the map ${byEnd}`}</p><p class="hint">${followed === p.name ? "Click to let go" : "Click to follow"}</p>`);
     headRow.append(button);
@@ -174,13 +196,27 @@ function renderTimeline() {
       h("li", {}, h("span", {}, "Victors"), victorCount),
       h("li", {}, h("span", {}, "Furthest"), furthestStep),
       furthestWho));
-  const list = h("ol", { class: "tl-victors" }, victors.map((v) => h("li", { "data-day": v.day },
-    head(v.name), personLink(v.name),
-    h("span", { class: "tl-won dim" }, flag(v.country), v.date ? date(v.date) : "no date", v.first ? icon("crown", "first") : null))));
+  // a victor in the list is followed like a player on the board: their steps and their victory
+  // marked on the bars, and their column whenever the replay is before their victory
+  const list = h("ol", { class: "tl-victors" }, victors.map((v) => {
+    const li = h("li", { "data-day": v.day, "data-name": v.name, role: "button", tabindex: "0", "aria-pressed": "false" },
+      head(v.name), nameTag(v.name),
+      h("span", { class: "tl-won dim" }, flag(v.country), v.date ? date(v.date) : "no date", v.first ? icon("crown", "first") : null));
+    li.addEventListener("click", () => follow(v.name));
+    li.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      follow(v.name);
+    });
+    return li;
+  }));
   const nobody = h("p", { class: "tl-none dim" }, "Nobody yet");
   const winners = h("section", { class: "well score tl-winners", "aria-label": "Victors" }, h("p", { class: "score-title" }, "Victors"), list, nobody);
 
   const lockLine = h("p", { class: "tl-lock", "aria-live": "polite" });
+  // days something happened: with quiet days skipped, Play leaps over a stretch with nothing in it
+  const busy = [...new Set([...players.flatMap((p) => p.days.map(([d]) => d)), ...victors.filter((v) => v.date).map((v) => v.day)])].sort((a, b) => a - b);
+  const skip = h("input", { type: "checkbox" });
   const find = h("input", { type: "search", placeholder: "Find a player", "aria-label": "Find a player to follow", spellcheck: "false" });
   const well = h("div", { class: "well tl-well" }, grid);
 
@@ -192,7 +228,9 @@ function renderTimeline() {
       h("div", { class: "tl-scrub" }, bars, h("label", { class: "tl-slider" }, slider, sliderText), axis),
       h("div", { class: "tl-speed" }, h("label", { class: "tl-slider" }, speedInput, speedText),
         h("div", { class: "tl-axis", "aria-hidden": "true" }, h("span", { style: "--at:0" }, "Slower"), h("span", { style: "--at:1" }, "Faster"))),
-      h("div", { class: "tl-bar" }, lockLine, h("label", { class: "field tl-find" }, icon("search"), find))),
+      h("div", { class: "tl-bar" }, lockLine,
+        h("label", { class: "check tl-skip" }, skip, h("span", { class: "box", "aria-hidden": "true" }, icon("check")), "Skip quiet days"),
+        h("label", { class: "field tl-find" }, icon("search"), find))),
     h("div", { class: "tl-side" }, score, winners),
     h("div", { class: "tl-main" }, well));
 
@@ -211,7 +249,7 @@ function renderTimeline() {
   }
   find.addEventListener("input", () => {
     const q = find.value.trim().toLowerCase();
-    const p = q && columns.find((each) => each.name.toLowerCase().startsWith(q));
+    const p = q && players.find((each) => each.name.toLowerCase().startsWith(q));
     if (p && p.name !== followed) follow(p.name);
   });
   for (const type of ["wheel", "pointerdown", "touchstart"]) {
@@ -276,17 +314,26 @@ function renderTimeline() {
   function show(n) {
     sliderText.textContent = date(isoOf(n));
     scoreTitle.textContent = date(isoOf(n));
-    const played = isoOf(n).slice(0, 7);
-    spanMonths.forEach((month, m) => monthBars[m].classList.toggle("played", month <= played));
-    ranked = race(n);
+    bars.style.setProperty("--now", n / total);
+    markFollowed();
+    // a victory takes the player off the board, to the victors (Texyle)
+    const order = race(n);
+    ranked = order.filter((entry) => !entry.now?.won);
+    for (const { i } of order.filter((entry) => entry.now?.won)) {
+      for (const el of [heads[i], lanes[i], chips[i]]) el.classList.add("gone");
+      placed[i] = null;
+    }
+    grid.style.setProperty("--cols", ranked.length);
     const locked = followed || ranked[0]?.p.name;
     const perRow = new Map();
     let climbing = 0;
     ranked.forEach(({ p, i, now }, c) => {
       const chip = chips[i];
       const on = p.name === followed;
-      for (const el of [heads[i], lanes[i], chip]) el.style.setProperty("--c", c);
-      heads[i].classList.toggle("won", Boolean(now && now.won));
+      for (const el of [heads[i], lanes[i], chip]) {
+        el.classList.remove("gone");
+        el.style.setProperty("--c", c);
+      }
       heads[i].classList.toggle("on", on);
       heads[i].setAttribute("aria-pressed", String(on));
       lanes[i].classList.toggle("on", on);
@@ -311,17 +358,21 @@ function renderTimeline() {
       const shown = Number(li.dataset.day) <= n;
       if (drawn && shown && li.hidden) flash(li);
       li.hidden = !shown;
+      li.classList.toggle("on", li.dataset.name === followed);
+      li.setAttribute("aria-pressed", String(li.dataset.name === followed));
       if (shown) won++;
     }
     nobody.hidden = won > 0;
     climbingCount.textContent = String(climbing);
     victorCount.textContent = String(won);
-    const lead = ranked[0] && ranked[0].now && !ranked[0].now.won ? ranked[0] : null;
-    furthestStep.textContent = lead ? stepAt(lead.now.step).code : "-";
-    furthestWho.replaceChildren(...(lead ? [head(lead.p.name), personLink(lead.p.name)] : [h("span", { class: "dim" }, "Nobody on it yet")]));
+    // once the map is beaten the furthest climber means little, so it says so (Texyle)
+    const lead = ranked[0] && ranked[0].now ? ranked[0] : null;
+    furthestStep.textContent = lead && !won ? stepAt(lead.now.step).code : "-";
+    furthestWho.replaceChildren(...(won ? [h("span", { class: "dim" }, "Map beaten")]
+      : lead ? [head(lead.p.name), personLink(lead.p.name)] : [h("span", { class: "dim" }, "Nobody on it yet")]));
     lockLine.replaceChildren(...(followed
       ? [h("span", {}, "Following "), nameTag(followed), h("span", { class: "dim" }, ". Click them again to let go.")]
-      : [h("span", { class: "dim" }, "Following the furthest player. Click a player to follow them.")]));
+      : [h("span", { class: "dim" }, "Following the furthest climber. Click a player to follow them.")]));
     drawTrail(n, locked);
     keepInView(drawn ? false : "now");
     drawn = true;
@@ -389,6 +440,11 @@ function renderTimeline() {
     const tick = (now) => {
       if (last != null) at = Math.min(total, at + ((now - last) / 1000) * speed);
       last = now;
+      // a quiet stretch takes a third of a second at most, then the next thing happens
+      if (skip.checked) {
+        const next = busy.find((d) => d > at) ?? total;
+        if ((next - at) / speed > 0.35) at = next - speed * 0.35;
+      }
       const day = Math.round(at);
       if (day !== Number(slider.value)) {
         slider.value = day;
