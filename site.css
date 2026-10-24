@@ -6480,6 +6480,11 @@ html.calm .beacon-row.summit .layer::after {
   margin-top: 56px;
 }
 
+/* level with the day's axis, which sits under the row of dots */
+.tl-speed .tl-axis {
+  margin-top: 24px;
+}
+
 /* the month bars: how many steps were reached each month, each as wide as its days, inset by half
    the slider's handle so a day on the bars sits over the same day on the slider. Two copies, the
    lit one cut off at the day shown, so exactly what the replay has passed is lit. A victory is a
@@ -6517,38 +6522,66 @@ html.calm .beacon-row.summit .layer::after {
   background-image: linear-gradient(90deg, var(--g8b) calc(100% - 2px), transparent 0);
 }
 
-.tl-win,
-.tl-marks i {
+.tl-win {
   position: absolute;
   top: 0;
   bottom: 0;
   left: calc(var(--at) * 100% - 1px);
   width: 2px;
+  background: var(--victor);
   opacity: 0.35;
 }
 
-.tl-win {
-  background: var(--victor);
-}
-
-.tl-marks i {
-  top: 8px;
-  background: var(--hover);
-}
-
-.tl-marks i::before {
-  content: "";
-  position: absolute;
-  top: -8px;
-  left: -3px;
-  width: 8px;
-  height: 8px;
-  background: var(--hover);
-}
-
-.lit .tl-win,
-.lit .tl-marks i {
+.lit .tl-win {
   opacity: 1;
+}
+
+/* over each victory line, a wider target for its tooltip and click */
+.tl-hits {
+  position: absolute;
+  inset: 0;
+}
+
+.tl-hit {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--at) * 100% - 6px);
+  width: 12px;
+  cursor: pointer;
+}
+
+.tl-hit:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* the followed player's steps under the slider: hover-yellow dots, dim while still ahead */
+.tl-dots {
+  position: relative;
+  height: 12px;
+  margin: 6px 8px 0;
+}
+
+.tl-dot {
+  position: absolute;
+  top: 0;
+  left: calc(var(--at) * 100% - 6px);
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: 2px solid #404028;
+  background: var(--hover);
+  cursor: pointer;
+}
+
+.tl-dot.ahead {
+  opacity: 0.35;
+}
+
+.tl-dot:hover,
+.tl-dot:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 0;
 }
 
 /* the game's slider: a dark button with its value written on it, and a button for a handle */
@@ -6764,12 +6797,18 @@ html.calm .beacon-row.summit .layer::after {
   scroll-margin: calc(var(--bar, 70px) + 12px) 0 12px;
 }
 
-/* the step column is sized in characters by timeline.js, to the longest step plus its count; a
-   player's column is just wide enough for their face */
+/* sized in characters by timeline.js: the step column to the longest step plus its count, a
+   player's column to the longest name; with nametags hidden a column is just wide enough for a
+   face */
+.tl-grid.bare {
+  --col: 48px;
+  --head: 52px;
+}
+
 .tl-grid {
   --lead: max(132px, calc((var(--code) + 2) * 1ch + 92px));
-  --col: 48px;
-  --head: calc(var(--name) * 1ch + 60px);
+  --col: max(152px, calc(var(--name) * 1ch + 24px));
+  --head: 80px;
   --row: 44px;
   position: relative;
   display: grid;
@@ -6809,8 +6848,8 @@ html.calm .beacon-row.summit .layer::after {
   border-bottom: 2px solid var(--d37);
 }
 
-/* the line-up: every player's face in race order, their name read up over it like a book's
-   spine, changing places as they pass each other */
+/* the line-up: every player's face and name in race order, changing places as they pass each
+   other */
 .tl-head {
   position: absolute;
   top: 0;
@@ -6819,7 +6858,7 @@ html.calm .beacon-row.summit .layer::after {
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 6px;
   width: var(--col);
   height: 100%;
   padding: 0 0 8px;
@@ -6836,27 +6875,15 @@ html.calm .beacon-row.summit .layer::after {
   height: 32px;
 }
 
-/* turned to read upwards, so the shadow is set the other way round to fall down and right */
-.tl-spine {
+.tl-name {
   line-height: 20px;
   white-space: nowrap;
-  writing-mode: vertical-rl;
-  rotate: 180deg;
   color: var(--white);
-  text-shadow: -2px -2px 0 #3f3f3f;
+  text-shadow: var(--shadow);
 }
 
-.tl-spine .name {
-  text-shadow: -2px -2px 0 color-mix(in srgb, var(--c1) 25%, #000);
-}
-
-.tl-spine .name.blend {
-  background: linear-gradient(0deg, var(--c1), var(--c2), var(--c3), var(--c1)) 0 0 / 100% 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  text-shadow: none;
-  filter: drop-shadow(-2px -2px 0 rgba(0, 0, 0, 0.6));
-  animation: none;
+.tl-grid.bare .tl-name {
+  display: none;
 }
 
 .tl-head.lit {
@@ -7121,6 +7148,13 @@ html.calm .tl-victors li.flash::after {
   .tl-speed {
     grid-area: speed;
     width: auto;
+  }
+
+  /* shorter on a phone: the speed says itself, and the follow line shows only while following */
+  .tl-speed .tl-axis,
+  .tl-lock.idle,
+  .tl-dots:empty {
+    display: none;
   }
 
   .tl-deck > .tl-bar {
