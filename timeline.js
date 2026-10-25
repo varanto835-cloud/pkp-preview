@@ -130,8 +130,9 @@ function renderTimeline() {
   const play = h("button", { class: "button tl-play", type: "button" }, "Play");
 
   // the board: steps as rows, highest on top, each with its tier; players as columns, each
-  // headed by the face and the name, as wide as the longest name, since the names come first
-  // (Texyle); "Hide nametags" folds them to faces only, so the whole race fits in view. The
+  // headed by the face and the name, since the names come first (Texyle), the names on two lines
+  // turn about so a column need only be half a name wide; "Hide nametags" folds them to faces
+  // only, so the whole race fits in view. The
   // game's name tag adds the day, over the locked player and the one under the pointer. The font
   // is monospaced, so columns are sized in characters; on phones a step may take two lines,
   // split where its longer half is shortest
@@ -301,7 +302,7 @@ function renderTimeline() {
     let x = well.scrollLeft;
     const face = c * col + (col - 36) / 2 - 2;
     const nameW = heads[ranked[c].i].querySelector(".tl-name").offsetWidth;
-    const nameAt = c * col + (col - nameW) / 2;
+    const nameAt = c ? c * col + (col - nameW) / 2 : 4;
     const tagEnd = face + Math.max(40, chips[ranked[c].i].querySelector(".tl-tag").offsetWidth);
     const view = well.clientWidth - lead;
     // on a narrow screen where both cannot fit, the face and its tag win, as the tag names them too
@@ -369,6 +370,8 @@ function renderTimeline() {
         el.style.setProperty("--c", c);
       }
       heads[i].classList.toggle("on", on);
+      heads[i].classList.toggle("low", c % 2 === 1);
+      heads[i].classList.toggle("first", c === 0);
       heads[i].setAttribute("aria-pressed", String(on));
       lanes[i].classList.toggle("on", on);
       chip.classList.toggle("on", on);

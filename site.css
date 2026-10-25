@@ -6807,8 +6807,8 @@ html.calm .beacon-row.summit .layer::after {
 
 .tl-grid {
   --lead: max(132px, calc((var(--code) + 2) * 1ch + 92px));
-  --col: max(56px, calc(var(--name) * 0.5ch + 16px));
-  --head: 64px;
+  --col: max(56px, calc((var(--name) * 1ch + 12px) / 2));
+  --head: 96px;
   --row: 44px;
   position: relative;
   display: grid;
@@ -6875,23 +6875,28 @@ html.calm .beacon-row.summit .layer::after {
   height: 32px;
 }
 
-/* the names at 9px, the font's own pixel at its smallest, so more players fit at once (Texyle);
-   the shadow keeps to one font pixel */
+/* the names at full size, on two lines turn about, so each may run over its neighbours' columns
+   and the columns stay half a name wide: twice the players in view (Texyle found four too few, and
+   9px too small); the first column's name starts at its edge, clear of the steps */
 .tl-name {
-  font-size: 9px;
-  line-height: 10px;
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  line-height: 20px;
   white-space: nowrap;
   color: var(--white);
-  text-shadow: 1px 1px 0 #3f3f3f;
+  text-shadow: var(--shadow);
+  translate: -50% 0;
+  transition: top 450ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.tl-name .name {
-  text-shadow: 1px 1px 0 color-mix(in srgb, var(--c1) 25%, #000);
+.tl-head.low .tl-name {
+  top: 30px;
 }
 
-.tl-name .name.blend {
-  text-shadow: none;
-  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.6));
+.tl-head.first .tl-name {
+  left: 4px;
+  translate: 0 0;
 }
 
 .tl-grid.bare .tl-name {
