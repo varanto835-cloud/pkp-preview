@@ -6807,8 +6807,8 @@ html.calm .beacon-row.summit .layer::after {
 
 .tl-grid {
   --lead: max(132px, calc((var(--code) + 2) * 1ch + 92px));
-  --col: max(152px, calc(var(--name) * 1ch + 24px));
-  --head: 80px;
+  --col: max(56px, calc(var(--name) * 0.5ch + 16px));
+  --head: 64px;
   --row: 44px;
   position: relative;
   display: grid;
@@ -6875,11 +6875,23 @@ html.calm .beacon-row.summit .layer::after {
   height: 32px;
 }
 
+/* the names at 9px, the font's own pixel at its smallest, so more players fit at once (Texyle);
+   the shadow keeps to one font pixel */
 .tl-name {
-  line-height: 20px;
+  font-size: 9px;
+  line-height: 10px;
   white-space: nowrap;
   color: var(--white);
-  text-shadow: var(--shadow);
+  text-shadow: 1px 1px 0 #3f3f3f;
+}
+
+.tl-name .name {
+  text-shadow: 1px 1px 0 color-mix(in srgb, var(--c1) 25%, #000);
+}
+
+.tl-name .name.blend {
+  text-shadow: none;
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.6));
 }
 
 .tl-grid.bare .tl-name {
@@ -7062,7 +7074,9 @@ html.calm .beacon-row.summit .layer::after {
   bottom: auto;
 }
 
-.tl-chip.locked .tl-tag,
+/* the locked player's tag stays only while names are hidden, as the line-up names them
+   otherwise (Texyle); under the pointer it always shows, for the day */
+.tl-grid.bare .tl-chip.locked .tl-tag,
 .tl-chip.lit .tl-tag {
   display: flex;
 }
