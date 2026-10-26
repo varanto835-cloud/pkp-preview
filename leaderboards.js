@@ -13,7 +13,7 @@ const BOARDS = {
       { label: "Player", lead: true },
       {
         label: "Hardest badge", by: "difficulty", alt: "victory", wide: true,
-        note: "The hardest badge held, grouped by tier. With a gamemode picked, this is the TOP on the cards.",
+        note: "The hardest badge held, grouped by tier. With a gamemode picked, this is the TOP a profile shows.",
         altNote: "The hardest map beaten, grouped by tier.",
       },
       { label: "Tiers", by: "tiers", note: "Tiers acquired: every badge in a tier and in the tiers below it is held." },
@@ -207,7 +207,8 @@ function rankIn(board, by, mode, id, country = "") {
   return row && row.rank ? row.rank : null;
 }
 
-function cardMode(name) {
+// the gamemode of a player's hardest badge, whose TOP their profile shows
+function bestMode(name) {
   const per = (playerBoard.find(([n]) => n === name) || [])[2];
   const best = per && per.All && per.All[1];
   if (!best) return null;
@@ -220,7 +221,7 @@ function cardMode(name) {
 function lead(row) {
   if (row.kind === "player") return [head(row.name), nameTag(row.name), flag(row.country)];
   if (row.kind === "country") return [flag(row.code), h("span", {}, row.name)];
-  if (row.kind === "map") return [h("span", { class: "mode-chip" }, MODE_LETTER[row.mode]), painted(row.name, row.badge), narrow.matches ? null : socket(tierOf(row.value))];
+  if (row.kind === "map") return [modeChip(row.mode), painted(row.name, row.badge), narrow.matches ? null : socket(tierOf(row.value))];
   return [socket(tierOf(row.value)), pillSpan(row.badge)];
 }
 
@@ -547,32 +548,35 @@ function podiumVisual(row, place) {
     box.view = mountPose(box, row, place);
     return box;
   }
-  if (row.kind === "country") return flag(row.code, "flag podium-flag");
+  if (row.kind === "country") return flag(row.code, "flag podium-flag", true);
   if (row.kind === "map") return row.shot ? tile("span", {}, `assets/tile/map_${row.shot}.jpg`, tierOf(row.value)) : h("span", { class: "podium-blank" });
   return null;
 }
 
+// The podium always holds the board's top three, whichever way the table runs: reversing the
+// order changes the table only, so nothing above it moves or plays again (Texyle: the buttons
+// jumped when the podium went away)
+let podiumKey = "";
+
 function renderPodium() {
   const podium = document.getElementById("podium");
+  const key = [state.board, state.by, state.mode, state.country].join("|");
+  if (key === podiumKey) return;
+  podiumKey = key;
   const run = ++podiumRun;
-  const top = rows.filter((row) => row.rank).slice(0, 3);
-  // the podium is for the top, a reversed board has none
-  podium.hidden = state.reverse || top.length < 3;
+  const top = build(state.board, state.by, state.mode, state.country).rows.filter((row) => row.rank).slice(0, 3);
+  podium.hidden = top.length < 3;
   if (podium.hidden) return podium.replaceChildren();
   const steps = [[top[1], 2, 4], [top[0], 1, 5], [top[2], 3, 3]];
   podium.className = `podium podium-${state.board}`;
   podium.replaceChildren(...steps.map(([row, place, material]) => {
-    const open = () => openRow(rows.indexOf(row), true);
-    const card = hasCard(row);
+    // the table may be the reversed list, so the row is found again by its id
+    const open = () => openRow(rows.findIndex((each) => String(each.id) === String(row.id)), true);
     return h("div", { class: `podium-step place${place}${row.kind === "player" && !calm.matches ? " waiting" : ""}` },
       h("span", { class: "podium-plate" },
         h("span", { class: "podium-name" }, row.kind === "player" ? [nameTag(row.name), flag(row.country)] : row.kind === "map" ? painted(row.name, row.badge) : row.name),
         h("span", { class: "podium-value" }, valueOf(row))),
-      h("button", {
-        class: `podium-visual${card ? " zoom" : ""}`, type: "button",
-        "aria-label": card ? `See ${row.name}'s card` : `Number ${row.rank}: ${row.name}`,
-        onclick: card ? () => showCard(row.name) : open,
-      }, podiumVisual(row, place)),
+      h("button", { class: "podium-visual", type: "button", "aria-label": `Number ${row.rank}: ${row.name}`, onclick: open }, podiumVisual(row, place)),
       h("button", { class: "podium-label", type: "button", "aria-label": `Number ${row.rank}: ${row.name}`, onclick: open },
         h("span", { class: `podium-block m${material}` }, h("span", { class: "podium-rank" }, String(row.rank)))));
   }));
@@ -581,21 +585,6 @@ function renderPodium() {
   // the 3D starts once the page has been shown, so the table and the blocks appear at once
   const views = [...podium.querySelectorAll(".pose")].map((box) => box.view);
   if (views.length) requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => stagePlayers(podium, views, run))));
-}
-
-// the cards are drawn to be read at full size, so a click shows them that big
-function hasCard(row) {
-  return row.kind === "player" && boardCards.includes(row.name.toLowerCase());
-}
-
-const viewer = h("dialog", { class: "card-view", "aria-label": "Card", onclick: (event) => { if (event.target === viewer) viewer.close(); } });
-document.body.append(viewer);
-
-function showCard(name) {
-  viewer.replaceChildren(
-    h("img", { src: asset(`assets/card/${name.toLowerCase()}.webp`), width: 500, height: 700, alt: `${name}'s card` }),
-    h("button", { class: "button", type: "button", onclick: () => viewer.close() }, "Close"));
-  viewer.showModal();
 }
 
 // table on wide screens, list on phones; the detail opens under the clicked row
@@ -774,20 +763,18 @@ function detailFrame(visual, title, sub, table, extra, action) {
 
 function playerDetail(row) {
   const mode = state.mode;
-  const card = cardMode(row.name);
-  const diffMode = mode === "All" ? card : mode;
+  const best = bestMode(row.name);
+  const diffMode = mode === "All" ? best : mode;
   const winMode = mode === "All" && row.victory ? mapMode[row.victory[2]] : mode;
   const r = (by, m = mode) => {
     const rank = m ? rankIn("players", by, m, row.name) : null;
     if (!rank) return null;
-    if (by === "difficulty") return [rank, `in ${m}${m === card ? ", the TOP on the card" : ""}`];
+    if (by === "difficulty") return [rank, `in ${m}${m === best ? ", the TOP on their profile" : ""}`];
     return [rank, m === "All" ? "" : `in ${m}`];
   };
   const jump = (by, m = mode) => () => go({ board: "players", by, mode: m, country: "", pick: row.name });
-  const visual = hasCard(row)
-    ? h("button", { class: "zoom", type: "button", "aria-label": `See ${row.name}'s card`, onclick: () => showCard(row.name) },
-      h("img", { class: "detail-card", src: asset(`assets/card/${row.name.toLowerCase()}.webp`), width: 500, height: 700, alt: "" }))
-    : (() => { const c = head(row.name); c.classList.add("big"); return c; })();
+  const visual = head(row.name);
+  visual.classList.add("big");
   return detailFrame(visual, [nameTag(row.name, "strong"), flag(row.country)], COUNTRIES[row.country] || null, [
     statRow("EXP", String(row.exp), r("exp"), jump("exp")),
     statRow("Hardest badge", row.best ? badgeLink(row.best[1], bestLabels[row.best[2]]) : "-", r("difficulty", diffMode), jump("difficulty", diffMode)),
@@ -804,7 +791,7 @@ function countryDetail(row) {
   const jump = (by) => () => go({ board: "countries", by, pick: row.code });
   const by = { victories: "victories", players: "exp", maps: "victories", badges: "badges", sky: "sky", difficulty: "difficulty" }[state.by];
   const top = build("players", by, state.mode, row.code).rows.slice(0, 5);
-  return detailFrame(flag(row.code, "flag podium-flag"), h("strong", {}, row.name), null, [
+  return detailFrame(flag(row.code, "flag podium-flag", true), h("strong", {}, row.name), null, [
     statRow("Hardest badge", row.best ? [badgeLink(row.best[1], bestLabels[row.best[2]]), h("span", { class: "dim" }, " by "), nameTag(row.best[3])] : "-", r("difficulty"), jump("difficulty")),
     statRow("Players", String(row.players), r("players"), jump("players")),
     statRow("Victories", String(row.victories), r("victories"), jump("victories")),

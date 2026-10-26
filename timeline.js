@@ -472,8 +472,7 @@ function renderTimeline() {
     running = null;
     play.textContent = "Play";
   }
-  play.addEventListener("click", () => {
-    if (running) return stop();
+  function start(pace) {
     if (Number(slider.value) >= total) {
       slider.value = 0;
       show(0);
@@ -489,11 +488,11 @@ function renderTimeline() {
         // quiet days are left out: the replay steps through the days something happened, the
         // speed counted in those days, so at 1 day a second each one shows for a second
         if (k == null) k = busy.findIndex((d) => d >= at) < 0 ? busy.length : busy.findIndex((d) => d >= at);
-        k += dt * speed;
+        k += dt * (pace || speed);
         at = Math.floor(k) < busy.length ? busy[Math.floor(k)] : total;
       } else {
         k = null;
-        at = Math.min(total, at + dt * speed);
+        at = Math.min(total, at + dt * (pace || speed));
       }
       const day = Math.round(at);
       if (day !== Number(slider.value)) {
@@ -504,7 +503,23 @@ function renderTimeline() {
       running = requestAnimationFrame(tick);
     };
     running = requestAnimationFrame(tick);
-  });
+  }
+  play.addEventListener("click", () => (running ? stop() : start()));
+
+  // the first time the board comes into view the replay plays itself once, from the release to
+  // the last day in about 8 seconds, so the race is seen without a click; touching anything in
+  // the timeline before that cancels it, Play pauses it, and with animations off it never runs
+  let touched = false;
+  for (const type of ["pointerdown", "keydown"]) box.addEventListener(type, () => { touched = true; });
+  const intro = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    intro.disconnect();
+    if (touched || calm.matches || running) return;
+    slider.value = 0;
+    show(0);
+    start(total / 8);
+  }, { threshold: 0.4 });
+  intro.observe(well);
 
   block.hidden = false;
   show(total);

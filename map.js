@@ -62,7 +62,7 @@ function renderSide() {
           ? `<b>${plural(victors.length, "victor")}</b><p>${esc(`First: ${first.name}, ${when(first.date)}`)}</p>${victors.length > 1 ? `<p>${esc(`Latest: ${last.name}, ${when(last.date)}`)}</p>` : ""}`
           : `<b>Unbeaten</b><p>Nobody has beaten ${esc(map.name)} yet.</p>${furthest[0] ? `<p>${esc(`Furthest: ${furthest[0].name} at ${furthest[0].step.code}`)}</p>` : ""}`)),
     h("ul", { class: "facts" },
-      h("li", {}, h("span", { class: "mode-chip" }, MODE_LETTER[map.gamemode]), map.gamemode),
+      h("li", {}, modeChip(map.gamemode), map.gamemode),
       h("li", {}, h("strong", {}, `#${map.rank}`), ` of ${map.ranked} rated maps`),
       h("li", {}, socket(map.tier), tierText(map.tier)),
       h("li", { class: "built" }, "Built by", builders(map.builder)),

@@ -122,15 +122,23 @@ function sword(tier, cls = "sword") {
   return h("img", { class: cls, src: asset(`assets/tier/tier${tier}.png`), alt: `Tier ${ROMAN[tier]}` });
 }
 
+// a gamemode's letter in its chip; the letters alone are ambiguous, so the full name is in its
+// tooltip wherever one appears (Texyle, website-feedbacks)
+function modeChip(mode) {
+  return tip(h("span", { class: "mode-chip", role: "img", "aria-label": mode, tabindex: "-1" }, MODE_LETTER[mode] || "-"), () => `<b>${esc(mode)}</b>`);
+}
+
 function socket(tier, cls = "") {
   if (!tier) return h("span");
   return h("span", { class: `socket ${cls}`.trim() }, sword(tier, "sword small"));
 }
 
 // a flag for every country here; the bot keeps "idk" for a player who never set one
-function flag(code, cls = "flag") {
+// flags are 48px, sharp at the 24px they are drawn in lists; a big one (the podium's 96px) comes
+// from the 192px set
+function flag(code, cls = "flag", big = false) {
   if (!COUNTRIES[code]) return null;
-  return h("img", { class: cls, src: asset(`assets/flag/${code}.png`), alt: COUNTRIES[code] || code.toUpperCase(), title: COUNTRIES[code] || "" });
+  return h("img", { class: cls, src: asset(`assets/flag/${big ? "big/" : ""}${code}.png`), alt: COUNTRIES[code] || code.toUpperCase(), title: COUNTRIES[code] || "" });
 }
 
 function tierText(tier) {
@@ -647,9 +655,39 @@ function measureBar() {
 addEventListener("resize", measureBar);
 measureBar();
 
+// The eye in the corner shows the map behind the page as it is, sharp and bright, with the page
+// out of the way, as the old site let you (Texyle, website-feedbacks). The eye again, a click on
+// the map or Escape brings the page back. The sharp picture loads only then.
+const EYE = '<svg class="icon" viewBox="0 0 8 8" aria-hidden="true"><path d="M2 1h4v1h-4zM1 2h1v1h-1zM6 2h1v1h-1zM0 3h1v2h-1zM3 3h2v2h-2zM7 3h1v2h-1zM1 5h1v1h-1zM6 5h1v1h-1zM2 6h4v1h-4z"/></svg>';
+
+function initEye() {
+  if (!document.querySelector(".world")) return;
+  const button = h("button", { class: "button eye", type: "button", "aria-pressed": "false", "aria-label": "Show the background" });
+  button.innerHTML = EYE;
+  const sharp = h("div", { class: "world-sharp", "aria-hidden": "true" });
+  const bare = () => document.body.classList.contains("bare");
+  const set = (on) => {
+    if (on) {
+      const worlds = document.querySelectorAll(".world");
+      const current = getComputedStyle(worlds[worlds.length - 1]).getPropertyValue("--world");
+      sharp.style.setProperty("--world", current.replace("assets/world/", "assets/world/sharp/"));
+    }
+    document.body.classList.toggle("bare", on);
+    button.setAttribute("aria-pressed", String(on));
+    button.setAttribute("aria-label", on ? "Show the page" : "Show the background");
+  };
+  button.addEventListener("click", () => set(!bare()));
+  sharp.addEventListener("click", () => set(false));
+  addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && bare()) set(false);
+  });
+  document.body.append(sharp, tip(button, () => (bare() ? "<b>Show the page</b>" : "<b>Show the background</b><p>The map behind the page, sharp</p>")));
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   document.body.append(tooltip);
   initSearch();
   initMenu();
   initAccount();
+  initEye();
 });

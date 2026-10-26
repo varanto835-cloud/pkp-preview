@@ -92,7 +92,7 @@ function fillBadges() {
     const row = h("li", { class: mine ? "yours" : null },
       h("span", { class: "dim" }, `${i + 1}.`),
       pill("a", { class: "pill", href: linkOf(b) }, roleOf(colours), map, token),
-      h("span", { class: "mode-chip", title: mode }, MODE_LETTER[mode]),
+      modeChip(mode),
       h("span", { class: "meta" },
         h("span", { class: "worth" }, `${expOf(worth)} EXP`),
         h("span", { class: "dim" }, holders ? plural(holders, "player") : "nobody yet"),

@@ -30,7 +30,7 @@ function renderSide() {
   side.append(...[
     h("h1", { class: `badge-name${badge.end ? " blend" : ""}${badge.third ? " holo" : ""}`, style: nameColours(badge.color, badge.end, badge.third), "data-text": badge.name }, badge.name),
     h("ul", { class: "facts" },
-      h("li", {}, h("span", { class: "mode-chip" }, MODE_LETTER[badge.gamemode]), mapPage ? h("a", { href: mapPage }, badge.map) : badge.map),
+      h("li", {}, modeChip(badge.gamemode), mapPage ? h("a", { href: mapPage }, badge.map) : badge.map),
       h("li", {}, socket(badge.tier), tierText(badge.tier)),
       badge.code !== "VICTOR" ? h("li", {}, `Earned at ${badge.code}`) : h("li", {}, "Earned by beating the map")),
     h("section", { class: "win", "aria-labelledby": "rarity-title" },

@@ -1756,8 +1756,7 @@ button.pill {
 }
 
 .podium-visual,
-.podium-label,
-.zoom {
+.podium-label {
   padding: 0;
   border: 0;
   font: inherit;
@@ -1765,10 +1764,6 @@ button.pill {
   text-shadow: inherit;
   background: none;
   cursor: pointer;
-}
-
-.zoom {
-  cursor: zoom-in;
 }
 
 .podium-visual {
@@ -2024,34 +2019,6 @@ button.pill {
   font-size: 54px;
   line-height: 60px;
   text-shadow: 6px 6px 0 #000;
-}
-
-/* a card at full size, over the page */
-
-.card-view {
-  max-width: none;
-  max-height: none;
-  padding: 0;
-  border: 0;
-  background: none;
-  overflow: visible;
-}
-
-.card-view[open] {
-  display: grid;
-  justify-items: center;
-  gap: 16px;
-}
-
-.card-view::backdrop {
-  background: rgba(0, 0, 0, 0.8);
-}
-
-.card-view img {
-  display: block;
-  width: min(500px, 90vw, calc((100vh - 120px) / 1.4));
-  height: auto;
-  filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.7));
 }
 
 /* the table */
@@ -2387,13 +2354,6 @@ li.detail-row {
   display: grid;
   place-items: center;
   min-width: 96px;
-}
-
-.detail-card {
-  display: block;
-  width: 200px;
-  height: auto;
-  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.55));
 }
 
 .detail-visual .tile {
@@ -2898,10 +2858,6 @@ html.calm .name.blend {
     gap: 20px;
   }
 
-  .detail-card {
-    width: 160px;
-  }
-
   .detail-stats th {
     width: 140px;
   }
@@ -3132,10 +3088,6 @@ html.calm .name.blend {
     grid-template-columns: minmax(0, 1fr);
     gap: 16px;
     padding: 14px 12px;
-  }
-
-  .detail-card {
-    width: 180px;
   }
 
   .detail-visual .tile {
@@ -6427,6 +6379,58 @@ html.calm .beacon-row.summit .layer::after {
     font-size: 18px;
     line-height: 28px;
     text-shadow: 2px 2px 0 #3f3f3f;
+  }
+}
+
+/* the eye: the map behind the page, sharp and bright, with the page out of the way */
+
+.eye {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+}
+
+.eye .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.eye[aria-pressed="true"] {
+  border-image-source: url("assets/gui/button-hover.png");
+  color: var(--hover);
+}
+
+.world-sharp {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: var(--world, none) center / cover no-repeat, #101010;
+  opacity: 0;
+  transition: opacity 400ms ease-out;
+  pointer-events: none;
+}
+
+.bare .world-sharp {
+  z-index: 40;
+  opacity: 1;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+html.calm .world-sharp {
+  transition: none;
+}
+
+/* the search page's buttons stick to the foot of a phone's screen, so the eye sits above them */
+@media (max-width: 760px) {
+  .finding .eye {
+    bottom: 80px;
   }
 }
 

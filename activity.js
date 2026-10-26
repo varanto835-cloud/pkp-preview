@@ -2,7 +2,9 @@ const PERIODS = [[7, "7 days", "Last 7 days"], [30, "30 days", "Last 30 days"], 
 const SHOWS = [["all", "All"], ["big", "Big moments"], ["victories", "Victories"], ["progress", "Progress"]];
 const MODES = [["All", "All"], ["Rankup", "Rankup"], ["Segmented", "Segmented"], ["Onlysprint", "Onlysprint"], ["Miscellaneous", "Misc"]];
 const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const XP_TITLE = { v: "Challenge Complete!", t: "Goal Reached!", r: "Goal Reached!", s: "Advancement Made!", m: "New Map!" };
+// in the game's toast style but the site's own words, so they never read as the achievements
+// to come (Texyle: rename them now)
+const XP_TITLE = { v: "Map Beaten!", t: "Tier Acquired!", r: "New Rank!", s: "Step Reached!", m: "New Map!" };
 // the site will keep each visitor's last visit in their browser; the mockup fixes it on this day
 const LAST_VISIT = "2026-09-16";
 
