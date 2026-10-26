@@ -96,7 +96,7 @@ const mapCatalog = [
   ["GCXV","Rankup",0,9,37.0,89,0,51,["2021-01-18","greypk"],["2026-09-02","Irongolas"],0.7,"sky","XM, Kratos, Hulk1050","2020-06-02",null,"https://youtu.be/X2qo-mbouLY",18,"gcxv",null,0.155,66],
   ["Olympus","Rankup",0,10,118.0,28,16,25,["2024-07-21","xBonkZ14"],["2026-05-14","bartelox9"],2.3,"sky","SeanStricklandPK","2024-07-18",null,"https://www.youtube.com/watch?v=WWx3MMCXigk",26,"olympus",null,0.076,65],
   ["Jumpcraft XII","Rankup",0,11,115.0,11,37,24,["2021-07-19","carterbear06"],["2026-08-13","MegaTop4ick"],2.0,"sky","HelloSarina","2018-04-29",null,"https://www.youtube.com/watch?v=AVXHNbCnqOs",25,"jumpcraftxii",null,0.137,22],
-  ["Arcvale","Rankup",0,12,104.0,12,8,8,["2025-12-17","hypickle_nub"],["2026-09-07","dongdong1103"],10.2,"sky","AsianLife","2025-12-14",null,null,62,null,null,null,122],
+  ["Arcvale","Rankup",0,12,104.0,12,8,8,["2025-12-17","hypickle_nub"],["2026-09-07","dongdong1103"],10.2,"sky","AsianLife","2025-12-14",null,null,62,"arcvale",null,0.058,122],
   ["Space","Rankup",0,12,26.0,29,0,15,["2023-05-06","xBonkZ14"],["2026-07-17","Louka15"],0.3,"sky","Kratos and WhyThough","2023-04-18",null,"https://www.youtube.com/watch?v=1YqOdII1_Ks",1,"space",null,0.048,9],
   ["Origin","Rankup",0,13,17.0,38,0,6,["2025-10-28","hypickle_nub"],["2026-08-22","bluebear99"],1.0,"sky","Astral_Aria & RubyGemstoneCat","2025-10-27",null,"https://www.youtube.com/watch?v=cHDUhCgNfmE",57,"origin",null,0.555,39],
   ["Pizzeria","Rankup",0,13,96.0,53,15,39,["2022-09-19","Supermoar"],["2026-08-27","Xigua_Meow"],0.7,"sky","OGNamess","2022-09-11",null,"https://www.youtube.com/watch?v=gbPNJDBPpr4",46,"pizzeria",null,0.054,39],

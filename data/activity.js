@@ -182,7 +182,7 @@ const activityMaps = {
   "Abyss": {"mode":"Rankup","tier":2,"b":76,"world":"abyss","light":0.256,"tile":"abyss","victors":27,"builder":"AsianLife"},
   "Achilles": {"mode":"Segmented","tier":5,"b":152,"world":"achilles","light":0.26,"tile":"achilles","victors":18,"builder":"Leg0shi_"},
   "Arcade 3": {"mode":"Rankup","tier":3,"b":4,"world":"arcade3","light":0.185,"tile":"arcade3","victors":77,"builder":"_XM_"},
-  "Arcvale": {"mode":"Rankup","tier":4,"b":43,"world":null,"light":null,"tile":null,"victors":12,"builder":"AsianLife"},
+  "Arcvale": {"mode":"Rankup","tier":4,"b":43,"world":"arcvale","light":0.058,"tile":"arcvale","victors":12,"builder":"AsianLife"},
   "Arkyter Section": {"mode":"Segmented","tier":4,"b":82,"world":"arkytersection","light":0.065,"tile":"arkytersection","victors":20,"builder":"Arkyter"},
   "Ascent": {"mode":"Rankup","tier":4,"b":30,"world":"ascent","light":0.074,"tile":"ascent","victors":45,"builder":"abax27"},
   "Bonus 11": {"mode":"Rankup","tier":2,"b":79,"world":"bonus11","light":0.155,"tile":"bonus11","victors":87,"builder":"Fuzzbearplush"},
