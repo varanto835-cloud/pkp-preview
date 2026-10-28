@@ -378,16 +378,28 @@ ol {
   background-clip: padding-box;
 }
 
+/* the title and the swords are cut into the block, both as deep, the block's own texture
+   showing through. Light comes from the top left: the top and left walls in shade, stepped
+   darker toward the floor, the bottom and right ones lit, a shadow cast on the floor */
 .win.material .win-title {
-  margin: 0 0 8px;
-  padding: 2px 8px 4px;
-  background: rgba(0, 0, 0, 0.62);
+  margin: 2px 0 8px;
+  padding: 0 8px 0 2px;
+  border-style: solid;
+  border-width: 12px 4px 4px 12px;
+  border-image: url("assets/gui/carve.png") 6 2 2 6 fill / 12px 4px 4px 12px;
+  image-rendering: pixelated;
   color: var(--white);
   text-shadow: var(--shadow);
 }
 
+.win.material .well {
+  padding: 6px 14px 14px 6px;
+  border-width: 12px 4px 4px 12px;
+  border-image: url("assets/gui/carve.png") 6 2 2 6 fill / 12px 4px 4px 12px;
+}
+
 .win.material .win-title small {
-  color: var(--dim);
+  color: var(--face);
   text-shadow: 2px 2px 0 #2a2a2a;
 }
 
@@ -543,7 +555,6 @@ a.pill {
 .slot.part img,
 .slot.empty img {
   opacity: 0.35;
-  filter: grayscale(1);
 }
 
 .slot.empty img {
@@ -1472,21 +1483,91 @@ button.pill {
   flex: none;
 }
 
+/* the facts in two columns, the players then the badges, the numbers white on grey words */
+.tier-facts {
+  display: grid;
+  grid-template-rows: auto auto;
+  grid-auto-flow: column;
+  justify-content: start;
+  gap: 0 72px;
+  color: var(--dim);
+}
+
+.tier-facts li {
+  display: block;
+}
+
+.tier-facts strong {
+  font-weight: 400;
+  color: var(--white);
+}
+
+/* the title of the badges, and the gamemodes on its right */
+.tier-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 32px;
+  margin: 0 0 12px;
+}
+
+.tier-bar .win-title {
+  margin: 0;
+  color: var(--white);
+  text-shadow: var(--shadow);
+}
+
+.tier-bar .lb-filters {
+  margin: 0;
+}
+
+/* the header and the rows share the columns: number, tick, gamemode, badge, EXP, holders */
+.tier-head,
 .tier-badges li {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) 32px 112px 144px 88px;
+  grid-template-columns: 40px 48px 96px minmax(0, 1fr) 112px 144px;
   align-items: center;
-  gap: 12px;
+  gap: 12px 20px;
+}
+
+.no-held .tier-head,
+.no-held .tier-badges li {
+  grid-template-columns: 40px 96px minmax(0, 1fr) 112px 144px;
+}
+
+.tier-badges li {
   padding: 4px 0;
+}
+
+.tier-head {
+  margin-bottom: 4px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--d37);
+  color: var(--dim);
+  text-shadow: 2px 2px 0 #2a2a2a;
+  white-space: nowrap;
+}
+
+.tier-head .c-sort {
+  display: none;
+}
+
+.tier-head .c-held,
+.tier-head .c-mode {
+  text-align: center;
+}
+
+.tier-head .c-exp {
+  text-align: right;
 }
 
 .tier-badges .pill {
   justify-self: start;
 }
 
-/* the EXP and the holders are columns of the row on a wide screen, a line under the badge on a phone */
-.tier-badges .meta {
-  display: contents;
+.tier-badges .mode-chip {
+  justify-self: center;
 }
 
 .tier-badges .worth {
@@ -1494,7 +1575,8 @@ button.pill {
 }
 
 /* "100 players" stays on one line */
-.tier-badges .meta > span {
+.tier-badges .worth,
+.tier-badges .held-by {
   white-space: nowrap;
 }
 
@@ -1503,16 +1585,54 @@ button.pill {
 }
 
 .tier-badges .mine {
+  justify-self: center;
   display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  padding: 4px;
+  border: 0;
   color: var(--t9);
+  background: none;
 }
 
 .tier-badges .mine .icon {
   width: 16px;
   height: 16px;
   fill: currentColor;
+}
+
+.tier-head .short {
+  display: none;
+}
+
+/* between a phone and a wide screen the gamemode column is only as wide as "Mode", and a long
+   badge takes two lines */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .tier-head,
+  .tier-badges li {
+    grid-template-columns: 40px 48px 48px minmax(0, 1fr) 96px 120px;
+    column-gap: 12px;
+  }
+
+  .no-held .tier-head,
+  .no-held .tier-badges li {
+    grid-template-columns: 40px 48px minmax(0, 1fr) 96px 120px;
+  }
+
+  .tier-head .long {
+    display: none;
+  }
+
+  .tier-head .short {
+    display: inline;
+  }
+
+  .tier-badges .pill {
+    white-space: normal;
+    align-items: start;
+  }
+
+  .tier-badges .pill .dot {
+    margin-top: 8px;
+  }
 }
 
 /* who stopped here: two columns only where a name and its badge fit side by side */
@@ -2126,7 +2246,8 @@ button.pill {
   text-align: left;
 }
 
-.lb-table th button {
+.lb-table th button,
+.tier-head button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -2139,11 +2260,13 @@ button.pill {
   cursor: pointer;
 }
 
-.lb-table th button:hover {
+.lb-table th button:hover,
+.tier-head button:hover {
   color: var(--white);
 }
 
-.lb-table th button.sorted {
+.lb-table th button.sorted,
+.tier-head button.sorted {
   color: var(--hover);
   text-decoration: underline;
   text-underline-offset: 6px;
@@ -2679,6 +2802,10 @@ html.calm .name.blend {
     padding: 12px;
   }
 
+  .win.material .well {
+    padding: 2px 10px 10px 2px;
+  }
+
   .step {
     grid-template-columns: 16px minmax(0, 1fr) 88px 24px;
   }
@@ -2743,30 +2870,59 @@ html.calm .name.blend {
     row-gap: 0;
   }
 
-  .tier-badges li {
-    grid-template-columns: 28px minmax(0, 1fr);
+  .tier-facts {
+    grid-template-rows: none;
+    grid-auto-flow: row;
+  }
+
+  /* only the sortable columns are left in the header, as a line of choices */
+  .tier-head,
+  .no-held .tier-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+  }
+
+  .tier-head .c-sort {
+    display: inline;
+  }
+
+  .tier-head .c-n,
+  .tier-head .c-mode,
+  .tier-head .c-badge {
+    display: none;
+  }
+
+  /* the badge gets the first line, its EXP, holders and a tick if it is yours the second */
+  .tier-badges li,
+  .no-held .tier-badges li {
+    grid-template-columns: 28px auto minmax(0, 1fr) auto;
     row-gap: 0;
+  }
+
+  .tier-badges li > :first-child {
+    grid-area: 1 / 1;
+  }
+
+  .tier-badges .pill {
+    grid-area: 1 / 2 / 2 / -1;
   }
 
   .tier-badges .mode-chip {
     display: none;
   }
 
-  /* the badge gets the first line, its EXP, holders and a tick if it is yours the second */
-  .tier-badges .meta {
-    display: flex;
-    gap: 12px;
-    grid-column: 2 / -1;
-    grid-row: 2;
-    white-space: nowrap;
+  .tier-badges .worth {
+    grid-area: 2 / 2;
+    text-align: left;
+  }
+
+  .tier-badges .held-by {
+    grid-area: 2 / 3;
   }
 
   .tier-badges .mine {
-    margin-left: auto;
-  }
-
-  .tier-badges .mine-word {
-    display: none;
+    grid-area: 2 / 4;
   }
 
   .hero h1.tier-name {
@@ -4815,6 +4971,11 @@ body.home {
   font-weight: 700;
 }
 
+/* a click has antoultrav and Texyle write it (index.js) */
+.home-name.replay {
+  cursor: pointer;
+}
+
 .welcome {
   font-size: 27px;
   line-height: 36px;
@@ -5111,24 +5272,24 @@ html.calm .build-line::after {
 }
 
 .door-place img {
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.6);
 }
 
 /* each face stands on a block of its place's material, the first highest */
 .door-place i {
   display: block;
-  width: 40px;
+  width: 56px;
   height: var(--rise);
-  background: var(--mat) 0 0 / 20px 20px;
+  background: var(--mat) 0 0 / 28px 28px;
   box-shadow: inset 0 2px rgba(255, 255, 255, 0.3), inset 0 -2px rgba(0, 0, 0, 0.45);
   image-rendering: pixelated;
 }
 
-.door-place.p1 { --rise: 28px; --mat: url("assets/gui/mat-5.png"); }
-.door-place.p2 { --rise: 18px; --mat: url("assets/gui/mat-4.png"); }
-.door-place.p3 { --rise: 10px; --mat: url("assets/gui/mat-3.png"); }
+.door-place.p1 { --rise: 30px; --mat: url("assets/gui/mat-5.png"); }
+.door-place.p2 { --rise: 20px; --mat: url("assets/gui/mat-4.png"); }
+.door-place.p3 { --rise: 12px; --mat: url("assets/gui/mat-3.png"); }
 
 .door-face {
   position: absolute;
@@ -5448,14 +5609,10 @@ html.calm .build-line::after {
   transition: --at 520ms cubic-bezier(0.3, 0.7, 0.2, 1) calc(var(--i, 0) * 30ms);
 }
 
-.beacon.counted .beacon-row {
+/* pointed: the mouse is on the pyramid (index.js) */
+.beacon.counted .beacon-row,
+.beacon.pointed .beacon-row {
   --at: var(--p, 1);
-}
-
-@media (hover: hover) {
-  .beacon:hover .beacon-row {
-    --at: var(--p, 1);
-  }
 }
 
 html.calm .beacon-row {

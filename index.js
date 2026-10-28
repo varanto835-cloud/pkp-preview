@@ -96,11 +96,10 @@ function stageWho(m) {
 // as on the podium: a backflip for whoever beat the map, a spin for whoever is closest to it.
 let stageViewer = null;
 let stageRun = 0;
-// the title and the stage's player take turns, overlapping only at the end of each. At load the
-// title goes first and the stage's player comes on once it is written and "Welcome to" is in its
-// place, while Texyle sits down (titleHolds); a title that comes into view later waits until the
-// stage's player has landed (stageBusy); and the stage doesn't turn until the title is built
-// (titleBusy)
+// the title and the stage's player take turns, overlapping only at the end of each. A title that is
+// clicked waits until the stage's player has landed (stageBusy); a stage player due meanwhile comes
+// on once the title is written and "Welcome to" is in its place, while Texyle sits down
+// (titleHolds); and the stage doesn't turn until the title is built (titleBusy)
 let stageBusy = false;
 let titleBusy = false;
 let titleHolds = false;
@@ -284,8 +283,8 @@ function wakeIdle() {
 // idea, 2026-10-15). Starting from the top, they take about 2.5s on a phone and 3.3s on a wide
 // screen. Every pose eases on springs. A figure that is clicked flinches, is knocked back and goes
 // red, as in the game, and its hits heal after a while; ten hits and it falls over, goes up in
-// smoke and comes in again. It plays once, the first time the title comes into view; with
-// animations off it is all simply there, the two of them sitting on it.
+// smoke and comes in again. Until then the title is simply written, with nobody on it; it plays
+// once, when the title is clicked. With animations off the click just sits the two of them on it.
 const BUILDER = "antoultrav";
 const FRIEND = "Texyle";
 // a little faster than a sprint-jump in the game, in figure heights a second
@@ -467,25 +466,15 @@ function renderTitle() {
   // a box for each of them; index.js moves it, and its bottom is where the feet are
   const spots = [h("span", { class: "title-builder" }), h("span", { class: "title-builder" })];
   line.append(...spots);
-  // the page starts with the title unbuilt (index.html), so it never shows before it is built
-  if (calm.matches) {
-    title.classList.remove("building");
-    buildTitle(line, spots, true);
-    return;
-  }
-  // in view at load, the title goes first and the stage's player waits for it
-  const box = title.getBoundingClientRect();
-  if (box.top >= 0 && box.bottom <= innerHeight) titleHolds = titleBusy = true;
-  if (!("IntersectionObserver" in window)) {
-    buildTitle(line, spots);
-    return;
-  }
-  const watch = new IntersectionObserver(([entry]) => {
-    if (!entry.isIntersecting) return;
-    watch.disconnect();
-    buildTitle(line, spots);
-  }, { threshold: 0.6 });
-  watch.observe(title);
+  // the title is simply there, and a click on it has them write it. Playing at every visit was too
+  // much movement at once (Texyle and Quartz, website-feedbacks)
+  title.classList.add("replay");
+  // the 3D starts loading as the pointer comes onto the title, so the click doesn't wait as long
+  title.addEventListener("pointerenter", () => getBuilderViewer().catch(() => {}), { once: true });
+  title.addEventListener("click", () => {
+    title.classList.remove("replay");
+    buildTitle(line, spots, calm.matches);
+  }, { once: true });
 }
 
 // where a point on one of the figure's parts lands on its canvas, in CSS pixels, for the pose the
@@ -699,15 +688,7 @@ async function buildTitle(line, spots, still = false) {
       figure(BUILDER, spots[0], getBuilderViewer()),
     ]);
   } catch {
-    // no 3D here: the letters still go down one by one, and "Welcome to" comes after them
-    if (!still) {
-      await new Promise((resolve) => {
-        boxes.forEach((box, i) => setTimeout(() => {
-          box.classList.add("set");
-          if (i === boxes.length - 1) resolve();
-        }, i * 45));
-      });
-    }
+    // no 3D here: the title stays as it is
     done();
     return;
   }
@@ -765,6 +746,10 @@ async function buildTitle(line, spots, still = false) {
   titleHolds = true;
   const asked = performance.now();
   while (stageBusy && performance.now() - asked < 6000) await new Promise((resolve) => setTimeout(resolve, 100));
+  // the written title goes, to be written again
+  title.classList.add("building");
+  boxes.forEach((box) => box.classList.remove("set"));
+  welcome.classList.remove("placed");
   m = measure();
   const set = new Array(letters).fill(false);
   // the top of the letter at i: the capitals, the "!" and the tall small letters reach the top,
@@ -1461,8 +1446,11 @@ function renderStage() {
   // the world darkens once the stage is mostly out of view, as the game's does behind other screens
   if ("IntersectionObserver" in window) new IntersectionObserver(([entry]) => document.body.classList.toggle("stage-on", entry.intersectionRatio >= 0.5), { threshold: [0, 0.5, 1] }).observe(stage);
   if (calm.matches) return;
-  stage.addEventListener("mouseenter", () => { held = true; });
-  stage.addEventListener("mouseleave", () => { held = false; });
+  // only the map's picture holds the turn, the whole stage was too big a place to keep clear of
+  // (Texyle, website-feedbacks)
+  const view = document.getElementById("stage-view");
+  view.addEventListener("mouseenter", () => { held = true; });
+  view.addEventListener("mouseleave", () => { held = false; });
   stage.addEventListener("focusin", () => { held = true; });
   stage.addEventListener("focusout", () => { held = false; });
   if ("IntersectionObserver" in window) {
@@ -1474,7 +1462,7 @@ function renderStage() {
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) wakeIdle();
   });
-  // the time only runs while the stage is in view and nobody is pointing at it
+  // the time only runs while the stage is in view and nobody is pointing at its picture
   let spent = 0;
   let before = performance.now();
   setInterval(() => {
@@ -1575,7 +1563,7 @@ function renderDoors() {
     ]),
     door("maps.html", `assets/tile/thumb_${newestSlug}.jpg`, null, "Maps", [
       [`${home.maps} maps, `, h("span", { class: "hl" }, `${home.unbeaten.length} unbeaten`)],
-      ["New: ", paintedMap(newest[0], badgeOf(newest[3])), `, ${shortDay(newest[1])}`],
+      ["Recently added: ", paintedMap(newest[0], badgeOf(newest[3])), `, ${shortDay(newest[1])}`],
     ]),
   );
 }
@@ -1702,6 +1690,16 @@ function layoutBeacon() {
   });
 }
 
+function onPyramid(box, event) {
+  const block = parseFloat(box.style.getPropertyValue("--block"));
+  for (const row of box.querySelectorAll(".beacon-row")) {
+    const r = row.getBoundingClientRect();
+    if (event.clientY < r.top || event.clientY >= r.bottom) continue;
+    return Math.abs(event.clientX - (r.left + r.width / 2)) <= (Number(row.style.getPropertyValue("--w")) * block) / 2;
+  }
+  return false;
+}
+
 function beaconTag(name, note) {
   return h("span", { class: "beacon-tag" }, head(name), nameTag(name), note ? h("span", { class: "dim" }, note) : null);
 }
@@ -1740,6 +1738,13 @@ function renderBeacon() {
     size.textContent = counted ? "Back to the beacon" : "Size by players";
   });
   if ("ResizeObserver" in window) new ResizeObserver(layoutBeacon).observe(box);
+  // the layers size by players while the mouse is on the pyramid itself, as it stands at rest (Texyle:
+  // the whole box was too big). That shape never moves, so a layer can shrink under the mouse
+  // without letting go of it
+  box.addEventListener("pointermove", (event) => {
+    if (event.pointerType === "mouse") box.classList.toggle("pointed", onPyramid(box, event));
+  });
+  box.addEventListener("pointerleave", () => box.classList.remove("pointed"));
   // the beam rises once, the first time the beacon comes into view
   if (calm.matches || !("IntersectionObserver" in window)) {
     box.classList.add("lit");

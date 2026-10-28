@@ -6,11 +6,12 @@
   <title>Tier - Parkour Progress</title>
   <meta name="description" content="A Parkour Progress tier: every badge in it, easiest first, and the players whose hardest badge stopped there.">
   <meta property="og:site_name" content="Parkour Progress">
-  <link rel="stylesheet" href="site.css?v=2610261200">
+  <link rel="stylesheet" href="site.css?v=2610281400">
 </head>
 <body>
   <svg class="sprites" aria-hidden="true">
     <symbol id="i-search" viewBox="0 0 8 8"><path d="M1 0h4v1h-4zM0 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM5 2h1v1h-1zM0 3h1v1h-1zM5 3h1v1h-1zM1 4h4v1h-4zM5 5h2v1h-2zM6 6h2v1h-2z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 8 8"><path d="M4 0h1v1h-1zM4 1h2v1h-2zM0 2h7v1h-7zM0 3h8v1h-8zM0 4h7v1h-7zM4 5h2v1h-2zM4 6h1v1h-1z"/></symbol>
     <symbol id="i-check" viewBox="0 0 8 8"><path d="M7 1h1v1h-1zM6 2h1v1h-1zM5 3h1v1h-1zM0 4h1v1h-1zM4 4h1v1h-1zM1 5h1v1h-1zM3 5h1v1h-1zM2 6h1v1h-1z"/></symbol>
   </svg>
   <div class="world" id="world"></div>
@@ -41,9 +42,15 @@
     </section>
 
     <section class="block" aria-labelledby="badges-title">
-      <h2 class="win-title" id="badges-title"></h2>
+      <div class="tier-bar">
+        <h2 class="win-title" id="badges-title"></h2>
+        <div class="lb-filters" id="filters"></div>
+      </div>
       <div class="win material" id="badges-win">
-        <ol class="well tier-badges" id="badges"></ol>
+        <div class="well" id="badges-well">
+          <div class="tier-head" id="badges-head"></div>
+          <ol class="tier-badges" id="badges"></ol>
+        </div>
       </div>
     </section>
 
@@ -60,10 +67,10 @@
     </footer>
   </main>
 
-  <script src="data/search.js?v=2610261200"></script>
-  <script src="data/names.js?v=2610261200"></script>
-  <script src="data/tiers.js?v=2610261200"></script>
-  <script src="site.js?v=2610261200"></script>
-  <script src="tier.js?v=2610261200"></script>
+  <script src="data/search.js?v=2610281400"></script>
+  <script src="data/names.js?v=2610281400"></script>
+  <script src="data/tiers.js?v=2610281400"></script>
+  <script src="site.js?v=2610281400"></script>
+  <script src="tier.js?v=2610281400"></script>
 </body>
 </html>
