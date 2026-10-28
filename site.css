@@ -5018,7 +5018,8 @@ body.home {
   pointer-events: none;
   opacity: 1;
   transition: opacity 900ms ease-out;
-  animation: enchant 9s linear infinite;
+  /* started 2.5s in, so the first sheen is already on the first letters and not 2s away */
+  animation: enchant 9s -2.5s linear infinite;
 }
 
 .home-name.building .build-line::after {
