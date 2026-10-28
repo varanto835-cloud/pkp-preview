@@ -172,7 +172,8 @@ function fillBadges() {
     const [, name, colours, map, , mode, worth, , holders, held, page, day, by] = b;
     const mine = Boolean(me && held);
     const token = name.split(" | ")[1];
-    const row = h("li", {},
+    // the whole row opens what its pill does, as a leaderboard row does; the tick keeps its tap
+    const row = h("li", { onclick: (event) => { if (!event.target.closest("a, button")) location.href = linkOf(b); } },
       h("span", { class: "dim" }, `${i + 1}.`),
       me ? (mine ? tick(day, by) : h("span")) : null,
       modeChip(mode),

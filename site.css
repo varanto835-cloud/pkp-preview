@@ -1536,13 +1536,30 @@ button.pill {
   grid-template-columns: 40px 96px minmax(0, 1fr) 112px 144px;
 }
 
+/* the leaderboards' table: their solid well, with the tier's material only as the frame around it
+   (Texyle: the texture behind the rows was too much), striped rows lit under the pointer */
+.win.material .well.lb-body {
+  padding: 6px 10px 10px;
+  border-width: 2px;
+  border-image: url("assets/gui/well.png") 1 fill / 2px;
+}
+
 .tier-badges li {
-  padding: 4px 0;
+  padding: 5px 10px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.tier-badges li:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tier-badges li:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .tier-head {
-  margin-bottom: 4px;
-  padding-bottom: 6px;
+  padding: 4px 10px 8px;
   border-bottom: 2px solid var(--d37);
   color: var(--dim);
   text-shadow: 2px 2px 0 #2a2a2a;
@@ -1582,6 +1599,8 @@ button.pill {
 
 .tier-badges li.none {
   display: block;
+  cursor: auto;
+  background: none;
 }
 
 .tier-badges .mine {
@@ -1642,6 +1661,11 @@ button.pill {
 
 .tooltip .tip-pill {
   margin: 2px 0 4px;
+}
+
+/* a line left empty over it, where a map's tooltip used to say "Badge" */
+.tooltip .tip-pill.apart {
+  margin-top: 28px;
 }
 
 .tooltip .pill {
@@ -2806,6 +2830,10 @@ html.calm .name.blend {
     padding: 2px 10px 10px 2px;
   }
 
+  .win.material .well.lb-body {
+    padding: 12px;
+  }
+
   .step {
     grid-template-columns: 16px minmax(0, 1fr) 88px 24px;
   }
@@ -2881,6 +2909,7 @@ html.calm .name.blend {
     display: flex;
     flex-wrap: wrap;
     gap: 4px 14px;
+    padding: 4px 6px 8px;
   }
 
   .tier-head .c-sort {
@@ -2894,10 +2923,12 @@ html.calm .name.blend {
   }
 
   /* the badge gets the first line, its EXP, holders and a tick if it is yours the second */
+  /* spaced as the leaderboards' rows on a phone */
   .tier-badges li,
   .no-held .tier-badges li {
     grid-template-columns: 28px auto minmax(0, 1fr) auto;
-    row-gap: 0;
+    gap: 0 10px;
+    padding: 5px 6px;
   }
 
   .tier-badges li > :first-child {
@@ -4338,7 +4369,8 @@ a.map-link:focus-visible {
   text-shadow: 2px 2px 0 #404028;
 }
 
-.map-facts .on {
+/* "7 victors, 23 climbing" or "Furthest" is the card's line in bold, not the builders (Texyle) */
+.map-facts {
   font-weight: 700;
 }
 
@@ -4355,6 +4387,7 @@ a.map-link:focus-visible {
 
 .map-card .builder {
   max-width: 100%;
+  font-weight: 400;
   overflow: hidden;
   white-space: nowrap;
 }
@@ -4388,7 +4421,7 @@ a.map-link:focus-visible {
 .col-hardest { width: 96px; }
 .col-exp { width: 72px; }
 .col-victors { width: 100px; }
-.col-players { width: 80px; }
+.col-players { width: 112px; }
 .col-steps { width: 80px; }
 .col-avg { width: 120px; }
 .col-fails { width: 84px; }

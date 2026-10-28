@@ -1,6 +1,6 @@
 const MODES = [["All", "All"], ["Rankup", "Rankup"], ["Segmented", "Segmented"], ["Onlysprint", "Onlysprint"], ["Miscellaneous", "Misc"]];
 const SORTS = [
-  ["list", "Server order"], ["hardest", "Hardest"], ["victors", "Most victors"], ["players", "Most on it"],
+  ["list", "Server order"], ["hardest", "Hardest"], ["victors", "Most victors"], ["players", "Most climbing"],
   ["avg", "Avg fails"], ["fails", "Total fails"], ["newest", "Newest"], ["beaten", "Last beaten"], ["first", "First beaten"], ["name", "Name"],
 ];
 const SHOWS = [["all", "All"], ["beaten", "Beaten"], ["unbeaten", "Unbeaten"], ["extra", "Extra"], ["legacy", "Legacy"]];
@@ -14,6 +14,7 @@ const maps = mapCatalog.map((r, i) => ({
   i, name: r[0], mode: r[1], list: LISTS[r[2]], extra: r[2] === 1, legacy: r[2] === 2, position: r[3], value: r[4], tier: tierOf(r[4]),
   victors: r[5], on: r[6], steps: r[7], first: r[8], last: r[9], avg: r[10], failsLabel: r[11],
   builder: r[12], released: r[13], verified: r[14], video: r[15], badge: r[16], shot: r[17], far: r[18], light: r[19], fails: r[20],
+  holders: mapHolders[i],
 }));
 
 let state = readUrl();
@@ -94,21 +95,25 @@ function victorsText(m) {
   return m.victors ? plural(m.victors, "victor") : "Unbeaten";
 }
 
-function mapTip(m) {
+// the tooltip leaves out what is already under the picture or in the row (Texyle): `where` is
+// "card", "challenge" (a Still unbeaten card) or "table"
+function mapTip(m, where) {
   const badge = badgeOf(m.badge);
   const lines = [`<b style="color:${badge ? headingColour(badge.color, badge.end, badge.third) : "#fff"}">${esc(m.name)}</b>`,
     `<p>${esc(m.mode)}${m.extra ? ", Extra" : m.legacy ? ", Legacy" : ""}, ${esc(m.tier ? tierText(m.tier) : "no tier yet")}</p>`];
   if (m.value != null) lines.push(`<p>${expOf(m.value)} EXP for the victory</p>`);
   else if (m.legacy) lines.push("<p>No EXP: legacy maps are off the rated lists</p>");
   const crown = '<svg class="icon first" aria-hidden="true"><use href="#i-crown"/></svg>';
-  lines.push(m.victors
-    ? `<p>${esc(victorsText(m))}</p><p>${crown} First ${esc(m.first[1])}${m.first[0] ? ` on ${esc(date(m.first[0]))}` : ""}${m.victors > 1 && m.last ? `, latest ${esc(m.last[1])}${m.last[0] ? ` on ${esc(date(m.last[0]))}` : ""}` : ""}</p>`
-    : `<p>Still unbeaten${m.far ? `, furthest ${esc(m.far[0])} at ${esc(shortStep(stripFlags(m.far[1])))}` : ""}</p>`);
-  lines.push(`<p>${m.steps ? `${plural(m.on, "player")} on it, ${plural(m.steps, "step")}` : m.legacy ? "Legacy: too easy for the main lists now, still kept up to date" : "No progress steps, victory only"}</p>`);
+  if (m.victors) lines.push(`<p>${crown} First ${esc(m.first[1])}${m.first[0] ? ` on ${esc(date(m.first[0]))}` : ""}${m.victors > 1 && m.last ? `, latest ${esc(m.last[1])}${m.last[0] ? ` on ${esc(date(m.last[0]))}` : ""}` : ""}</p>`);
+  else if (m.far && where !== "challenge") lines.push(`<p>Furthest ${esc(m.far[0])} at ${esc(shortStep(stripFlags(m.far[1])))}</p>`);
+  if (m.steps) {
+    if (where === "challenge") lines.push(`<p>${plural(m.steps, "step")}</p>`);
+  } else if (m.legacy) lines.push("<p>Legacy: too easy for the main lists now, still kept up to date</p>");
+  else if (m.extra || where !== "card") lines.push("<p>No progress steps, victory only</p>");
   if (m.avg != null) lines.push(`<p>${m.avg} ${esc(m.failsLabel)} fails on average, ${m.fails} in all</p>`);
-  lines.push(`<p>Built by ${esc(m.builder)}</p>`);
+  if (where === "challenge") lines.push(`<p>Built by ${esc(m.builder)}</p>`);
   if (m.released) lines.push(`<p>Released ${esc(date(m.released))}${m.verified ? `, verified by ${esc(m.verified)}` : ""}</p>`);
-  if (badge) lines.push(`<p>Badge</p><p class="tip-pill"><span class="pill"><span class="dot${badge.end ? " blend" : ""}" style="${roleColours(badge)}"></span><span>${esc(badge.name)}</span></span></p>`);
+  if (badge) lines.push(`<p class="tip-pill apart"><span class="pill"><span class="dot${badge.end ? " blend" : ""}" style="${roleColours(badge)}"></span><span>${esc(badge.name)}</span></span></p>`);
   lines.push(`<p class="hint">${PAGES[m.name] ? "Click to open the map page" : "Map page not part of this mockup"}</p>`);
   return lines.join("");
 }
@@ -136,18 +141,17 @@ function sortedFact(m) {
 function card(m) {
   const page = PAGES[m.name];
   const link = h(page ? "a" : "span", { class: "map-link", href: page || null }, art(m));
-  const facts = [h("span", { class: m.victors ? (state.sort === "victors" ? "on" : "") : "unbeaten" }, victorsText(m))];
-  if (m.steps) facts.push(h("span", { class: state.sort === "players" ? "on" : "dim" }, `${m.on} on it`));
-  else facts.push(h("span", { class: "dim" }, m.legacy ? "Legacy" : m.extra ? "Extra" : "victory only"));
-  const sorted = sortedFact(m);
-  if (sorted) facts.unshift(sorted);
+  // "7 victors, 23 climbing" in one line
+  const count = h("span", {}, h("span", { class: m.victors ? (state.sort === "victors" ? "on" : "") : "unbeaten" }, victorsText(m)), ", ",
+    m.steps ? h("span", { class: state.sort === "players" ? "on" : null }, `${m.on} climbing`) : m.legacy ? "Legacy" : m.extra ? "Extra" : "victory only");
+  const facts = [sortedFact(m), count].filter(Boolean);
   const line = [m.value != null ? `${expOf(m.value)} EXP` : m.legacy ? "no EXP" : "no EXP yet", m.steps ? plural(m.steps, "step") : null].filter(Boolean).join(", ");
   return tip(h("li", { class: "map-card", onpointerenter: () => showWorld(m), onfocusin: () => showWorld(m) }, link,
     h("div", { class: "meta" },
       painted(m, page ? "a" : "strong", { class: "map-name", href: page || null }),
       h("span", { class: "map-facts" }, ...facts),
       line ? h("span", { class: "dim" }, line) : null,
-      h("span", { class: "dim builder" }, `by ${m.builder}`))), () => mapTip(m));
+      h("span", { class: "dim builder" }, `by ${m.builder}`))), () => mapTip(m, "card"));
 }
 
 // the world behind the page follows the map under the pointer, after a short rest on it
@@ -164,7 +168,7 @@ function challenges(list) {
   const open = list.filter((m) => !m.victors);
   if (!open.length) return [];
   return [h("section", { class: "map-group" },
-    h("h2", { class: "list-head" }, h("span", {}, "Still unbeaten"), h("span", { class: "dim" }, `${open.length} open`, h("span", { class: "head-more" }, open.length === 1 ? " challenge" : " challenges"))),
+    h("h2", { class: "list-head" }, h("span", {}, "Still unbeaten"), h("span", { class: "dim" }, plural(open.length, "map"))),
     h("ol", { class: "map-grid challenges" }, open.map((m) => {
       const page = PAGES[m.name];
       const who = m.far ? h("span", { class: "who" }, head(m.far[0]), nameTag(m.far[0])) : h("span", { class: "dim" }, "nobody yet");
@@ -175,7 +179,7 @@ function challenges(list) {
           h("span", { class: "map-facts" }, h("span", { class: "unbeaten" }, "Furthest"), who),
           m.far ? h("span", { class: "dim" }, "at ", withFlags(shortStep(stripFlags(m.far[1])))) : null,
           h("span", { class: "dim" }, `${m.mode}, ${m.tier ? `Tier ${ROMAN[m.tier]}` : "no tier yet"}`),
-          h("span", { class: "dim" }, `${m.on} on it`))), () => mapTip(m));
+          h("span", { class: "dim" }, `${m.on} climbing`))), () => mapTip(m, "challenge"));
     })))];
 }
 
@@ -199,7 +203,7 @@ addEventListener("resize", measureHeads);
 // key, label, kind; the column widths are in the stylesheet, and the Map column takes what is left
 const COLUMNS = [
   ["name", "Map", "lead"], ["hardest", "Tier", "num"], ["exp", "EXP", "num"], ["victors", "Victors", "num"],
-  ["players", "On it", "num"], ["steps", "Steps", "num"], ["avg", "Avg fails", "num"], ["fails", "Fails", "num"], ["newest", "Released", "num"], ["builder", "Builder", "wide"],
+  ["players", "Climbing", "num"], ["steps", "Steps", "num"], ["avg", "Avg fails", "num"], ["fails", "Fails", "num"], ["newest", "Released", "num"], ["builder", "Builder", "wide"],
 ];
 const SORT_OF = { hardest: "hardest", exp: "hardest", victors: "victors", players: "players", avg: "avg", fails: "fails", newest: "newest", name: "name" };
 
@@ -229,15 +233,16 @@ function table(list) {
     h("tbody", {}, list.map((m) => tip(h("tr", { class: "rank-line" },
       h("td", { class: "c-lead" }, h("span", { class: "map-cell" }, m.shot ? h("span", { class: "thumb", style: `--art: url("${asset(`assets/tile/thumb_${m.shot}.jpg`)}")` }) : h("span", { class: "thumb" }),
         painted(m, PAGES[m.name] ? "a" : "span", { class: "map-name", href: PAGES[m.name] || null }), m.extra ? h("span", { class: "dim" }, "Extra") : m.legacy ? h("span", { class: "dim" }, "Legacy") : null)),
-      ...COLUMNS.slice(1).map(([key, , kind]) => h("td", { class: `c-${kind}` }, cell(m, key)))), () => mapTip(m)))));
+      ...COLUMNS.slice(1).map(([key, , kind]) => h("td", { class: `c-${kind}` }, cell(m, key)))), () => mapTip(m, "table")))));
 }
 
 // rendering
 
 function groupHead(title, list, sub) {
   const open = list.filter((m) => !m.victors).length;
-  const on = list.reduce((n, m) => n + m.on, 0);
-  const more = [open ? `${open} unbeaten` : null, on ? `${on} on them` : null].filter(Boolean).join(", ");
+  // each player once, however many of these maps they are on
+  const tracked = new Set(list.flatMap((m) => m.holders)).size;
+  const more = [open ? `${open} unbeaten` : null, tracked ? plural(tracked, "tracked player") : null].filter(Boolean).join(", ");
   // on phones the sticky head keeps to one line: the rest of the numbers drop
   return h("h2", { class: "list-head" }, h("span", {}, title, sub ? h("span", { class: "dim" }, ` ${sub}`) : null),
     h("span", { class: "dim" }, plural(list.length, "map"), more ? h("span", { class: "head-more" }, `, ${more}`) : null));
