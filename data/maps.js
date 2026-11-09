@@ -119,7 +119,7 @@ const mapCatalog = [
   ["Effort 13","Segmented",0,2,null,43,7,16,["2021-02-04","YouAreRexist"],["2025-01-06","bluebear99"],null,null,"DingoBird","2021-01-23",null,"https://www.youtube.com/watch?v=lLxtV5aEZsE",null,"effort13",null,0.021,null],
   ["Hallway 10","Segmented",0,2,null,4,1,8,["2026-08-27","notplayer585"],["2026-09-09","Alfons1no"],null,null,"alexhuhu","2026-08-23",null,null,68,"hallway10",null,0.208,null],
   ["Submerged","Segmented",0,2,27.0,100,0,16,["2022-04-18","Jeysunn"],["2026-09-04","signal_lemon"],null,null,"Jeysunn","2022-12-28","Jeysunn","https://www.youtube.com/watch?v=x0wRlJZ1Xp8",13,"submerged",null,0.143,null],
-  ["Trepanation","Segmented",0,2,146.0,3,15,15,["2026-03-22","__mercyy"],["2026-05-08","39Crispy"],null,null,"idk yet","2025-11-14",null,null,59,null,null,null,null],
+  ["Trepanation","Segmented",0,2,146.0,3,15,15,["2026-03-22","__mercyy"],["2026-05-08","39Crispy"],null,null,"idk yet","2025-11-14",null,null,59,"trepanation",null,0.038,null],
   ["Carnage","Segmented",0,3,6.0,80,0,5,["2022-06-21","Supermoar"],["2026-09-08","Melvintnh327"],null,null,"Supermoar","2022-12-28","Supermoar","https://www.youtube.com/watch?v=DIUPWyD7XzI",33,"carnage",null,0.464,null],
   ["Ettc Section","Segmented",0,3,143.0,9,20,9,["2025-10-17","LilkeZ"],["2026-05-09","leith"],null,null,"ettc","2025-01-27",null,"https://youtu.be/R49-ScjnjCE?si=Yd9Te6AdkPgmvMNL",7,"ettcsection",null,0.155,null],
   ["Magnum Opus CP Mode","Segmented",0,3,187.0,0,15,30,null,null,null,null,"XM, merplow, Furrytism","2024-07-16",null,"https://www.youtube.com/playlist?list=PL-KhEAXvmYRtpn_h7Z1fbnPxf6dEclW6Z",0,"magnumopuscpmode",["dongdong1103","Shelf F4 SP 92"],0.11,null],

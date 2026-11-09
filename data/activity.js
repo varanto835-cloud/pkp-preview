@@ -243,7 +243,7 @@ const activityMaps = {
   "Sunshine": {"mode":"Segmented","tier":null,"b":null,"world":"sunshine","light":0.529,"tile":"sunshine","victors":135,"builder":"juwku"},
   "The Pirate Bay": {"mode":"Onlysprint","tier":3,"b":32,"world":"thepiratebay","light":0.164,"tile":"thepiratebay","victors":5,"builder":"who?"},
   "Tianxia 2": {"mode":"Rankup","tier":2,"b":64,"world":"tianxia2","light":0.384,"tile":"tianxia2","victors":57,"builder":"BanMePls"},
-  "Trepanation": {"mode":"Segmented","tier":7,"b":6,"world":null,"light":null,"tile":null,"victors":3,"builder":"idk yet"},
+  "Trepanation": {"mode":"Segmented","tier":7,"b":6,"world":"trepanation","light":0.038,"tile":"trepanation","victors":3,"builder":"idk yet"},
   "Unnerfed GCXV": {"mode":"Rankup","tier":3,"b":47,"world":"unnerfedgcxv","light":0.098,"tile":"unnerfedgcxv","victors":16,"builder":"Hulk1050"},
   "Upwards Journey": {"mode":"Onlysprint","tier":3,"b":63,"world":"upwardsjourney","light":0.058,"tile":"upwardsjourney","victors":12,"builder":"Unknown"},
   "Utopica": {"mode":"Rankup","tier":1,"b":3,"world":"utopica","light":0.433,"tile":"utopica","victors":72,"builder":"Cocasse"},
