@@ -233,7 +233,7 @@ const activityMaps = {
   "Reiteration 2": {"mode":"Rankup","tier":2,"b":73,"world":"reiteration2","light":0.049,"tile":"reiteration2","victors":77,"builder":"3bneo"},
   "Remedy": {"mode":"Miscellaneous","tier":5,"b":116,"world":"remedy","light":0.041,"tile":"remedy","victors":13,"builder":"EntityWolf, NateTheCrack"},
   "Sarina's Pipelines": {"mode":"Onlysprint","tier":4,"b":94,"world":"sarinaspipelines","light":0.027,"tile":"sarinaspipelines","victors":10,"builder":"KyrohIsTaken"},
-  "Sarina's Pipelines L/D": {"mode":"Onlysprint","tier":9,"b":164,"world":"sarinaspipelines","light":0.027,"tile":"sarinaspipelines","victors":1,"builder":"KyrohIsTaken"},
+  "Sarina's Pipelines L/D": {"mode":"Onlysprint","tier":9,"b":164,"world":"sarinaspipelinesld","light":0.125,"tile":"sarinaspipelinesld","victors":1,"builder":"KyrohIsTaken"},
   "Singularity": {"mode":"Onlysprint","tier":2,"b":14,"world":"singularity","light":0.011,"tile":"singularity","victors":19,"builder":"AlphaEclipse"},
   "Solitude": {"mode":"Onlysprint","tier":3,"b":98,"world":"solitude","light":0.041,"tile":"solitude","victors":17,"builder":"Silas_Greaves"},
   "Solventum": {"mode":"Onlysprint","tier":5,"b":138,"world":"solventum","light":0.162,"tile":"solventum","victors":2,"builder":"Silas_greaves"},
