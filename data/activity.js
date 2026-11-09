@@ -247,7 +247,7 @@ const activityMaps = {
   "Unnerfed GCXV": {"mode":"Rankup","tier":3,"b":47,"world":"unnerfedgcxv","light":0.098,"tile":"unnerfedgcxv","victors":16,"builder":"Hulk1050"},
   "Upwards Journey": {"mode":"Onlysprint","tier":3,"b":63,"world":"upwardsjourney","light":0.058,"tile":"upwardsjourney","victors":12,"builder":"Unknown"},
   "Utopica": {"mode":"Rankup","tier":1,"b":3,"world":"utopica","light":0.433,"tile":"utopica","victors":72,"builder":"Cocasse"},
-  "Valor 9": {"mode":"Segmented","tier":4,"b":13,"world":null,"light":null,"tile":null,"victors":31,"builder":"HPK team"},
+  "Valor 9": {"mode":"Segmented","tier":4,"b":13,"world":"valor9","light":0.208,"tile":"valor9","victors":31,"builder":"HPK team"},
   "Versatile": {"mode":"Miscellaneous","tier":2,"b":99,"world":"versatile","light":0.055,"tile":"versatile","victors":38,"builder":"NateTheCrack"},
   "Vitality": {"mode":"Segmented","tier":null,"b":140,"world":"vitality","light":0.074,"tile":"vitality","victors":3,"builder":"EasyBugC"},
   "Void Corridor": {"mode":"Segmented","tier":4,"b":68,"world":"voidcorridor","light":0.023,"tile":"voidcorridor","victors":28,"builder":"Unknown"},

@@ -127,7 +127,7 @@ const mapCatalog = [
   ["Hallway 9","Segmented",0,4,2.0,88,0,8,["2022-12-12","BRCamy"],["2026-09-16","mundell1"],null,null,"alexhuhu","2022-12-10",null,"https://www.youtube.com/watch?v=jnwbw_xKh1o",53,"hallway9",null,0.011,null],
   ["Pandora's Box SP Mode","Segmented",0,4,null,6,1,15,["2025-01-05","BenTMCB"],["2026-09-16","hypickle_nub"],null,null,"XM, merplow, PattyCakesxD, Meiomooo and BenTMCB",null,null,null,70,null,null,null,null],
   ["Arkyter Section","Segmented",0,5,107.0,20,3,10,["2022-09-18","juwku"],["2026-09-12","PortugalTheCrack"],null,null,"Arkyter","2022-07-31",null,"https://www.youtube.com/watch?v=_6C9-fKuJpI",43,"arkytersection",null,0.065,null],
-  ["Valor 9","Segmented",0,6,105.0,31,14,18,["2025-12-13","bluebear99"],["2026-08-25","DS_Derek"],null,null,"HPK team","2025-11-14",null,null,58,null,null,null,null],
+  ["Valor 9","Segmented",0,6,105.0,31,14,18,["2025-12-13","bluebear99"],["2026-08-25","DS_Derek"],null,null,"HPK team","2025-11-14",null,null,58,"valor9",null,0.208,null],
   ["Realm Of Champions SP Mode","Segmented",0,7,100.0,58,45,30,["2023-08-26","Supermoar"],["2026-09-11","bartelox9"],null,null,"Abax27, Supermoar, Tiago_skorpion","2023-08-09",null,"https://www.youtube.com/playlist?list=PLdIbVZrW35lozNbZamXbzq43utk0vfS4y",24,"realmofchampionsspmode",null,0.054,null],
   ["Void Corridor","Segmented",0,8,90.0,28,12,12,["2025-07-25","LilkeZ"],["2026-07-26","clawnys"],null,null,"Unknown","2025-07-21",null,null,5,"voidcorridor",null,0.023,null],
   ["Death Corridor","Segmented",0,9,61.0,56,2,5,["2023-03-17","GoreMagala_"],["2026-07-09","lumea"],null,null,"Libration","2022-12-12",null,"https://youtu.be/AB9feGvwyHc",35,"deathcorridor",null,0.034,null],
