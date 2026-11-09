@@ -81,7 +81,7 @@ const mapCatalog = [
   ["Pandora's Box","Rankup",0,2,178.0,5,54,47,["2024-04-20","mundell1"],["2026-08-29","Siser"],4.0,"sky","XM and merplow","2021-06-28",null,"https://www.youtube.com/watch?v=L3TN_WFsYYs",36,"pandorasbox",null,0.111,20],
   ["Hall of Legends","Rankup",0,3,173.0,2,34,35,["2024-10-10","hypickle_nub"],["2025-09-29","__mercyy"],0.0,"sky","Furrytism","2024-03-24",null,null,45,"halloflegends",null,0.156,0],
   ["Reiteration 2","Rankup",0,3,50.0,77,0,10,["2023-12-28","Texyle"],["2026-09-06","ciaoale"],0.3,"sky","3bneo","2023-12-23",null,"https://youtu.be/VGK13XcgSzQ",9,"reiteration2",null,0.049,25],
-  ["World of Mario","Rankup",0,3,null,0,3,23,null,null,null,"sky","Zaithay","2026-03-18",null,null,63,null,["__mercyy","S4 (semi-l/d to Start)"],null,null],
+  ["World of Mario","Rankup",0,3,null,0,3,23,null,null,null,"sky","Zaithay","2026-03-18",null,null,63,"worldofmario",["__mercyy","S4 (semi-l/d to Start)"],0.351,null],
   ["Bram's Arcade","Rankup",0,4,170.0,2,26,36,["2024-11-28","BRCamy"],["2025-02-06","hypickle_nub"],0.0,"sky","BramVeen","2020-08-23",null,"https://youtu.be/IbTT5Ah3cM8?si=AOJ2gwyJnCSSB5YA",20,"bramsarcade",null,0.149,0],
   ["Hell 3","Rankup",0,4,48.0,78,0,12,["2022-01-19","Jeysunn"],["2026-09-05","bluebear99"],7.6,"sky","EntityWolf","2021-06-19",null,"https://www.youtube.com/watch?v=p8N1QgW7AdY",30,"hell3",null,0.054,592],
   ["Endurance Hall","Rankup",0,5,159.0,7,23,38,["2022-09-25","Supermoar"],["2026-04-23","kenko9217"],0.1,"sky","EntityWolf","2022-05-24",null,"https://www.youtube.com/watch?v=Qz51HxXgwjo",22,"endurancehall",null,0.195,1],

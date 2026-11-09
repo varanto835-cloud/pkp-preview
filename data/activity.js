@@ -253,7 +253,7 @@ const activityMaps = {
   "Void Corridor": {"mode":"Segmented","tier":4,"b":68,"world":"voidcorridor","light":0.023,"tile":"voidcorridor","victors":28,"builder":"Unknown"},
   "Whitespace": {"mode":"Miscellaneous","tier":null,"b":null,"world":"whitespace","light":0.3,"tile":"whitespace","victors":21,"builder":"pantacourt"},
   "Wolf 11": {"mode":"Rankup","tier":2,"b":144,"world":"wolf11","light":0.128,"tile":"wolf11","victors":18,"builder":"EntityWolf"},
-  "World of Mario": {"mode":"Rankup","tier":null,"b":173,"world":null,"light":null,"tile":null,"victors":0,"builder":"Zaithay"},
+  "World of Mario": {"mode":"Rankup","tier":null,"b":173,"world":"worldofmario","light":0.351,"tile":"worldofmario","victors":0,"builder":"Zaithay"},
   "Yanantin": {"mode":"Onlysprint","tier":10,"b":172,"world":"yanantin","light":0.254,"tile":"yanantin","victors":0,"builder":"Silas_Greaves and oKyrea"},
   "Yanantin SP Mode": {"mode":"Onlysprint","tier":8,"b":159,"world":"yanantinspmode","light":0.254,"tile":"yanantinspmode","victors":2,"builder":"Silas_Greaves and oKyrea"}
 };
