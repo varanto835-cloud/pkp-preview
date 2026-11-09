@@ -195,7 +195,7 @@ const activityMaps = {
   "Death Corridor": {"mode":"Segmented","tier":3,"b":23,"world":"deathcorridor","light":0.034,"tile":"deathcorridor","victors":56,"builder":"Libration"},
   "Dock": {"mode":"Onlysprint","tier":5,"b":102,"world":null,"light":null,"tile":null,"victors":2,"builder":"alexhuhu"},
   "Drool City": {"mode":"Rankup","tier":7,"b":77,"world":"droolcity","light":0.066,"tile":"droolcity","victors":13,"builder":"merplow"},
-  "Echoes Of Eclipsion": {"mode":"Rankup","tier":7,"b":46,"world":null,"light":null,"tile":null,"victors":4,"builder":"_Astral_Aria_"},
+  "Echoes Of Eclipsion": {"mode":"Rankup","tier":7,"b":46,"world":"echoesofeclipsion","light":0.261,"tile":"echoesofeclipsion","victors":4,"builder":"_Astral_Aria_"},
   "Elvenation": {"mode":"Rankup","tier":5,"b":86,"world":"elvenation","light":0.338,"tile":"elvenation","victors":13,"builder":"WolfAndRyan"},
   "Endurance Hall": {"mode":"Rankup","tier":7,"b":71,"world":"endurancehall","light":0.195,"tile":"endurancehall","victors":7,"builder":"EntityWolf"},
   "Ettc Section": {"mode":"Segmented","tier":7,"b":50,"world":"ettcsection","light":0.155,"tile":"ettcsection","victors":9,"builder":"ettc"},
