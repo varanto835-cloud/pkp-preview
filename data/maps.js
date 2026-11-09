@@ -117,7 +117,7 @@ const mapCatalog = [
   ["Kaku Section","Segmented",0,1,42.0,41,0,11,["2022-01-15","Q_kot_I"],["2026-09-01","tonton_223"],null,null,"KK_kaku_","2021-12-31",null,"https://www.youtube.com/watch?v=2TmuESSkdXc",17,"kakusection",null,0.16,null],
   ["Vitality","Segmented",0,1,null,3,0,6,["2026-07-17","dongdong1103"],["2026-08-04","LilkeZ"],null,null,"EasyBugC","2026-07-14",null,null,67,"vitality",null,0.074,null],
   ["Effort 13","Segmented",0,2,null,43,7,16,["2021-02-04","YouAreRexist"],["2025-01-06","bluebear99"],null,null,"DingoBird","2021-01-23",null,"https://www.youtube.com/watch?v=lLxtV5aEZsE",null,"effort13",null,0.021,null],
-  ["Hallway 10","Segmented",0,2,null,4,1,8,["2026-08-27","notplayer585"],["2026-09-09","Alfons1no"],null,null,"alexhuhu","2026-08-23",null,null,68,"hallway10",null,0.074,null],
+  ["Hallway 10","Segmented",0,2,null,4,1,8,["2026-08-27","notplayer585"],["2026-09-09","Alfons1no"],null,null,"alexhuhu","2026-08-23",null,null,68,"hallway10",null,0.208,null],
   ["Submerged","Segmented",0,2,27.0,100,0,16,["2022-04-18","Jeysunn"],["2026-09-04","signal_lemon"],null,null,"Jeysunn","2022-12-28","Jeysunn","https://www.youtube.com/watch?v=x0wRlJZ1Xp8",13,"submerged",null,0.143,null],
   ["Trepanation","Segmented",0,2,146.0,3,15,15,["2026-03-22","__mercyy"],["2026-05-08","39Crispy"],null,null,"idk yet","2025-11-14",null,null,59,null,null,null,null],
   ["Carnage","Segmented",0,3,6.0,80,0,5,["2022-06-21","Supermoar"],["2026-09-08","Melvintnh327"],null,null,"Supermoar","2022-12-28","Supermoar","https://www.youtube.com/watch?v=DIUPWyD7XzI",33,"carnage",null,0.464,null],

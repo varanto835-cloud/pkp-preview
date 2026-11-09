@@ -206,7 +206,7 @@ const activityMaps = {
   "Geometrics 3": {"mode":"Rankup","tier":1,"b":33,"world":"geometrics3","light":0.099,"tile":"geometrics3","victors":25,"builder":"blubbajubba and carterbear06"},
   "Glitch Reloaded": {"mode":"Onlysprint","tier":1,"b":28,"world":"glitchreloaded","light":0.076,"tile":"glitchreloaded","victors":56,"builder":"oKyrea"},
   "Hall of Legends": {"mode":"Rankup","tier":8,"b":171,"world":"halloflegends","light":0.156,"tile":"halloflegends","victors":2,"builder":"Furrytism"},
-  "Hallway 10": {"mode":"Segmented","tier":null,"b":154,"world":"hallway10","light":0.074,"tile":"hallway10","victors":4,"builder":"alexhuhu"},
+  "Hallway 10": {"mode":"Segmented","tier":null,"b":154,"world":"hallway10","light":0.208,"tile":"hallway10","victors":4,"builder":"alexhuhu"},
   "Hallway 9": {"mode":"Segmented","tier":1,"b":38,"world":"hallway9","light":0.011,"tile":"hallway9","victors":88,"builder":"alexhuhu"},
   "Hell 3": {"mode":"Rankup","tier":2,"b":19,"world":"hell3","light":0.054,"tile":"hell3","victors":78,"builder":"EntityWolf"},
   "Hellfire Corridor": {"mode":"Segmented","tier":null,"b":null,"world":"hellfirecorridor","light":0.05,"tile":"hellfirecorridor","victors":69,"builder":"Librations"},
