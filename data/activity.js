@@ -241,7 +241,7 @@ const activityMaps = {
   "Strange Lab 2": {"mode":"Rankup","tier":null,"b":null,"world":"strangelab2","light":0.063,"tile":"strangelab2","victors":73,"builder":"Khaliio_"},
   "Submerged": {"mode":"Segmented","tier":1,"b":24,"world":"submerged","light":0.143,"tile":"submerged","victors":100,"builder":"Jeysunn"},
   "Sunshine": {"mode":"Segmented","tier":null,"b":null,"world":"sunshine","light":0.529,"tile":"sunshine","victors":135,"builder":"juwku"},
-  "The Pirate Bay": {"mode":"Onlysprint","tier":3,"b":32,"world":null,"light":null,"tile":null,"victors":5,"builder":"who?"},
+  "The Pirate Bay": {"mode":"Onlysprint","tier":3,"b":32,"world":"thepiratebay","light":0.164,"tile":"thepiratebay","victors":5,"builder":"who?"},
   "Tianxia 2": {"mode":"Rankup","tier":2,"b":64,"world":"tianxia2","light":0.384,"tile":"tianxia2","victors":57,"builder":"BanMePls"},
   "Trepanation": {"mode":"Segmented","tier":7,"b":6,"world":null,"light":null,"tile":null,"victors":3,"builder":"idk yet"},
   "Unnerfed GCXV": {"mode":"Rankup","tier":3,"b":47,"world":"unnerfedgcxv","light":0.098,"tile":"unnerfedgcxv","victors":16,"builder":"Hulk1050"},

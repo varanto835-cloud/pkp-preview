@@ -146,7 +146,7 @@ const mapCatalog = [
   ["Iris","Onlysprint",0,7,95.0,20,11,6,["2023-09-22","Majikal"],["2026-04-25","AnctyEnly"],null,null,"Majikal",null,"Majikal","https://www.youtube.com/watch?v=KEmYwevxziA",2,"iris",null,0.415,null],
   ["Cerkour XII","Onlysprint",0,8,89.0,13,0,6,["2025-09-20","Cerdax"],["2026-09-09","Raigurii"],0.4,"S3 Sky","Cerdax",null,"Cerdax",null,56,"cerkourxii",null,0.047,5],
   ["Solitude","Onlysprint",0,9,73.0,17,7,12,["2024-01-05","Majikal"],["2026-07-15","syzi"],0.5,"last stretch","Silas_Greaves","2023-11-17",null,"https://www.youtube.com/watch?v=k46DHArMPe0",28,"solitude",null,0.041,9],
-  ["The Pirate Bay","Onlysprint",0,10,72.0,5,1,8,["2026-02-22","Cerdax"],["2026-05-05","iTriqngle"],1.6,"sky","who?","2026-02-08",null,null,64,null,null,null,8],
+  ["The Pirate Bay","Onlysprint",0,10,72.0,5,1,8,["2026-02-22","Cerdax"],["2026-05-05","iTriqngle"],1.6,"sky","who?","2026-02-08",null,null,64,"thepiratebay",null,0.164,8],
   ["Upwards Journey","Onlysprint",0,11,71.0,12,0,3,["2025-08-03","Cerdax"],["2026-06-17","syzi"],null,null,"Unknown","2025-08-01",null,null,49,"upwardsjourney",null,0.058,null],
   ["Singularity","Onlysprint",1,1,34.0,19,0,0,["2024-11-19","AlphaEclipse"],["2026-03-25","Kev4"],0.4,"final stretch","AlphaEclipse",null,"AlphaEclipse","https://www.youtube.com/watch?v=2EtVBHCWkG4",34,"singularity",null,0.011,8],
   ["Perfect Extra 6","Onlysprint",1,2,28.0,22,0,0,["2024-10-16","Majikal"],["2026-05-14","syzi"],null,null,"crazy5pokemon",null,"Majikal","https://www.youtube.com/watch?v=g87q10kDnqI",32,"perfectextra6",null,0.023,null],
