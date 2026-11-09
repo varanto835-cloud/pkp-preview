@@ -224,7 +224,7 @@ const activityMaps = {
   "Olympus": {"mode":"Rankup","tier":5,"b":58,"world":"olympus","light":0.076,"tile":"olympus","victors":28,"builder":"SeanStricklandPK"},
   "Origin": {"mode":"Rankup","tier":1,"b":18,"world":"origin","light":0.555,"tile":"origin","victors":38,"builder":"Astral_Aria & RubyGemstoneCat"},
   "Pandora's Box": {"mode":"Rankup","tier":9,"b":158,"world":"pandorasbox","light":0.111,"tile":"pandorasbox","victors":5,"builder":"XM and merplow"},
-  "Pandora's Box SP Mode": {"mode":"Segmented","tier":null,"b":137,"world":"pandorasbox","light":0.111,"tile":"pandorasbox","victors":6,"builder":"XM, merplow, PattyCakesxD, Meiomooo and BenTMCB"},
+  "Pandora's Box SP Mode": {"mode":"Segmented","tier":null,"b":137,"world":"pandorasboxspmode","light":0.115,"tile":"pandorasboxspmode","victors":6,"builder":"XM, merplow, PattyCakesxD, Meiomooo and BenTMCB"},
   "Perfect Extra 6": {"mode":"Onlysprint","tier":1,"b":70,"world":"perfectextra6","light":0.023,"tile":"perfectextra6","victors":22,"builder":"crazy5pokemon"},
   "Perfect Extra 7": {"mode":"Onlysprint","tier":null,"b":null,"world":"perfectextra7","light":0.495,"tile":"perfectextra7","victors":81,"builder":"Unknown"},
   "Pizzeria": {"mode":"Rankup","tier":4,"b":105,"world":"pizzeria","light":0.054,"tile":"pizzeria","victors":53,"builder":"OGNamess"},
