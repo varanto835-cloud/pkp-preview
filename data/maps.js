@@ -85,7 +85,7 @@ const mapCatalog = [
   ["Bram's Arcade","Rankup",0,4,170.0,2,26,36,["2024-11-28","BRCamy"],["2025-02-06","hypickle_nub"],0.0,"sky","BramVeen","2020-08-23",null,"https://youtu.be/IbTT5Ah3cM8?si=AOJ2gwyJnCSSB5YA",20,"bramsarcade",null,0.149,0],
   ["Hell 3","Rankup",0,4,48.0,78,0,12,["2022-01-19","Jeysunn"],["2026-09-05","bluebear99"],7.6,"sky","EntityWolf","2021-06-19",null,"https://www.youtube.com/watch?v=p8N1QgW7AdY",30,"hell3",null,0.054,592],
   ["Endurance Hall","Rankup",0,5,159.0,7,23,38,["2022-09-25","Supermoar"],["2026-04-23","kenko9217"],0.1,"sky","EntityWolf","2022-05-24",null,"https://www.youtube.com/watch?v=Qz51HxXgwjo",22,"endurancehall",null,0.195,1],
-  ["Lethal Factoyry","Rankup",0,5,46.0,29,0,13,["2025-04-25","BenTMCB"],["2026-07-21","dongdong1103"],0.9,"sky","pantacourt","2025-04-23",null,null,15,null,null,null,26],
+  ["Lethal Factoyry","Rankup",0,5,46.0,29,0,13,["2025-04-25","BenTMCB"],["2026-07-21","dongdong1103"],0.9,"sky","pantacourt","2025-04-23",null,null,15,"lethalfactoyry",null,0.113,26],
   ["Echoes Of Eclipsion","Rankup",0,6,155.0,4,5,49,["2025-11-23","hypickle_nub"],["2026-08-25","xBonkZ14"],0.2,"Act IX","_Astral_Aria_","2025-11-14",null,null,60,"echoesofeclipsion",null,0.261,1],
   ["Geometrics 2","Rankup",0,6,44.0,91,0,16,["2021-12-12","BRCamy"],["2026-08-22","OmgIsJorBear"],2.4,"sky","_XM_","2021-07-06",null,"https://www.youtube.com/watch?v=dAl9fZqVaWw&ab_channel=BRCamy",52,"geometrics2",null,0.457,217],
   ["Bonus 11","Rankup",0,7,40.0,87,0,29,["2021-03-17","greypk"],["2026-08-31","Irongolas"],1.4,"sky","Fuzzbearplush","2020-08-07",null,"https://youtu.be/VDbwp9K8ZVY?si=sdTu0dYqN4lOoeFP",50,"bonus11",null,0.155,120],

@@ -215,7 +215,7 @@ const activityMaps = {
   "Jumpcraft XII": {"mode":"Rankup","tier":5,"b":147,"world":"jumpcraftxii","light":0.137,"tile":"jumpcraftxii","victors":11,"builder":"HelloSarina"},
   "Kaku Section": {"mode":"Segmented","tier":2,"b":60,"world":"kakusection","light":0.16,"tile":"kakusection","victors":41,"builder":"KK_kaku_"},
   "Kind Pandora's Box": {"mode":"Rankup","tier":6,"b":174,"world":"kindpandorasbox","light":0.164,"tile":"kindpandorasbox","victors":1,"builder":"merplow"},
-  "Lethal Factoyry": {"mode":"Rankup","tier":2,"b":37,"world":null,"light":null,"tile":null,"victors":29,"builder":"pantacourt"},
+  "Lethal Factoyry": {"mode":"Rankup","tier":2,"b":37,"world":"lethalfactoyry","light":0.113,"tile":"lethalfactoyry","victors":29,"builder":"pantacourt"},
   "Magnum Opus": {"mode":"Rankup","tier":10,"b":169,"world":"magnumopus","light":0.111,"tile":"magnumopus","victors":0,"builder":"_XM_"},
   "Magnum Opus CP Mode": {"mode":"Segmented","tier":10,"b":167,"world":"magnumopuscpmode","light":0.11,"tile":"magnumopuscpmode","victors":0,"builder":"XM, merplow, Furrytism"},
   "Mako Reactor": {"mode":"Rankup","tier":4,"b":40,"world":"makoreactor","light":0.256,"tile":"makoreactor","victors":56,"builder":"Furrytism"},
