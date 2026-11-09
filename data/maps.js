@@ -138,7 +138,7 @@ const mapCatalog = [
   ["Sunshine","Segmented",2,0,null,135,0,0,["2022-03-19","juwku"],["2026-09-05","Regular_Dude_Yes"],null,null,"juwku","2022-12-28","juwku",null,null,"sunshine",null,0.529,null],
   ["Sarina's Pipelines L/D","Onlysprint",0,-1,179.0,1,0,0,["2026-09-12","Cerdax"],["2026-09-12","Cerdax"],null,null,"KyrohIsTaken","2026-09-15",null,null,69,"sarinaspipelinesld",null,0.125,null],
   ["Yanantin SP Mode","Onlysprint",0,1,174.0,2,8,36,["2025-12-11","xZunk"],["2026-09-01","lqtic"],null,null,"Silas_Greaves and oKyrea","2025-03-29",null,"https://www.youtube.com/watch?v=_twhRbbhpGc",12,"yanantinspmode",null,0.254,null],
-  ["Dock","Onlysprint",0,2,121.0,2,0,8,["2025-11-21","Cerdax"],["2026-05-18","JunglePK"],0.0,"sky","alexhuhu","2025-11-18",null,null,61,null,null,null,0],
+  ["Dock","Onlysprint",0,2,121.0,2,0,8,["2025-11-21","Cerdax"],["2026-05-18","JunglePK"],0.0,"sky","alexhuhu","2025-11-18",null,null,61,"dock",null,0.345,0],
   ["Yanantin","Onlysprint",0,2,189.0,0,6,36,null,null,null,null,"Silas_Greaves and oKyrea","2025-03-29",null,"https://www.youtube.com/watch?v=_twhRbbhpGc",48,"yanantin",["Cerdax","CUBE5 Start"],0.254,null],
   ["Solventum","Onlysprint",0,3,120.0,2,2,5,["2025-09-14","Cerdax"],["2026-07-16","JunglePK"],3.0,"Final Beam","Silas_greaves","2025-06-28",null,null,55,"solventum",null,0.162,6],
   ["Cerkour XIII","Onlysprint",0,4,119.0,4,2,13,["2025-07-25","Supermoar"],["2026-06-16","JunglePK"],1.8,"F3","Unknown","2025-07-11",null,null,10,"cerkourxiii",null,0.036,7],

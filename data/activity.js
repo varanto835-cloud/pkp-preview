@@ -193,7 +193,7 @@ const activityMaps = {
   "Cerkour XIII": {"mode":"Onlysprint","tier":5,"b":126,"world":"cerkourxiii","light":0.036,"tile":"cerkourxiii","victors":4,"builder":"Unknown"},
   "Dark Road": {"mode":"Segmented","tier":3,"b":17,"world":null,"light":null,"tile":null,"victors":17,"builder":"who?"},
   "Death Corridor": {"mode":"Segmented","tier":3,"b":23,"world":"deathcorridor","light":0.034,"tile":"deathcorridor","victors":56,"builder":"Libration"},
-  "Dock": {"mode":"Onlysprint","tier":5,"b":102,"world":null,"light":null,"tile":null,"victors":2,"builder":"alexhuhu"},
+  "Dock": {"mode":"Onlysprint","tier":5,"b":102,"world":"dock","light":0.345,"tile":"dock","victors":2,"builder":"alexhuhu"},
   "Drool City": {"mode":"Rankup","tier":7,"b":77,"world":"droolcity","light":0.066,"tile":"droolcity","victors":13,"builder":"merplow"},
   "Echoes Of Eclipsion": {"mode":"Rankup","tier":7,"b":46,"world":"echoesofeclipsion","light":0.261,"tile":"echoesofeclipsion","victors":4,"builder":"_Astral_Aria_"},
   "Elvenation": {"mode":"Rankup","tier":5,"b":86,"world":"elvenation","light":0.338,"tile":"elvenation","victors":13,"builder":"WolfAndRyan"},
