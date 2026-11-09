@@ -90,7 +90,7 @@ const mapCatalog = [
   ["Geometrics 2","Rankup",0,6,44.0,91,0,16,["2021-12-12","BRCamy"],["2026-08-22","OmgIsJorBear"],2.4,"sky","_XM_","2021-07-06",null,"https://www.youtube.com/watch?v=dAl9fZqVaWw&ab_channel=BRCamy",52,"geometrics2",null,0.457,217],
   ["Bonus 11","Rankup",0,7,40.0,87,0,29,["2021-03-17","greypk"],["2026-08-31","Irongolas"],1.4,"sky","Fuzzbearplush","2020-08-07",null,"https://youtu.be/VDbwp9K8ZVY?si=sdTu0dYqN4lOoeFP",50,"bonus11",null,0.155,120],
   ["Drool City","Rankup",0,7,151.0,13,27,26,["2024-03-12","mundell1"],["2026-09-13","Louka15"],1.8,"sky","merplow","2024-03-03",null,"https://www.youtube.com/watch?v=AQE34aIWSEs",54,"droolcity",null,0.066,24],
-  ["Kind Pandora's Box","Rankup",0,8,133.0,1,7,43,["2026-01-27","hypickle_nub"],["2026-01-27","hypickle_nub"],0.0,"sky","merplow","2025-09-20",null,null,66,null,null,null,0],
+  ["Kind Pandora's Box","Rankup",0,8,133.0,1,7,43,["2026-01-27","hypickle_nub"],["2026-01-27","hypickle_nub"],0.0,"sky","merplow","2025-09-20",null,null,66,"kindpandorasbox",null,0.164,0],
   ["Tianxia 2","Rankup",0,8,39.0,57,0,11,["2023-01-04","xBonkZ14"],["2026-08-14","Centrepiece"],0.8,"sky","BanMePls","2022-12-31",null,"https://youtu.be/nYh8iEbpIgo",4,"tianxia2",null,0.384,43],
   ["Elvenation","Rankup",0,9,124.0,13,21,28,["2023-07-02","BRCamy"],["2026-08-21","dongdong1103"],1.8,"sky","WolfAndRyan","2023-05-27",null,null,40,"elvenation",null,0.338,23],
   ["GCXV","Rankup",0,9,37.0,89,0,51,["2021-01-18","greypk"],["2026-09-02","Irongolas"],0.7,"sky","XM, Kratos, Hulk1050","2020-06-02",null,"https://youtu.be/X2qo-mbouLY",18,"gcxv",null,0.155,66],
