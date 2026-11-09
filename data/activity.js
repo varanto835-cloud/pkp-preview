@@ -249,7 +249,7 @@ const activityMaps = {
   "Utopica": {"mode":"Rankup","tier":1,"b":3,"world":"utopica","light":0.433,"tile":"utopica","victors":72,"builder":"Cocasse"},
   "Valor 9": {"mode":"Segmented","tier":4,"b":13,"world":null,"light":null,"tile":null,"victors":31,"builder":"HPK team"},
   "Versatile": {"mode":"Miscellaneous","tier":2,"b":99,"world":"versatile","light":0.055,"tile":"versatile","victors":38,"builder":"NateTheCrack"},
-  "Vitality": {"mode":"Segmented","tier":null,"b":140,"world":null,"light":null,"tile":null,"victors":3,"builder":"EasyBugC"},
+  "Vitality": {"mode":"Segmented","tier":null,"b":140,"world":"vitality","light":0.074,"tile":"vitality","victors":3,"builder":"EasyBugC"},
   "Void Corridor": {"mode":"Segmented","tier":4,"b":68,"world":"voidcorridor","light":0.023,"tile":"voidcorridor","victors":28,"builder":"Unknown"},
   "Whitespace": {"mode":"Miscellaneous","tier":null,"b":null,"world":"whitespace","light":0.3,"tile":"whitespace","victors":21,"builder":"pantacourt"},
   "Wolf 11": {"mode":"Rankup","tier":2,"b":144,"world":"wolf11","light":0.128,"tile":"wolf11","victors":18,"builder":"EntityWolf"},
