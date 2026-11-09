@@ -131,7 +131,7 @@ const mapCatalog = [
   ["Realm Of Champions SP Mode","Segmented",0,7,100.0,58,45,30,["2023-08-26","Supermoar"],["2026-09-11","bartelox9"],null,null,"Abax27, Supermoar, Tiago_skorpion","2023-08-09",null,"https://www.youtube.com/playlist?list=PLdIbVZrW35lozNbZamXbzq43utk0vfS4y",24,"realmofchampionsspmode",null,0.054,null],
   ["Void Corridor","Segmented",0,8,90.0,28,12,12,["2025-07-25","LilkeZ"],["2026-07-26","clawnys"],null,null,"Unknown","2025-07-21",null,null,5,"voidcorridor",null,0.023,null],
   ["Death Corridor","Segmented",0,9,61.0,56,2,5,["2023-03-17","GoreMagala_"],["2026-07-09","lumea"],null,null,"Libration","2022-12-12",null,"https://youtu.be/AB9feGvwyHc",35,"deathcorridor",null,0.034,null],
-  ["Dark Road","Segmented",0,10,59.0,17,1,8,["2026-03-03","joejqd"],["2026-08-31","_Sekisei_"],null,null,"who?","2026-02-13",null,null,65,null,null,null,null],
+  ["Dark Road","Segmented",0,10,59.0,17,1,8,["2026-03-03","joejqd"],["2026-08-31","_Sekisei_"],null,null,"who?","2026-02-13",null,null,65,"darkroad",null,0.016,null],
   ["Apocalypse","Segmented",1,4,15.0,16,0,0,["2020-12-03","Q_kot_I"],["2025-01-09","bluebear99"],null,null,"zDaRuo","2019-01-23",null,"https://youtu.be/wn8TyVWU_04?si=Iq88ifVlL7DPAZf0",47,"apocalypse",null,0.046,null],
   ["Fire Section","Segmented",2,0,null,70,0,0,["2020-06-16","Q_kot_I"],["2026-07-31","Corentin1308"],null,null,"FireDreadlord","2020-03-08",null,null,null,"firesection",null,0.389,null],
   ["Hellfire Corridor","Segmented",2,0,null,69,0,0,["2022-12-20","xBonkZ14"],["2026-08-29","Cree_05"],null,null,"Librations","2022-11-28",null,null,null,"hellfirecorridor",null,0.05,null],

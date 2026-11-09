@@ -191,7 +191,7 @@ const activityMaps = {
   "Cerkour XI": {"mode":"Onlysprint","tier":1,"b":59,"world":"cerkourxi","light":0.179,"tile":"cerkourxi","victors":30,"builder":"Unknown"},
   "Cerkour XII": {"mode":"Onlysprint","tier":4,"b":155,"world":"cerkourxii","light":0.047,"tile":"cerkourxii","victors":13,"builder":"Cerdax"},
   "Cerkour XIII": {"mode":"Onlysprint","tier":5,"b":126,"world":"cerkourxiii","light":0.036,"tile":"cerkourxiii","victors":4,"builder":"Unknown"},
-  "Dark Road": {"mode":"Segmented","tier":3,"b":17,"world":null,"light":null,"tile":null,"victors":17,"builder":"who?"},
+  "Dark Road": {"mode":"Segmented","tier":3,"b":17,"world":"darkroad","light":0.016,"tile":"darkroad","victors":17,"builder":"who?"},
   "Death Corridor": {"mode":"Segmented","tier":3,"b":23,"world":"deathcorridor","light":0.034,"tile":"deathcorridor","victors":56,"builder":"Libration"},
   "Dock": {"mode":"Onlysprint","tier":5,"b":102,"world":"dock","light":0.345,"tile":"dock","victors":2,"builder":"alexhuhu"},
   "Drool City": {"mode":"Rankup","tier":7,"b":77,"world":"droolcity","light":0.066,"tile":"droolcity","victors":13,"builder":"merplow"},
